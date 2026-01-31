@@ -39,8 +39,6 @@ export default function RootLayout({
 
           <SectionContainer className="">
             <Navbar1></Navbar1>
-          </SectionContainer>
-          <SectionContainer>
             {children}
           </SectionContainer>
         </ThemeProvider>
