@@ -58,8 +58,12 @@ export function SignupForm({
 
       // optional: redirect to login or dashboard
       window.location.href = "/login"
-    } catch (err) {
-      setError(err.message)
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message)
+      } else {
+        setError(String(err))
+      }
     } finally {
       setLoading(false)
     }

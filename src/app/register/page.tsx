@@ -2,7 +2,7 @@
 
 import { SignupForm } from "@/components/signup-form"
 import SectionContainer from "@/utils/SectionContainer"
-import RegisterAnimationClient from "./animationClient"
+import RegisterAnimationClient from "./RegisterAnimationClient"
 
 
 export default function SignupPage() {
