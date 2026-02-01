@@ -119,6 +119,9 @@ export default function ShopPage() {
                 boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
                 transition: "transform 0.2s, box-shadow 0.2s",
                 backgroundColor: "#fff",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
               }}
               onMouseEnter={(e) => {
                 const el = e.currentTarget;
@@ -132,11 +135,13 @@ export default function ShopPage() {
               }}
             >
               <img
-                src={med.image}
+                src={"https://i.ibb.co/wNXj2FR6/serum-sweet-Purple.png"}
+                // src={med.image || "https://i.ibb.co/wNXj2FR6/serum-sweet-Purple.png"}
                 alt={med.name}
                 style={{ width: "100%", height: "180px", objectFit: "cover" }}
               />
-              <div style={{ padding: "15px" }}>
+
+              <div style={{ padding: "15px", flex: 1 }}>
                 <h3 style={{ margin: "0 0 10px 0", fontSize: "1.2rem", color: "#333" }}>{med.name}</h3>
                 <p style={{ fontSize: "0.9rem", color: "#555", minHeight: "50px" }}>{med.description}</p>
                 <p style={{ fontSize: "0.85rem", color: "#666" }}>
@@ -150,7 +155,38 @@ export default function ShopPage() {
                   <strong>Stock:</strong> {med.stock > 0 ? med.stock : "Out of stock"}
                 </p>
               </div>
+
+              <div style={{ padding: "0 15px 15px 15px" }}>
+                <a
+                  href={`/shop/${med.id}`}
+                  style={{
+                    display: "inline-block",
+                    width: "100%",
+                    textAlign: "center",
+                    padding: "10px 0",
+                    borderRadius: "8px",
+                    backgroundColor: "#4f46e5",
+                    color: "#fff",
+                    fontWeight: "bold",
+                    textDecoration: "none",
+                    transition: "background-color 0.2s, transform 0.2s",
+                  }}
+                  onMouseEnter={(e) => {
+                    const el = e.currentTarget;
+                    el.style.backgroundColor = "#4338ca";
+                    el.style.transform = "translateY(-2px)";
+                  }}
+                  onMouseLeave={(e) => {
+                    const el = e.currentTarget;
+                    el.style.backgroundColor = "#4f46e5";
+                    el.style.transform = "translateY(0)";
+                  }}
+                >
+                  View Details
+                </a>
+              </div>
             </div>
+
           ))}
         </div>
       )}
