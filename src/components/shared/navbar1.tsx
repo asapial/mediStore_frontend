@@ -60,10 +60,10 @@ interface Navbar1Props {
 
 const Navbar1 = ({
   logo = {
-    url: "https://www.shadcnblocks.com",
-    src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/shadcnblockscom-icon.svg",
+    url: "/",
+    src: "../../logo/medistore-high-resolution-logo-transparent.png",
     alt: "logo",
-    title: "Shadcnblocks.com",
+    title: "MediStore",
   },
   menu = [
     { title: "Home", url: "/" },
@@ -98,44 +98,44 @@ const Navbar1 = ({
       //   },
       // ],
     },
-    {
-      title: "Resources",
-      url: "#",
-      items: [
-        {
-          title: "Help Center",
-          description: "Get all the answers you need right here",
-          icon: <Zap className="size-5 shrink-0" />,
-          url: "#",
-        },
-        {
-          title: "Contact Us",
-          description: "We are here to help you with any questions you have",
-          icon: <Sunset className="size-5 shrink-0" />,
-          url: "#",
-        },
-        {
-          title: "Status",
-          description: "Check the current status of our services and APIs",
-          icon: <Trees className="size-5 shrink-0" />,
-          url: "#",
-        },
-        {
-          title: "Terms of Service",
-          description: "Our terms and conditions for using our services",
-          icon: <Book className="size-5 shrink-0" />,
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Pricing",
-      url: "#",
-    },
-    {
-      title: "Blog",
-      url: "#",
-    },
+    // {
+    //   title: "Resources",
+    //   url: "#",
+    //   items: [
+    //     {
+    //       title: "Help Center",
+    //       description: "Get all the answers you need right here",
+    //       icon: <Zap className="size-5 shrink-0" />,
+    //       url: "#",
+    //     },
+    //     {
+    //       title: "Contact Us",
+    //       description: "We are here to help you with any questions you have",
+    //       icon: <Sunset className="size-5 shrink-0" />,
+    //       url: "#",
+    //     },
+    //     {
+    //       title: "Status",
+    //       description: "Check the current status of our services and APIs",
+    //       icon: <Trees className="size-5 shrink-0" />,
+    //       url: "#",
+    //     },
+    //     {
+    //       title: "Terms of Service",
+    //       description: "Our terms and conditions for using our services",
+    //       icon: <Book className="size-5 shrink-0" />,
+    //       url: "#",
+    //     },
+    //   ],
+    // },
+    // {
+    //   title: "Pricing",
+    //   url: "#",
+    // },
+    // {
+    //   title: "Blog",
+    //   url: "#",
+    // },
   ],
   auth = {
     login: { title: "Login", url: "/login" },
@@ -152,13 +152,11 @@ const Navbar1 = ({
             {/* Logo */}
             <a href={logo.url} className="flex items-center gap-2">
               <img
-                src={logo.src}
+                src="/logo/medistore-high-resolution-logo-transparent.png"
                 className="max-h-8 dark:invert"
-                alt={logo.alt}
+                alt="MediStore logo"
               />
-              <span className="text-lg font-semibold tracking-tighter">
-                {logo.title}
-              </span>
+
             </a>
             <div className="flex items-center">
               <NavigationMenu>
