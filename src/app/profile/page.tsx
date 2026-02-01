@@ -24,7 +24,6 @@ export default function ProfilePage() {
           credentials: "include", // must include cookie
         });
 
-        console.log(res)
 
         if (!res.ok) {
           throw new Error("Failed to fetch profile");
@@ -32,9 +31,9 @@ export default function ProfilePage() {
 
         const data = await res.json();
         setUser(data.user); // assuming backend returns { user: {...} }
-      } catch (err: any) {
+      } catch (err) {
         console.error("Profile fetch error:", err);
-        setError(err.message || "Something went wrong");
+        // setError(err.message || "Something went wrong");
       } finally {
         setLoading(false);
       }

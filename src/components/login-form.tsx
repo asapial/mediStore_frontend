@@ -33,6 +33,7 @@ export function LoginForm({
       setLoading(true)
 
       const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
+      // const res = await fetch(`${BASE_URL}/api/auth/sign-in/email`, {
       const res = await fetch(`${BASE_URL}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
