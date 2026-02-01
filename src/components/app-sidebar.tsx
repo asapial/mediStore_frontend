@@ -28,6 +28,10 @@ const data = {
     {
       title: "Order",
       url: "/seller/orders",
+    },
+    {
+      title: "Add Medicine",
+      url: "/seller/addMedicine",
     }
 
   ],
