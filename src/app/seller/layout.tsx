@@ -56,10 +56,7 @@ export default function Page({
           <div className="">
             {children}
           </div>
-          <div>
-<Link href="/seller/medicines">Medicines</Link>
-      <Link href="/seller/orders">Orders</Link>
-          </div>
+
         </div>
       </SidebarInset>
     </SidebarProvider>

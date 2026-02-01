@@ -27,7 +27,7 @@ const stats = {
 
 export default function SellerDashBoardPage() {
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 max-w-7xl mx-auto">
       {/* Page Title */}
       <div>
         <h1 className="text-3xl font-bold">Seller Dashboard</h1>

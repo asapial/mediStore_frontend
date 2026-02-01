@@ -13,7 +13,8 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Pencil, Trash2, Plus } from "lucide-react";
+import { Pencil, Trash2, Plus, InfoIcon } from "lucide-react";
+import { navigate } from "next/dist/client/components/segment-cache/navigation";
 
 interface Medicine {
   id: string;
@@ -28,12 +29,14 @@ export default function SellerMedicinesPage() {
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/medicines`, {
+    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/medicines/own`, {
       credentials: "include",
     })
       .then((res) => res.json())
       .then((data) => setMedicines(data.data || []));
   }, []);
+
+  console.log(medicines)
 
   const filtered = medicines.filter((m) =>
     m.name.toLowerCase().includes(search.toLowerCase())
@@ -46,7 +49,7 @@ export default function SellerMedicinesPage() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-5 space-y-5">
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Inventory</h1>
@@ -107,6 +110,13 @@ export default function SellerMedicinesPage() {
                     </Button>
                     <Button size="icon" variant="destructive">
                       <Trash2 size={16} />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      onClick={() => window.open(`/shop/${med.id}`, "_blank")}
+                    >
+                      <InfoIcon size={16} />
                     </Button>
                   </TableCell>
                 </TableRow>
