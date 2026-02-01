@@ -50,10 +50,7 @@ export default function RootLayout({
         disableTransitionOnChange
         >
 
-          <SectionContainer className="">
-            <Navbar1></Navbar1>
             {children}
-          </SectionContainer>
         </ThemeProvider>
       </body>
     </html>
