@@ -15,6 +15,7 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar"
 import Link from "next/link"
+import UserProfile from "./shared/ProfileData"
 
 // This is sample data.
 const data = {
@@ -41,11 +42,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar {...props}>
       <SidebarHeader>
-        <VersionSwitcher
-          versions={data.versions}
-          defaultVersion={data.versions[0]}
+
+        <img
+          src="/logo/medistore-high-resolution-logo-transparent.png"
+          className="max-h-8 dark:invert"
+          alt="MediStore logo"
         />
-        <SearchForm />
       </SidebarHeader>
       <SidebarContent>
         {/* We create a SidebarGroup for each parent. */}
