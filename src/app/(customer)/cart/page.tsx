@@ -193,7 +193,7 @@ export default function CartPage() {
                   <TableCell>${item.medicine.price.toFixed(2)}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <Button
+                      {/* <Button
                         type="button"
                         variant="outline"
                         size="sm"
@@ -202,7 +202,7 @@ export default function CartPage() {
                         }
                       >
                         -
-                      </Button>
+                      </Button> */}
 
                       <Input
                         type="number"
@@ -218,7 +218,7 @@ export default function CartPage() {
                         className="w-16 text-center border-0 focus:ring-0"
                       />
 
-                      <Button
+                      {/* <Button
                         type="button"
                         variant="outline"
                         size="sm"
@@ -227,7 +227,7 @@ export default function CartPage() {
                         }
                       >
                         +
-                      </Button>
+                      </Button> */}
                     </div>
                   </TableCell>
                   <TableCell>${(item.quantity * item.medicine.price).toFixed(2)}</TableCell>
