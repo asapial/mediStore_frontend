@@ -1,7 +1,7 @@
 "use client";
 
-import { Book, Menu, Sunset, Trees, Zap } from "lucide-react";
-
+import React, { useState, useEffect } from "react";
+import { BiHomeAlt, BiShoppingBag, BiUserCircle, BiShieldQuarter } from "react-icons/bi";
 import { cn } from "@/lib/utils";
 
 import {
@@ -45,7 +45,6 @@ interface Navbar1Props {
     title: string;
     className?: string;
   };
-  menu?: MenuItem[];
   auth?: {
     login: {
       title: string;
@@ -56,30 +55,54 @@ interface Navbar1Props {
       url: string;
     };
   };
+  userRole?: "ADMIN" | "SELLER" | null;
 }
 
-const Navbar1 = ({
+export const Navbar1 = ({
   logo = {
     url: "/",
     src: "../../logo/medistore-high-resolution-logo-transparent.png",
     alt: "logo",
     title: "MediStore",
   },
-  menu = [
-    { title: "Home", url: "/" },
-    {
-      title: "Shop",
-      url: "/shop",
-
-    }
-
-  ],
   auth = {
     login: { title: "Login", url: "/login" },
     signup: { title: "Sign up", url: "/register" },
   },
+  userRole = null,
   className,
 }: Navbar1Props) => {
+  // base menu
+  const [menu, setMenu] = useState<MenuItem[]>([
+    { title: "Home", url: "/", icon: <BiHomeAlt className="text-blue-600" /> },
+    { title: "Shop", url: "/shop", icon: <BiShoppingBag className="text-green-600" /> },
+  ]);
+
+  // Add conditional Dashboard item based on role
+  useEffect(() => {
+    let dashboardItem: MenuItem | null = null;
+
+    if (userRole === "ADMIN") {
+      dashboardItem = {
+        title: "Dashboard",
+        url: "/admin",
+        icon: <BiShieldQuarter className="text-red-600" />,
+        description: "Admin Panel",
+      };
+    } else if (userRole === "SELLER") {
+      dashboardItem = {
+        title: "Dashboard",
+        url: "/seller/dashboard",
+        icon: <BiUserCircle className="text-purple-600" />,
+        description: "Seller Panel",
+      };
+    }
+
+    if (dashboardItem) {
+      setMenu((prev) => [...prev.filter((i) => i.title !== "Dashboard"), dashboardItem]);
+    }
+  }, [userRole]);
+
   return (
     <section className={cn("py-4", className)}>
       <div className="container">
@@ -88,23 +111,18 @@ const Navbar1 = ({
           <div className="flex items-center gap-6">
             {/* Logo */}
             <a href={logo.url} className="flex items-center gap-2">
-              <img
-                src="/logo/medistore-high-resolution-logo-transparent.png"
-                className="max-h-8 dark:invert"
-                alt="MediStore logo"
-              />
-
+              <img src={logo.src} className="max-h-8 dark:invert" alt={logo.alt} />
             </a>
-            <div className="flex items-center">
-              <NavigationMenu>
-                <NavigationMenuList>
-                  {menu.map((item) => renderMenuItem(item))}
-                </NavigationMenuList>
-              </NavigationMenu>
-            </div>
+
+            <NavigationMenu>
+              <NavigationMenuList>
+                {menu.map((item) => renderMenuItem(item))}
+              </NavigationMenuList>
+            </NavigationMenu>
           </div>
+
           <div className="flex gap-2">
-            <ModeToggle></ModeToggle>
+            <ModeToggle />
             <Button asChild variant="outline" size="sm">
               <a href={auth.login.url}>{auth.login.title}</a>
             </Button>
@@ -119,36 +137,27 @@ const Navbar1 = ({
           <div className="flex items-center justify-between">
             {/* Logo */}
             <a href={logo.url} className="flex items-center gap-2">
-              <img
-                src={logo.src}
-                className="max-h-8 dark:invert"
-                alt={logo.alt}
-              />
+              <img src={logo.src} className="max-h-8 dark:invert" alt={logo.alt} />
             </a>
+
             <Sheet>
               <SheetTrigger asChild>
                 <Button variant="outline" size="icon">
-                  <Menu className="size-4" />
+                  <BiHomeAlt className="text-lg" />
                 </Button>
               </SheetTrigger>
+
               <SheetContent className="overflow-y-auto">
                 <SheetHeader>
                   <SheetTitle>
                     <a href={logo.url} className="flex items-center gap-2">
-                      <img
-                        src={logo.src}
-                        className="max-h-8 dark:invert"
-                        alt={logo.alt}
-                      />
+                      <img src={logo.src} className="max-h-8 dark:invert" alt={logo.alt} />
                     </a>
                   </SheetTitle>
                 </SheetHeader>
+
                 <div className="flex flex-col gap-6 p-4">
-                  <Accordion
-                    type="single"
-                    collapsible
-                    className="flex w-full flex-col gap-4"
-                  >
+                  <Accordion type="single" collapsible className="flex w-full flex-col gap-4">
                     {menu.map((item) => renderMobileMenuItem(item))}
                   </Accordion>
 
@@ -170,6 +179,7 @@ const Navbar1 = ({
   );
 };
 
+// Desktop menu item
 const renderMenuItem = (item: MenuItem) => {
   if (item.items) {
     return (
@@ -190,14 +200,16 @@ const renderMenuItem = (item: MenuItem) => {
     <NavigationMenuItem key={item.title}>
       <NavigationMenuLink
         href={item.url}
-        className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-muted hover:text-accent-foreground"
+        className="group inline-flex h-10 w-max items-center gap-2 rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-muted hover:text-accent-foreground"
       >
+        {item.icon && <span className="text-lg">{item.icon}</span>}
         {item.title}
       </NavigationMenuLink>
     </NavigationMenuItem>
   );
 };
 
+// Mobile menu item
 const renderMobileMenuItem = (item: MenuItem) => {
   if (item.items) {
     return (
@@ -215,12 +227,14 @@ const renderMobileMenuItem = (item: MenuItem) => {
   }
 
   return (
-    <a key={item.title} href={item.url} className="text-md font-semibold">
+    <a key={item.title} href={item.url} className="text-md font-semibold flex items-center gap-2">
+      {item.icon && <span>{item.icon}</span>}
       {item.title}
     </a>
   );
 };
 
+// Submenu link
 const SubMenuLink = ({ item }: { item: MenuItem }) => {
   return (
     <a
@@ -231,13 +245,9 @@ const SubMenuLink = ({ item }: { item: MenuItem }) => {
       <div>
         <div className="text-sm font-semibold">{item.title}</div>
         {item.description && (
-          <p className="text-sm leading-snug text-muted-foreground">
-            {item.description}
-          </p>
+          <p className="text-sm leading-snug text-muted-foreground">{item.description}</p>
         )}
       </div>
     </a>
   );
 };
-
-export { Navbar1 };
