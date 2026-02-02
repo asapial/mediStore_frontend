@@ -29,67 +29,123 @@ interface Order {
   items: OrderItem[];
 }
 
+const STATUSES = [
+  "PLACED",
+  "PROCESSING",
+  "SHIPPED",
+  "DELIVERED",
+  "CANCELLED"
+];
+
 export default function SellerOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchOrders = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/seller/orders`,{
-      // const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/orders`,{
-          method: "GET",
-          credentials: "include", // must include cookie
-        });
-      const data = await res.json();
-      console.log(data);
-      setOrders(data.data); // ✅ use data.data
-    } catch (err) {
-      console.error("Error fetching orders:", err);
-      toast.error("Failed to load orders");
-    } finally {
-      setLoading(false);
+  const badgeVariant = (status: string) => {
+    switch (status) {
+      case "DELIVERED":
+        return "secondary"; // green-ish by custom css if needed
+      case "CANCELLED":
+        return "destructive";
+      default:
+        return "default";
     }
   };
+
+const fetchOrders = async () => {
+  setLoading(true);
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/seller/orders`,
+      {
+        method: "GET",
+        credentials: "include",
+      }
+    );
+
+    const data = await res.json();
+    let orders: Order[] = data.data || [];
+    console.log(orders)
+
+    // Adjust order status based on item statuses
+    orders = orders.map((order) => {
+      const itemStatuses = order.items.map((item) => item.status);
+      const allSame = itemStatuses.every((s) => s === itemStatuses[0]);
+
+      return {
+        ...order,
+        status: allSame ? itemStatuses[0] : order.status, // use item's status if all same
+      };
+    });
+
+    setOrders(orders);
+  } catch (err) {
+    console.error(err);
+    toast.error("Failed to load orders");
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     fetchOrders();
   }, []);
 
-  const handleUpdateStatus = async (orderId: string, newStatus: string) => {
-    try {
-      const res = await fetch(`/api/seller/orders/${orderId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: newStatus }),
-        credentials: "include"
-      });
-      if (!res.ok) throw new Error("Failed to update status");
+  const handleUpdateStatus = async (order: Order, status: string) => {
+    const orderItemIds = order.items.map((item) => item.id);
 
-      setOrders((prev) =>
-        prev.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o))
+    console.log(order.id,
+            orderItemIds,
+            status,)
+
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/seller/orders`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            orderId: order.id,
+            orderItemIds,
+            status,
+          }),
+        }
       );
-      toast.success(`Order updated to ${newStatus}`);
+
+      console.log(res)
+
+      if (!res.ok) throw new Error("Update failed");
+
+      // optimistic UI update
+      setOrders((prev) =>
+        prev.map((o) =>
+          o.id === order.id ? { ...o, status } : o
+        )
+      );
+
+      toast.success(`Order updated to ${status}`);
     } catch (err) {
       console.error(err);
-      toast.error("Error updating order status");
+      toast.error("Failed to update order status");
     }
   };
 
-  if (loading) return <p className="text-center py-10">Loading orders...</p>;
+  if (loading) {
+    return <p className="text-center py-10">Loading orders...</p>;
+  }
 
-  if (!orders.length)
+  if (!orders.length) {
     return (
       <p className="text-center text-muted-foreground py-10">
         No orders yet.
       </p>
     );
+  }
 
   return (
     <div className="p-5 space-y-5">
-      <h1 className="text-3xl font-bold text-foreground dark:text-white">
-        Seller Orders
-      </h1>
+      <h1 className="text-3xl font-bold">Seller Orders</h1>
 
       <Card className="flex flex-col gap-6 p-5">
         {orders.map((order) => {
@@ -101,83 +157,66 @@ export default function SellerOrdersPage() {
           return (
             <div
               key={order.id}
-              className="bg-background dark:bg-slate-900 shadow-xl rounded-xl p-6 space-y-4"
+              className="rounded-xl border bg-background p-6 space-y-4"
             >
               {/* Header */}
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div className="space-y-1">
-                  <h2 className="text-xl font-bold text-foreground dark:text-white">
-                    Order ID: {order.id}
-                  </h2>
+              <div className="flex flex-col md:flex-row justify-between gap-4">
+                <div>
+                  <h2 className="text-lg font-bold">Order ID: {order.id}</h2>
                   <p className="text-sm text-muted-foreground">
                     Address: {order.address}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    Created At: {new Date(order.createdAt).toLocaleString()}
+                    {new Date(order.createdAt).toLocaleString()}
                   </p>
                 </div>
 
-                {/* <Badge
-                  variant={
-                    order.status === "DELIVERED"
-                      ? "success"
-                      : order.status === "CANCELLED"
-                      ? "destructive"
-                      : "default"
-                  }
-                  className="uppercase"
-                >
+                <Badge variant={badgeVariant(order.status)} className="uppercase">
                   {order.status}
-                </Badge> */}
+                </Badge>
               </div>
 
               {/* Items */}
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="border-b border-muted-foreground/20">
-                      <th className="py-2 px-4">Medicine</th>
-                      <th className="py-2 px-4">Quantity</th>
-                      <th className="py-2 px-4">Price</th>
-                      <th className="py-2 px-4">Subtotal</th>
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b">
+                    <th className="py-2 text-left">Medicine</th>
+                    <th>Qty</th>
+                    <th>Price</th>
+                    <th>Subtotal</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {order.items.map((item) => (
+                    <tr key={item.id} className="border-b">
+                      <td className="py-2">{item.medicine.name}</td>
+                      <td>{item.quantity}</td>
+                      <td>${item.price.toFixed(2)}</td>
+                      <td>
+                        ${(item.price * item.quantity).toFixed(2)}
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {order.items.map((item) => (
-                      <tr
-                        key={item.id}
-                        className="border-b border-muted-foreground/10"
-                      >
-                        <td className="py-2 px-4">{item.medicine.name}</td>
-                        <td className="py-2 px-4">{item.quantity}</td>
-                        <td className="py-2 px-4">${item.price.toFixed(2)}</td>
-                        <td className="py-2 px-4">
-                          ${(item.price * item.quantity).toFixed(2)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                  ))}
+                </tbody>
+              </table>
 
               {/* Footer */}
-              <div className="flex flex-col md:flex-row justify-between items-center gap-4 mt-2">
-                <p className="text-lg font-bold text-foreground dark:text-white">
+              <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+                <p className="font-bold">
                   Total: ${totalPrice.toFixed(2)}
                 </p>
+
                 <div className="flex flex-wrap gap-2">
-                  {["PLACED", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"].map(
-                    (s) => (
-                      <Button
-                        key={s}
-                        size="sm"
-                        variant={s === order.status ? "default" : "outline"}
-                        onClick={() => handleUpdateStatus(order.id, s)}
-                      >
-                        {s}
-                      </Button>
-                    )
-                  )}
+                  {STATUSES.map((s) => (
+                    <Button
+                      key={s}
+                      size="sm"
+                      variant={s === order.status ? "default" : "outline"}
+                      onClick={() => handleUpdateStatus(order, s)}
+                    >
+                      {s}
+                    </Button>
+                  ))}
                 </div>
               </div>
             </div>

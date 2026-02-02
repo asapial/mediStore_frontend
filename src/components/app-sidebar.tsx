@@ -52,14 +52,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         {/* We create a SidebarGroup for each parent. */}
         {data.navMain.map((item) => (
-          <SidebarGroup key={item.title}>
+          <SidebarMenu key={item.title}>
             <div className=" font-bold p-1">
               <Link href={item.url}>
                 {item.title}
               </Link>
             </div>
 
-          </SidebarGroup>
+          </SidebarMenu>
         ))}
       </SidebarContent>
       <SidebarRail />
