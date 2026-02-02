@@ -1,147 +1,225 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Table, TableHeader, TableBody, TableRow, TableCell, TableHead } from "@/components/ui/table";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableCell,
+  TableHead,
+} from "@/components/ui/table";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { FaUserEdit, FaUserSlash, FaUserCheck } from "react-icons/fa";
 
 interface User {
-    id: string;
-    name: string;
-    email: string;
-    image: string | null;
-    role: "CUSTOMER" | "SELLER" | "ADMIN";
-    isBanned: boolean;
-    createdAt: string;
-    updatedAt: string;
-    emailVerified: boolean;
+  id: string;
+  name: string;
+  email: string;
+  image: string | null;
+  role: "CUSTOMER" | "SELLER" | "ADMIN";
+  isBanned: boolean;
+  createdAt: string;
 }
 
 export default function AdminUsersPage() {
-    const [users, setUsers] = useState<User[]>([]);
-    const [loading, setLoading] = useState(true);
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [saving, setSaving] = useState(false);
 
-    const fetchUsers = async () => {
-        setLoading(true);
-        try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/admin/users`, {
-                method: "GET",
-                credentials: "include",
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.message || "Failed to fetch users");
-            setUsers(data.data);
-        } catch (err: unknown) {
-            console.error(err);
+  /* ================= FETCH USERS ================= */
+  const fetchUsers = async () => {
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/admin/users`,
+        { credentials: "include" }
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+      setUsers(data.data);
+    } catch (e) {
+      toast.error("Failed to load users");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-            toast.error(
-                err instanceof Error
-                    ? err.message
-                    : "Error fetching users"
-            );
-        } finally {
-            setLoading(false);
+  /* ================= BAN / UNBAN ================= */
+  const toggleBan = async (id: string, ban: boolean) => {
+    try {
+      await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/admin/users/${id}/ban`,
+        {
+          method: "PATCH",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ban }),
         }
-    };
+      );
+      toast.success(`User ${ban ? "banned" : "unbanned"}`);
+      fetchUsers();
+    } catch {
+      toast.error("Action failed");
+    }
+  };
 
-    const toggleBan = async (userId: string, ban: boolean) => {
-        try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/admin/users/${userId}/ban`, {
-                method: "PATCH",
-                credentials: "include",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ ban }),
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.message || "Failed to update user");
-            toast.success(`User ${ban ? "banned" : "unbanned"} successfully`);
-            fetchUsers();
-        } catch (err: unknown) {
-            console.error(err);
+  /* ================= UPDATE USER ================= */
+  const saveUser = async () => {
+    if (!editingUser) return;
+    setSaving(true);
 
-            toast.error(
-                err instanceof Error
-                    ? err.message
-                    : "Error updating user"
-            );
+    try {
+      await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/admin/users/${editingUser.id}`,
+        {
+          method: "PATCH",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: editingUser.name,
+            role: editingUser.role,
+          }),
         }
-    };
+      );
+      toast.success("User updated");
+      setEditingUser(null);
+      fetchUsers();
+    } catch {
+      toast.error("Update failed");
+    } finally {
+      setSaving(false);
+    }
+  };
 
-    useEffect(() => {
-        fetchUsers();
-    }, []);
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
-    return (
-        <div className="p-6 md:p-10">
-            <h1 className="text-3xl font-extrabold mb-6">Manage Users</h1>
+  return (
+    <div className="p-6 md:p-10">
+      <h1 className="text-3xl font-bold mb-6">Manage Users</h1>
 
-            <Card className="overflow-x-auto">
-                <CardHeader>
-                    <CardTitle>All Users</CardTitle>
-                </CardHeader>
-                <CardContent className="p-0">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Image</TableHead>
-                                <TableHead>Name</TableHead>
-                                <TableHead>Email</TableHead>
-                                <TableHead>Role</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead>Joined</TableHead>
-                                <TableHead>Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {loading
-                                ? [...Array(5)].map((_, i) => (
-                                    <TableRow key={i}>
-                                        <TableCell colSpan={7} className="animate-pulse h-10 bg-gray-100 dark:bg-gray-800 rounded" />
-                                    </TableRow>
-                                ))
-                                : users.map((user) => (
-                                    <TableRow key={user.id}>
-                                        <TableCell>
-                                            <img
-                                                src={user.image || "https://via.placeholder.com/40"}
-                                                alt={user.name}
-                                                className="w-10 h-10 rounded-full object-cover"
-                                            />
-                                        </TableCell>
-                                        <TableCell className="font-medium">{user.name}</TableCell>
-                                        <TableCell>{user.email}</TableCell>
-                                        <TableCell>
-                                            <Badge variant="secondary">{user.role}</Badge>
-                                        </TableCell>
-                                        <TableCell>
-                                            {user.isBanned ? (
-                                                <Badge variant="destructive">Banned</Badge>
-                                            ) : (
-                                                <Badge variant="default">Active</Badge>
-                                            )}
-                                        </TableCell>
-                                        <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
-                                        <TableCell className="flex gap-2">
-                                            <Button
-                                                size="sm"
-                                                variant={user.isBanned ? "secondary" : "destructive"} // changed "success" → "secondary"
-                                                onClick={() => toggleBan(user.id, !user.isBanned)}
-                                            >
-                                                {user.isBanned ? <FaUserCheck /> : <FaUserSlash />}
-                                            </Button>
-                                            <Button size="sm" variant="outline">
-                                                <FaUserEdit />
-                                            </Button>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                        </TableBody>
-                    </Table>
-                </CardContent>
-            </Card>
-        </div>
-    );
+      <Card>
+        <CardHeader>
+          <CardTitle>All Users</CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>User</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Role</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Joined</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-6">
+                    Loading...
+                  </TableCell>
+                </TableRow>
+              ) : (
+                users.map((u) => (
+                  <TableRow key={u.id}>
+                    <TableCell className="flex items-center gap-3">
+                      <img
+                        src={u.image || "https://via.placeholder.com/40"}
+                        className="w-10 h-10 rounded-full"
+                      />
+                      {u.name}
+                    </TableCell>
+                    <TableCell>{u.email}</TableCell>
+                    <TableCell>
+                      <Badge variant="secondary">{u.role}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      {u.isBanned ? (
+                        <Badge variant="destructive">Banned</Badge>
+                      ) : (
+                        <Badge>Active</Badge>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {new Date(u.createdAt).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell className="flex justify-end gap-2">
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        onClick={() => setEditingUser(u)}
+                      >
+                        <FaUserEdit />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant={u.isBanned ? "secondary" : "destructive"}
+                        onClick={() => toggleBan(u.id, !u.isBanned)}
+                      >
+                        {u.isBanned ? <FaUserCheck /> : <FaUserSlash />}
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      {/* ================= EDIT MODAL ================= */}
+      <Dialog open={!!editingUser} onOpenChange={() => setEditingUser(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit User</DialogTitle>
+          </DialogHeader>
+
+          {editingUser && (
+            <div className="space-y-4">
+              <Input
+                value={editingUser.name}
+                onChange={(e) =>
+                  setEditingUser({ ...editingUser, name: e.target.value })
+                }
+                placeholder="User name"
+              />
+
+              <Select
+                value={editingUser.role}
+                onValueChange={(val) =>
+                  setEditingUser({
+                    ...editingUser,
+                    role: val as User["role"],
+                  })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="CUSTOMER">Customer</SelectItem>
+                  <SelectItem value="SELLER">Seller</SelectItem>
+                  <SelectItem value="ADMIN">Admin</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Button onClick={saveUser} disabled={saving} className="w-full">
+                {saving ? "Saving..." : "Save Changes"}
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import SectionContainer from "@/utils/SectionContainer";
 import { useEffect, useState } from "react";
 
 interface Category {
@@ -68,7 +69,7 @@ export default function ShopPage() {
   }, [search, selectedCategory]);
 
   return (
-    <div style={{ padding: "20px" }}>
+    <SectionContainer className=" min-h-screen" >
       <h1 style={{ marginBottom: "20px" }}>Shop - All Medicines</h1>
 
       {/* Search & Filter */}
@@ -190,6 +191,6 @@ export default function ShopPage() {
           ))}
         </div>
       )}
-    </div>
+    </SectionContainer>
   );
 }

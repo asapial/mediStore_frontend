@@ -23,6 +23,7 @@ import { FaPills, FaClipboardList, FaPlus, FaTachometerAlt, FaUsers, FaShoppingC
 
 
 const { data: userData } = await userService.getSession();
+// console.log(userData)
 const userRole = userData?.user?.role;
 
 // This is sample data.

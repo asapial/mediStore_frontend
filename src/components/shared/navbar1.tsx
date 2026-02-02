@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { BiHomeAlt, BiShoppingBag, BiUserCircle, BiShieldQuarter } from "react-icons/bi";
 import { cn } from "@/lib/utils";
-
+import {  BiCartAlt, BiReceipt } from "react-icons/bi";
 import {
   Accordion,
   AccordionContent,
@@ -79,29 +79,55 @@ export const Navbar1 = ({
   ]);
 
   // Add conditional Dashboard item based on role
-  useEffect(() => {
-    let dashboardItem: MenuItem | null = null;
+useEffect(() => {
+  let roleItems: MenuItem[] = [];
 
-    if (userRole === "ADMIN") {
-      dashboardItem = {
-        title: "Dashboard",
-        url: "/admin",
-        icon: <BiShieldQuarter className="text-red-600" />,
-        description: "Admin Panel",
-      };
-    } else if (userRole === "SELLER") {
-      dashboardItem = {
-        title: "Dashboard",
-        url: "/seller/dashboard",
-        icon: <BiUserCircle className="text-purple-600" />,
-        description: "Seller Panel",
-      };
-    }
+  if (userRole === "ADMIN") {
+    roleItems.push({
+      title: "Dashboard",
+      url: "/admin",
+      icon: <BiShieldQuarter className="text-red-600" />,
+      description: "Admin Panel",
+    });
+  } 
+  else if (userRole === "SELLER") {
+    roleItems.push({
+      title: "Dashboard",
+      url: "/seller/dashboard",
+      icon: <BiUserCircle className="text-purple-600" />,
+      description: "Seller Panel",
+    });
+  } 
+  else if (userRole === "CUSTOMER") {
+    roleItems.push(
+      {
+        title: "Cart",
+        url: "/cart",
+        icon: <BiCartAlt className="text-emerald-600" />,
+        description: "View items in your cart",
+      },
+      {
+        title: "Orders",
+        url: "/orders",
+        icon: <BiReceipt className="text-blue-600" />,
+        description: "Track your orders",
+      }
+    );
+  }
 
-    if (dashboardItem) {
-      setMenu((prev) => [...prev.filter((i) => i.title !== "Dashboard"), dashboardItem]);
-    }
-  }, [userRole]);
+  if (roleItems.length > 0) {
+    setMenu((prev) => [
+      ...prev.filter(
+        (item) =>
+          item.title !== "Dashboard" &&
+          item.title !== "Cart" &&
+          item.title !== "Orders"
+      ),
+      ...roleItems,
+    ]);
+  }
+}, [userRole]);
+
 
   return (
     <section className={cn("py-4", className)}>
@@ -111,7 +137,7 @@ export const Navbar1 = ({
           <div className="flex items-center gap-6">
             {/* Logo */}
             <a href={logo.url} className="flex items-center gap-2">
-              <img src={logo.src} className="max-h-8 dark:invert" alt={logo.alt} />
+              <img src={logo.src} className="max-h-8 " alt={logo.alt} />
             </a>
 
             <NavigationMenu>
@@ -137,7 +163,7 @@ export const Navbar1 = ({
           <div className="flex items-center justify-between">
             {/* Logo */}
             <a href={logo.url} className="flex items-center gap-2">
-              <img src={logo.src} className="max-h-8 dark:invert" alt={logo.alt} />
+              <img src={logo.src} className="max-h-8 " alt={logo.alt} />
             </a>
 
             <Sheet>
@@ -151,7 +177,7 @@ export const Navbar1 = ({
                 <SheetHeader>
                   <SheetTitle>
                     <a href={logo.url} className="flex items-center gap-2">
-                      <img src={logo.src} className="max-h-8 dark:invert" alt={logo.alt} />
+                      <img src={logo.src} className="max-h-8 " alt={logo.alt} />
                     </a>
                   </SheetTitle>
                 </SheetHeader>

@@ -101,7 +101,7 @@ export default function SellerMedicinesPage() {
         <h1 className="text-3xl font-bold">Inventory</h1>
         <Button
           className="flex gap-2"
-          onClick={() => router.push("/seller/medicines/add")}
+          onClick={() => router.push("/seller/addMedicine")}
         >
           <Plus size={18} /> Add Medicine
         </Button>

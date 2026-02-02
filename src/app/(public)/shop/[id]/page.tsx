@@ -7,6 +7,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import SectionContainer from "@/utils/SectionContainer";
 
 interface Category { id: string; name: string; }
 interface Seller { id: string; name: string; email: string; }
@@ -110,7 +111,7 @@ export default function MedicineDetailsPage() {
   }
 
   return (
-    <div className="p-4 md:p-8">
+    <SectionContainer className=" min-h-1/2">
       <div className="flex flex-col md:flex-row gap-5">
         <Card className="w-full md:w-2/5 bg-background p-5 dark:bg-slate-900 overflow-hidden hover:scale-[1.02] transition-transform duration-200">
           <img
@@ -183,6 +184,6 @@ export default function MedicineDetailsPage() {
           </CardFooter>
         </Card>
       </div>
-    </div>
+    </SectionContainer>
   );
 }

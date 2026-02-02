@@ -143,12 +143,9 @@ export function SignupForm({
           </Button>
         </Field>
 
-        <FieldSeparator>Or continue with</FieldSeparator>
 
         <Field>
-          <Button variant="outline" type="button">
-            Sign up with GitHub
-          </Button>
+
 
           <FieldDescription className="px-6 text-center">
             Already have an account? <a href="/login">Sign in</a>
