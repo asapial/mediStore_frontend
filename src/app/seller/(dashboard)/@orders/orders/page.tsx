@@ -18,6 +18,7 @@ interface OrderItem {
   quantity: number;
   price: number;
   medicine: Medicine;
+  status:string;
 }
 
 interface Order {

@@ -40,9 +40,14 @@ export default function ProfilePage() {
         setName(data.user.name);
         setEmail(data.user.email);
         setPreview(data.user.image || null);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("Profile fetch error:", err);
-        toast.error(err.message || "Failed to fetch profile");
+
+        toast.error(
+          err instanceof Error
+            ? err.message
+            : "Failed to fetch profile"
+        );
       } finally {
         setLoading(false);
       }
@@ -100,9 +105,14 @@ export default function ProfilePage() {
       setUser({ ...user!, name: name.trim(), email: email.trim(), image: imageUrl });
       setImageFile(null);
       toast.success("Profile updated successfully!");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      toast.error(err.message || "Error updating profile");
+
+      toast.error(
+        err instanceof Error
+          ? err.message
+          : "Error updating profile"
+      );
     } finally {
       setUpdating(false);
     }
