@@ -10,13 +10,13 @@ const getSession=async ()=>{
 
         console.log(cookieStore.toString());
 
-        const res= await fetch(`${baseUrl}/api/auth/get-session`,{
+        const res= await fetch(`${baseUrl}/api/auth/me`,{
 
             headers:{
                 Cookie: cookieStore.toString()
             },
             cache:"no-store",
-            credentials:"include"
+            // credentials:"include"
         })
         
         const session= await res.json();

@@ -1,3 +1,6 @@
+"use client";
+
+import { motion } from "framer-motion";
 import {
   Card,
   CardContent,
@@ -5,6 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { GiPill, GiSyringe, GiMedicinePills, GiHealthIncrease } from "react-icons/gi";
 
 const stats = {
   totalMedicines: 15,
@@ -27,85 +31,91 @@ const stats = {
 
 export default function SellerDashBoardPage() {
   return (
-    <div className="space-y-8 max-w-7xl mx-auto">
+    <div className="space-y-10 max-w-7xl mx-auto py-8 px-5">
       {/* Page Title */}
-      <div>
-        <h1 className="text-3xl font-bold">Seller Dashboard</h1>
-        <p className="text-muted-foreground">
-          Overview of your store performance
+      <div className="text-center">
+        <h1 className="text-4xl md:text-5xl font-extrabold text-emerald-600 dark:text-blue-400">
+          Seller Dashboard
+        </h1>
+        <p className="text-muted-foreground mt-2">
+          Overview of your pharmacy store performance
         </p>
       </div>
 
       {/* Stats Grid */}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard title="Total Medicines" value={stats.totalMedicines} />
-        <StatCard title="Total Orders" value={stats.totalOrders} />
-        <StatCard title="Total Sold" value={stats.totalSold} />
+        <StatCard
+          title="Total Medicines"
+          value={stats.totalMedicines}
+          icon={<GiPill className="text-emerald-500 w-6 h-6" />}
+        />
+        <StatCard
+          title="Total Orders"
+          value={stats.totalOrders}
+          icon={<GiMedicinePills className="text-blue-500 w-6 h-6" />}
+        />
+        <StatCard
+          title="Total Sold"
+          value={stats.totalSold}
+          icon={<GiSyringe className="text-purple-500 w-6 h-6" />}
+        />
         <StatCard
           title="Total Revenue"
           value={`$${stats.totalRevenue.toFixed(2)}`}
+          icon={<GiHealthIncrease className="text-green-500 w-6 h-6" />}
         />
       </div>
 
-      {/* Inventory & Sales */}
+      {/* Inventory & Revenue */}
       <div className="grid gap-6 md:grid-cols-2">
         {/* Inventory */}
-        <Card>
+        <Card className="bg-gradient-to-r from-emerald-50 to-emerald-100 dark:from-gray-900 dark:to-gray-700">
           <CardHeader>
-            <CardTitle>Inventory Status</CardTitle>
+            <CardTitle className="text-lg font-bold">Inventory Status</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <p>
               Out of stock:{" "}
-              <Badge variant="destructive">
-                {stats.outOfStockMedicines}
-              </Badge>
+              <Badge variant="destructive">{stats.outOfStockMedicines}</Badge>
             </p>
             <p>
-              Low stock:{" "}
-              <Badge variant="secondary">{stats.lowStockMedicines}</Badge>
+              Low stock: <Badge variant="secondary">{stats.lowStockMedicines}</Badge>
             </p>
             <p>
               Average price:{" "}
-              <span className="font-semibold">
-                ${stats.averagePrice.toFixed(2)}
-              </span>
+              <span className="font-semibold">${stats.averagePrice.toFixed(2)}</span>
             </p>
           </CardContent>
         </Card>
 
         {/* Sales */}
-        <Card>
+        <Card className="bg-gradient-to-r from-green-50 to-green-100 dark:from-gray-800 dark:to-gray-700">
           <CardHeader>
-            <CardTitle>Sales Summary</CardTitle>
+            <CardTitle className="text-lg font-bold">Sales Summary</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <p>
               Today’s revenue:{" "}
-              <span className="font-semibold text-green-600">
+              <span className="font-semibold text-green-600 dark:text-green-400">
                 ${stats.todayRevenue}
               </span>
             </p>
             <p>
               This month:{" "}
-              <span className="font-semibold">
-                ${stats.thisMonthRevenue}
-              </span>
+              <span className="font-semibold">${stats.thisMonthRevenue}</span>
             </p>
             <p>
               Avg order value:{" "}
-              <span className="font-semibold">
-                ${stats.averageOrderValue.toFixed(2)}
-              </span>
+              <span className="font-semibold">${stats.averageOrderValue.toFixed(2)}</span>
             </p>
           </CardContent>
         </Card>
       </div>
 
       {/* Order Status */}
-      <Card>
+      <Card className="bg-gradient-to-r from-yellow-50 to-yellow-100 dark:from-gray-900 dark:to-gray-800">
         <CardHeader>
-          <CardTitle>Order Status</CardTitle>
+          <CardTitle className="text-lg font-bold">Orders by Status</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-3">
           {stats.ordersByStatus.map((item) => (
@@ -114,13 +124,8 @@ export default function SellerDashBoardPage() {
             </Badge>
           ))}
 
-          <Badge variant="default">
-            Completed: {stats.completedOrders}
-          </Badge>
-
-          <Badge variant="destructive">
-            Cancelled: {stats.cancelledOrders}
-          </Badge>
+          <Badge variant="default">Completed: {stats.completedOrders}</Badge>
+          <Badge variant="destructive">Cancelled: {stats.cancelledOrders}</Badge>
         </CardContent>
       </Card>
     </div>
@@ -131,223 +136,27 @@ export default function SellerDashBoardPage() {
 function StatCard({
   title,
   value,
+  icon,
 }: {
   title: string;
   value: string | number;
+  icon?: React.ReactNode;
 }) {
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-sm text-muted-foreground">
-          {title}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p className="text-2xl font-bold">{value}</p>
-      </CardContent>
-    </Card>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <Card className="bg-gradient-to-r from-white to-emerald-50 dark:from-slate-800 dark:to-slate-900 hover:scale-105 transition-transform">
+        <CardHeader className="flex items-center justify-between pb-2">
+          <CardTitle className="text-sm text-muted-foreground">{title}</CardTitle>
+          {icon && <div className="ml-2">{icon}</div>}
+        </CardHeader>
+        <CardContent>
+          <p className="text-2xl font-bold">{value}</p>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 }
-
-
-
-// "use client";
-
-// import { useEffect, useState } from "react";
-// import {
-//   Card,
-//   CardContent,
-//   CardHeader,
-//   CardTitle,
-// } from "@/components/ui/card";
-// import { Badge } from "@/components/ui/badge";
-
-// interface OrderStatusCount {
-//   status: string;
-//   _count: number;
-// }
-
-// interface SellerStats {
-//   totalMedicines: number;
-//   outOfStockMedicines: number;
-//   lowStockMedicines: number;
-//   averagePrice: number;
-//   totalOrders: number;
-//   completedOrders: number;
-//   cancelledOrders: number;
-//   ordersByStatus: OrderStatusCount[];
-//   totalSold: number;
-//   totalRevenue: number;
-//   averageOrderValue: number;
-//   todayRevenue: number;
-//   thisMonthRevenue: number;
-// }
-
-// export default function SellerDashBoardPage() {
-//   const [stats, setStats] = useState<SellerStats | null>(null);
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState("");
-
-//   useEffect(() => {
-//     const fetchStats = async () => {
-//       try {
-//         const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/seller/stat`, {
-//           credentials: "include", // IMPORTANT if auth cookie based
-//         });
-
-//         if (!res.ok) {
-//           throw new Error("Failed to load seller stats");
-//         }
-
-//         const data = await res.json();
-//         setStats(data);
-//       } catch (err: any) {
-//         setError(err.message || "Something went wrong");
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     fetchStats();
-//   }, []);
-
-//   /* ------------------ States ------------------ */
-//   if (loading) {
-//     return (
-//       <div className="text-center py-16 text-muted-foreground">
-//         Loading dashboard...
-//       </div>
-//     );
-//   }
-
-//   if (error || !stats) {
-//     return (
-//       <div className="text-center py-16 text-red-500">
-//         {error || "Failed to load data"}
-//       </div>
-//     );
-//   }
-
-//   /* ------------------ UI ------------------ */
-//   return (
-//     <div className="space-y-8">
-//       {/* Header */}
-//       <div>
-//         <h1 className="text-3xl font-bold">Seller Dashboard</h1>
-//         <p className="text-muted-foreground">
-//           Store performance overview
-//         </p>
-//       </div>
-
-//       {/* Main Stats */}
-//       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-//         <StatCard title="Total Medicines" value={stats.totalMedicines} />
-//         <StatCard title="Total Orders" value={stats.totalOrders} />
-//         <StatCard title="Total Sold" value={stats.totalSold} />
-//         <StatCard
-//           title="Total Revenue"
-//           value={`$${stats.totalRevenue.toFixed(2)}`}
-//         />
-//       </div>
-
-//       {/* Inventory & Revenue */}
-//       <div className="grid gap-6 md:grid-cols-2">
-//         {/* Inventory */}
-//         <Card>
-//           <CardHeader>
-//             <CardTitle>Inventory</CardTitle>
-//           </CardHeader>
-//           <CardContent className="space-y-3">
-//             <p>
-//               Out of stock:{" "}
-//               <Badge variant="destructive">
-//                 {stats.outOfStockMedicines}
-//               </Badge>
-//             </p>
-//             <p>
-//               Low stock:{" "}
-//               <Badge variant="secondary">{stats.lowStockMedicines}</Badge>
-//             </p>
-//             <p>
-//               Avg price:{" "}
-//               <span className="font-semibold">
-//                 ${stats.averagePrice.toFixed(2)}
-//               </span>
-//             </p>
-//           </CardContent>
-//         </Card>
-
-//         {/* Revenue */}
-//         <Card>
-//           <CardHeader>
-//             <CardTitle>Revenue</CardTitle>
-//           </CardHeader>
-//           <CardContent className="space-y-3">
-//             <p>
-//               Today:{" "}
-//               <span className="font-semibold text-green-600">
-//                 ${stats.todayRevenue}
-//               </span>
-//             </p>
-//             <p>
-//               This month:{" "}
-//               <span className="font-semibold">
-//                 ${stats.thisMonthRevenue}
-//               </span>
-//             </p>
-//             <p>
-//               Avg order value:{" "}
-//               <span className="font-semibold">
-//                 ${stats.averageOrderValue.toFixed(2)}
-//               </span>
-//             </p>
-//           </CardContent>
-//         </Card>
-//       </div>
-
-//       {/* Order Status */}
-//       <Card>
-//         <CardHeader>
-//           <CardTitle>Orders by Status</CardTitle>
-//         </CardHeader>
-//         <CardContent className="flex flex-wrap gap-3">
-//           {stats.ordersByStatus.map((item) => (
-//             <Badge key={item.status} variant="outline">
-//               {item.status}: {item._count}
-//             </Badge>
-//           ))}
-
-//           <Badge variant="default">
-//             Completed: {stats.completedOrders}
-//           </Badge>
-
-//           <Badge variant="destructive">
-//             Cancelled: {stats.cancelledOrders}
-//           </Badge>
-//         </CardContent>
-//       </Card>
-//     </div>
-//   );
-// }
-
-// /* ------------------ Reusable Card ------------------ */
-// function StatCard({
-//   title,
-//   value,
-// }: {
-//   title: string;
-//   value: string | number;
-// }) {
-//   return (
-//     <Card>
-//       <CardHeader className="pb-2">
-//         <CardTitle className="text-sm text-muted-foreground">
-//           {title}
-//         </CardTitle>
-//       </CardHeader>
-//       <CardContent>
-//         <p className="text-2xl font-bold">{value}</p>
-//       </CardContent>
-//     </Card>
-//   );
-// }

@@ -2,32 +2,19 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import {
-    Card,
-    CardHeader,
-    CardContent,
-    CardFooter,
-    CardTitle,
-} from "@/components/ui/card";
-import {
-    Table,
-    TableHeader,
-    TableBody,
-    TableRow,
-    TableCell,
-    TableHead,
-} from "@/components/ui/table";
+import { Card, CardHeader, CardContent, CardFooter, CardTitle } from "@/components/ui/card";
+import { Table, TableHeader, TableBody, TableRow, TableCell, TableHead } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
+import { motion } from "framer-motion";
+import { BiTrash, BiCartAlt, BiPackage, BiCategory, BiDollar } from "react-icons/bi";
+import SectionContainer from "@/utils/SectionContainer";
+import MedicineLoadingPage from "@/components/shared/LoadingPage";
 
-interface Category {
-    id: string;
-    name: string;
-}
-
+interface Category { id: string; name: string; }
 interface Medicine {
     id: string;
     name: string;
@@ -40,7 +27,6 @@ interface Medicine {
     categoryId: string;
     createdAt: string;
 }
-
 interface CartItem {
     id: string;
     cartId: string;
@@ -49,7 +35,6 @@ interface CartItem {
     addedAt: string;
     medicine: Medicine;
 }
-
 interface CartData {
     items: CartItem[];
     totalQuantity: number;
@@ -61,7 +46,6 @@ export default function CartPage() {
     const [loading, setLoading] = useState(false);
     const router = useRouter();
 
-    // Fetch cart from API
     const fetchCart = async () => {
         setLoading(true);
         try {
@@ -74,22 +58,14 @@ export default function CartPage() {
             setCart(data.data);
         } catch (err: unknown) {
             console.error(err);
-
-            toast.error(
-                err instanceof Error
-                    ? err.message
-                    : "Error fetching cart"
-            );
+            toast.error(err instanceof Error ? err.message : "Error fetching cart");
         } finally {
             setLoading(false);
         }
     };
 
-    useEffect(() => {
-        fetchCart();
-    }, []);
+    useEffect(() => { fetchCart(); }, []);
 
-    // Update quantity locally
     const handleQuantityChange = (itemId: string, value: number) => {
         setCart((prev) => {
             if (!prev) return prev;
@@ -100,15 +76,11 @@ export default function CartPage() {
                 ...prev,
                 items: updatedItems,
                 totalQuantity: updatedItems.reduce((sum, i) => sum + i.quantity, 0),
-                totalPrice: updatedItems.reduce(
-                    (sum, i) => sum + i.quantity * i.medicine.price,
-                    0
-                ),
+                totalPrice: updatedItems.reduce((sum, i) => sum + i.quantity * i.medicine.price, 0),
             };
         });
     };
 
-    // Call API to update quantity
     const updateCartItem = async (itemId: string, quantity: number) => {
         try {
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/cart/update`, {
@@ -120,19 +92,13 @@ export default function CartPage() {
             const data = await res.json();
             if (!res.ok) throw new Error(data.message || "Failed to update cart item");
             toast.success("Cart updated successfully");
-            fetchCart(); // optional to sync with server
+            fetchCart();
         } catch (err: unknown) {
             console.error(err);
-
-            toast.error(
-                err instanceof Error
-                    ? err.message
-                    : "Error updating cart"
-            );
+            toast.error(err instanceof Error ? err.message : "Error updating cart");
         }
     };
 
-    // Remove item
     const removeCartItem = async (itemId: string) => {
         try {
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/cart/remove`, {
@@ -151,34 +117,32 @@ export default function CartPage() {
                     ...prev,
                     items: updatedItems,
                     totalQuantity: updatedItems.reduce((sum, i) => sum + i.quantity, 0),
-                    totalPrice: updatedItems.reduce(
-                        (sum, i) => sum + i.quantity * i.medicine.price,
-                        0
-                    ),
+                    totalPrice: updatedItems.reduce((sum, i) => sum + i.quantity * i.medicine.price, 0),
                 };
             });
         } catch (err: unknown) {
             console.error(err);
-
-            toast.error(
-                err instanceof Error
-                    ? err.message
-                    : "Error removing item"
-            );
+            toast.error(err instanceof Error ? err.message : "Error removing item");
         }
     };
 
-    if (loading) return <p className="text-center py-10 text-muted-foreground flex justify-center items-center gap-3">Loading cart <Spinner className="size-4" /></p>
+    if (loading) return (
+        <MedicineLoadingPage text="medicines"></MedicineLoadingPage>
+    );
     if (!cart || cart.items.length === 0)
-        return <p className="text-center py-10 text-muted-foreground">Your cart is empty.</p>;
+        return <p className="text-center py-10 text-slate-500 min-h-screen bg-gradient-to-br from-emerald-50 via-emerald-100/10 to-emerald-50  dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">Your cart is empty.</p>;
 
     return (
-        <div className="p-5 md:p-10 space-y-6">
-            <h1 className="text-3xl font-extrabold text-foreground dark:text-white">My Cart</h1>
+        <SectionContainer className="bg-gradient-to-br from-emerald-50 via-emerald-100/10 to-emerald-50  dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+            <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2 my-5">
+                <BiCartAlt className="text-emerald-600 text-3xl" /> My Cart
+            </h1>
 
-            <Card className="overflow-x-auto">
+            <Card className="overflow-x-auto shadow-lg border border-slate-200 dark:border-slate-700 my-5">
                 <CardHeader>
-                    <CardTitle>Items in your cart</CardTitle>
+                    <CardTitle className="text-lg md:text-xl text-slate-900 dark:text-white">
+                        Items in your cart
+                    </CardTitle>
                 </CardHeader>
 
                 <CardContent className="p-0">
@@ -197,7 +161,14 @@ export default function CartPage() {
 
                         <TableBody>
                             {cart.items.map((item) => (
-                                <TableRow key={item.id}>
+                                <motion.tr
+                                    key={item.id}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.3 }}
+                                    whileHover={{ scale: 1.02, backgroundColor: "#f0fdf4" }}
+                                    className="transition-colors rounded-md"
+                                >
                                     <TableCell>
                                         <img
                                             src={item.medicine.image || "https://via.placeholder.com/100"}
@@ -205,21 +176,16 @@ export default function CartPage() {
                                             className="w-20 h-20 object-cover rounded-md"
                                         />
                                     </TableCell>
-                                    <TableCell className="font-medium">{item.medicine.name}</TableCell>
-                                    <TableCell>${item.medicine.price.toFixed(2)}</TableCell>
+                                    <TableCell className="font-medium flex flex-col gap-1">
+                                        <span>{item.medicine.name}</span>
+                                        <div className="flex items-center gap-1 text-slate-500 text-xs">
+                                            <BiPackage /> {item.medicine.manufacturer}
+                                            <BiCategory /> Category: {item.medicine.categoryId}
+                                        </div>
+                                    </TableCell>
+                                    <TableCell><BiDollar className="inline mr-1" />{item.medicine.price.toFixed(2)}</TableCell>
                                     <TableCell>
                                         <div className="flex items-center gap-2">
-                                            {/* <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          updateCartItem(item.id, Math.max(1, item.quantity - 1))
-                        }
-                      >
-                        -
-                      </Button> */}
-
                                             <Input
                                                 type="number"
                                                 min={1}
@@ -231,19 +197,8 @@ export default function CartPage() {
                                                 onBlur={(e) =>
                                                     updateCartItem(item.id, Math.max(1, Number(e.target.value)))
                                                 }
-                                                className="w-16 text-center border-0 focus:ring-0"
+                                                className="w-16 text-center border-0 focus:ring-1 focus:ring-emerald-400 rounded"
                                             />
-
-                                            {/* <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          updateCartItem(item.id, Math.min(item.medicine.stock, item.quantity + 1))
-                        }
-                      >
-                        +
-                      </Button> */}
                                         </div>
                                     </TableCell>
                                     <TableCell>${(item.quantity * item.medicine.price).toFixed(2)}</TableCell>
@@ -270,30 +225,31 @@ export default function CartPage() {
                                             variant="destructive"
                                             size="sm"
                                             onClick={() => removeCartItem(item.id)}
+                                            className="flex items-center gap-1"
                                         >
-                                            Remove
+                                            <BiTrash /> Remove
                                         </Button>
                                     </TableCell>
-                                </TableRow>
+                                </motion.tr>
                             ))}
                         </TableBody>
                     </Table>
                 </CardContent>
 
                 <CardFooter className="flex flex-col md:flex-row justify-between items-center gap-4">
-                    <div className="space-y-1">
+                    <div className="space-y-1 text-slate-900 dark:text-white">
                         <p className="text-lg font-semibold">Total Quantity: {cart.totalQuantity}</p>
-                        <p className="text-xl font-bold">Total Price: ${cart.totalPrice.toFixed(2)}</p>
+                        <p className="text-xl font-bold text-emerald-600">Total Price: ${cart.totalPrice.toFixed(2)}</p>
                     </div>
 
                     <Button
-                        className="bg-primary dark:bg-blue-600 hover:bg-primary/90 px-6"
+                        className="bg-emerald-600 dark:bg-emerald-500 hover:bg-emerald-700 px-6 transition-all flex items-center gap-2"
                         onClick={() => router.push("/checkout")}
                     >
-                        Proceed to Checkout
+                        Proceed to Checkout <BiCartAlt />
                     </Button>
                 </CardFooter>
             </Card>
-        </div>
+        </SectionContainer>
     );
 }

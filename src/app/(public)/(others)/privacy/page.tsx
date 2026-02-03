@@ -19,18 +19,17 @@ export default function PrivacyPolicyPage() {
     <SectionContainer
       className="
         min-h-screen
-        bg-gradient-to-br
-        from-slate-50 via-slate-100 to-slate-200
+        bg-gradient-to-br from-blue-50 via-teal-50 to-indigo-50
         dark:from-slate-950 dark:via-slate-900 dark:to-slate-800
-        py-16 px-4
+        py-16
       "
     >
-      <div className=" space-y-10">
+      <div className="space-y-10 max-w-4xl mx-auto">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.6 }}
           className="text-center space-y-4"
         >
           <h1 className="text-4xl font-bold text-slate-900 dark:text-slate-100">
@@ -52,13 +51,12 @@ export default function PrivacyPolicyPage() {
             bg-white/80 backdrop-blur
             dark:bg-slate-900/80
             border border-slate-200 dark:border-slate-800
-            shadow-xl
+            shadow-xl hover:shadow-2xl transition-shadow
             space-y-10
           "
         >
-          {/* Section */}
           <PolicySection
-            icon={<ShieldCheck className="h-6 w-6 text-primary" />}
+            icon={<ShieldCheck className="h-6 w-6 text-teal-600 dark:text-teal-400" />}
             title="1. Information We Collect"
           >
             We may collect personal information such as your name, email address,
@@ -66,10 +64,10 @@ export default function PrivacyPolicyPage() {
             is collected when you register, place an order, or contact support.
           </PolicySection>
 
-          <Separator />
+          <Separator className="border-teal-200 dark:border-teal-700" />
 
           <PolicySection
-            icon={<User className="h-6 w-6 text-primary" />}
+            icon={<User className="h-6 w-6 text-teal-600 dark:text-teal-400" />}
             title="2. How We Use Your Information"
           >
             Your information is used to process orders, deliver products,
@@ -77,10 +75,10 @@ export default function PrivacyPolicyPage() {
             security.
           </PolicySection>
 
-          <Separator />
+          <Separator className="border-teal-200 dark:border-teal-700" />
 
           <PolicySection
-            icon={<Database className="h-6 w-6 text-primary" />}
+            icon={<Database className="h-6 w-6 text-teal-600 dark:text-teal-400" />}
             title="3. Data Storage & Security"
           >
             We store your data securely using industry-standard practices. Access
@@ -88,10 +86,10 @@ export default function PrivacyPolicyPage() {
             use, alteration, or disclosure.
           </PolicySection>
 
-          <Separator />
+          <Separator className="border-teal-200 dark:border-teal-700" />
 
           <PolicySection
-            icon={<Share2 className="h-6 w-6 text-primary" />}
+            icon={<Share2 className="h-6 w-6 text-teal-600 dark:text-teal-400" />}
             title="4. Data Sharing"
           >
             We do not sell or rent your personal data. Information may only be
@@ -99,10 +97,10 @@ export default function PrivacyPolicyPage() {
             platform (e.g., delivery or payment processing).
           </PolicySection>
 
-          <Separator />
+          <Separator className="border-teal-200 dark:border-teal-700" />
 
           <PolicySection
-            icon={<Lock className="h-6 w-6 text-primary" />}
+            icon={<Lock className="h-6 w-6 text-teal-600 dark:text-teal-400" />}
             title="5. Your Rights"
           >
             You have the right to access, update, or delete your personal
@@ -110,26 +108,26 @@ export default function PrivacyPolicyPage() {
             data processing activities.
           </PolicySection>
 
-          <Separator />
+          <Separator className="border-teal-200 dark:border-teal-700" />
 
           <PolicySection
-            icon={<RefreshCcw className="h-6 w-6 text-primary" />}
+            icon={<RefreshCcw className="h-6 w-6 text-teal-600 dark:text-teal-400" />}
             title="6. Policy Updates"
           >
             We may update this Privacy Policy from time to time. Any changes will
             be posted on this page with an updated revision date.
           </PolicySection>
 
-          <Separator />
+          <Separator className="border-teal-200 dark:border-teal-700" />
 
           <PolicySection
-            icon={<Mail className="h-6 w-6 text-primary" />}
+            icon={<Mail className="h-6 w-6 text-teal-600 dark:text-teal-400" />}
             title="7. Contact Us"
           >
             If you have any questions or concerns about this Privacy Policy,
             please contact us at{" "}
-            <span className="font-medium text-primary">
-              support@yourdomain.com
+            <span className="font-medium text-teal-600 dark:text-teal-400">
+              support@medistore.com
             </span>
             .
           </PolicySection>
@@ -156,7 +154,7 @@ function PolicySection({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.4 }}
-      className="flex gap-4"
+      className="flex gap-4 hover:bg-teal-50 dark:hover:bg-slate-800 p-4 rounded-xl transition-colors"
     >
       <div className="mt-1">{icon}</div>
       <div className="space-y-2">

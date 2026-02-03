@@ -9,6 +9,7 @@ export async function proxy(request: NextRequest) {
   // Get session from your auth service
   const { data } = await userService.getSession();
 
+  console.log(data)
   // const {}= await useSession
 
   if (data) {
@@ -21,9 +22,9 @@ export async function proxy(request: NextRequest) {
   // -------------------------
   // Redirect if not logged in
   // -------------------------
-  // if (!isAuthenticated) {
-  //   return NextResponse.redirect(new URL("/login", request.url));
-  // }
+  if (!isAuthenticated) {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
 
   // -------------------------
   // CUSTOMER ROUTES

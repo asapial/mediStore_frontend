@@ -2,18 +2,11 @@
 
 import SectionContainer from "@/utils/SectionContainer";
 import { useEffect, useState } from "react";
+import { BiSearch, BiCategory, BiDollar, BiUser, BiCartAlt } from "react-icons/bi";
+import { motion } from "framer-motion";
 
-interface Category {
-  id: string;
-  name: string;
-}
-
-interface Seller {
-  id: string;
-  name: string;
-  email: string;
-}
-
+interface Category { id: string; name: string; }
+interface Seller { id: string; name: string; email: string; }
 interface Medicine {
   id: string;
   name: string;
@@ -60,136 +53,106 @@ export default function ShopPage() {
     }
   };
 
-  useEffect(() => {
-    fetchCategories();
-  }, []);
-
-  useEffect(() => {
-    fetchMedicines();
-  }, [search, selectedCategory]);
+  useEffect(() => { fetchCategories(); }, []);
+  useEffect(() => { fetchMedicines(); }, [search, selectedCategory]);
 
   return (
-    <SectionContainer className=" min-h-screen" >
-      <h1 style={{ marginBottom: "20px" }}>Shop - All Medicines</h1>
+    <SectionContainer className="min-h-screen py-10">
+      <h1 className="text-3xl font-bold text-slate-900 mb-6">Shop - All Medicines</h1>
 
       {/* Search & Filter */}
-      <div style={{ marginBottom: "20px", display: "flex", gap: "10px", flexWrap: "wrap" }}>
-        <input
-          type="text"
-          placeholder="Search medicines..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          style={{ padding: "10px", flex: "1", minWidth: "200px" }}
-        />
+      <div className="flex flex-wrap gap-3 mb-8 items-center">
+        <div className="relative flex-1 min-w-[200px]">
+          <BiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl" />
+          <input
+            type="text"
+            placeholder="Search medicines..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full pl-10 pr-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400"
+          />
+        </div>
+
         <select
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
-          style={{ padding: "10px", minWidth: "200px" }}
+          className="px-4 py-2 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 min-w-[200px]"
         >
           <option value="">All Categories</option>
           {categories.map((cat) => (
-            <option key={cat.id} value={cat.id}>
-              {cat.name}
-            </option>
+            <option key={cat.id} value={cat.id}>{cat.name}</option>
           ))}
         </select>
+
         <button
           onClick={fetchMedicines}
-          style={{ padding: "10px 20px", background: "#0070f3", color: "#fff", border: "none", borderRadius: "5px" }}
+          className="px-5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold transition-all"
         >
           Filter
         </button>
       </div>
 
       {loading ? (
-        <p>Loading medicines...</p>
+        <p className="text-slate-600">Loading medicines...</p>
       ) : (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-            gap: "20px",
-          }}
+        <motion.div
+          className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6 }}
         >
           {medicines.map((med) => (
-            <div
+            <motion.div
               key={med.id}
-              style={{
-                borderRadius: "10px",
-                overflow: "hidden",
-                boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
-                transition: "transform 0.2s, box-shadow 0.2s",
-                backgroundColor: "#fff",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-between",
-              }}
-              onMouseEnter={(e) => {
-                const el = e.currentTarget;
-                el.style.transform = "translateY(-5px)";
-                el.style.boxShadow = "0 8px 20px rgba(0,0,0,0.2)";
-              }}
-              onMouseLeave={(e) => {
-                const el = e.currentTarget;
-                el.style.transform = "translateY(0)";
-                el.style.boxShadow = "0 4px 10px rgba(0,0,0,0.1)";
-              }}
+              whileHover={{ scale: 1.03, boxShadow: "0 10px 25px rgba(0,0,0,0.15)" }}
+              className="bg-white rounded-xl shadow-md overflow-hidden flex flex-col justify-between transition-all"
             >
+              {/* Image */}
               <img
-                src={"https://i.ibb.co/wNXj2FR6/serum-sweet-Purple.png"}
-                // src={med.image || "https://i.ibb.co/wNXj2FR6/serum-sweet-Purple.png"}
+                src={med.image || "https://i.ibb.co/wNXj2FR6/serum-sweet-Purple.png"}
                 alt={med.name}
-                style={{ width: "100%", height: "180px", objectFit: "cover" }}
+                className="w-full h-48 object-cover"
               />
 
-              <div style={{ padding: "15px", flex: 1 }}>
-                <h3 style={{ margin: "0 0 10px 0", fontSize: "1.2rem", color: "#333" }}>{med.name}</h3>
-                <p style={{ fontSize: "0.9rem", color: "#555", minHeight: "50px" }}>{med.description}</p>
-                <p style={{ fontSize: "0.85rem", color: "#666" }}>
-                  <strong>Category:</strong> {med.category.name}
-                </p>
-                <p style={{ fontSize: "0.85rem", color: "#666" }}>
-                  <strong>Seller:</strong> {med.seller.name} ({med.seller.email})
-                </p>
-                <p style={{ fontSize: "1rem", color: "#000", fontWeight: "bold" }}>${med.price}</p>
-                <p style={{ fontSize: "0.85rem", color: med.stock > 0 ? "green" : "red" }}>
-                  <strong>Stock:</strong> {med.stock > 0 ? med.stock : "Out of stock"}
-                </p>
+              {/* Info */}
+              <div className="p-4 flex-1 flex flex-col gap-2">
+                <h3 className="text-lg font-semibold text-slate-900">{med.name}</h3>
+                <p className="text-sm text-slate-600 line-clamp-3">{med.description}</p>
+
+                <div className="flex items-center gap-2 text-slate-500 text-sm mt-1">
+                  <BiCategory /> <span>{med.category.name}</span>
+                </div>
+                <div className="flex items-center gap-2 text-slate-500 text-sm">
+                  <BiUser /> <span>{med.seller.name} ({med.seller.email})</span>
+                </div>
+                <div className="flex items-center gap-2 text-emerald-600 font-bold text-md mt-1">
+                  <BiDollar /> <span>${med.price}</span>
+                </div>
+
+                <div className={`mt-1 text-sm font-medium ${med.stock > 0 ? "text-green-600" : "text-red-600"}`}>
+                  Stock: {med.stock > 0 ? med.stock : "Out of stock"}
+                </div>
               </div>
 
-              <div style={{ padding: "0 15px 15px 15px" }}>
+              {/* Actions */}
+              <div className="p-3 flex gap-2">
                 <a
                   href={`/shop/${med.id}`}
-                  style={{
-                    display: "inline-block",
-                    width: "100%",
-                    textAlign: "center",
-                    padding: "10px 0",
-                    borderRadius: "8px",
-                    backgroundColor: "#4f46e5",
-                    color: "#fff",
-                    fontWeight: "bold",
-                    textDecoration: "none",
-                    transition: "background-color 0.2s, transform 0.2s",
-                  }}
-                  onMouseEnter={(e) => {
-                    const el = e.currentTarget;
-                    el.style.backgroundColor = "#4338ca";
-                    el.style.transform = "translateY(-2px)";
-                  }}
-                  onMouseLeave={(e) => {
-                    const el = e.currentTarget;
-                    el.style.backgroundColor = "#4f46e5";
-                    el.style.transform = "translateY(0)";
-                  }}
+                  className="flex-1 text-center bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 rounded-lg transition-all"
                 >
                   View Details
                 </a>
+                {/* {med.stock > 0 && (
+                  <button
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg flex items-center justify-center gap-2 transition-all"
+                  >
+                    <BiCartAlt /> Add to Cart
+                  </button>
+                )} */}
               </div>
-            </div>
-
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       )}
     </SectionContainer>
   );

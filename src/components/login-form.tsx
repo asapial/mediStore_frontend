@@ -2,15 +2,23 @@
 
 import { useState } from "react"
 import { cn } from "@/lib/utils"
+import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import {
   Field,
-  FieldDescription,
   FieldGroup,
   FieldLabel,
-  FieldSeparator,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import {
+  FaEnvelope,
+  FaLock,
+  FaArrowRight,
+  FaSpinner,
+  FaShieldAlt,
+} from "react-icons/fa"
 
 export function LoginForm({
   className,
@@ -27,31 +35,20 @@ export function LoginForm({
     const email = formData.get("email") as string
     const password = formData.get("password") as string
 
-    console.log(email,password)
-
     try {
       setLoading(true)
 
       const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
-      // const res = await fetch(`${BASE_URL}/api/auth/sign-in/email`, {
       const res = await fetch(`${BASE_URL}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }), 
+        body: JSON.stringify({ email, password }),
         credentials: "include",
       })
 
       const data = await res.json()
-      console.log(data)
+      if (!res.ok) throw new Error(data.message || "Login failed")
 
-      if (!res.ok) {
-        throw new Error(data.message || "Login failed")
-      }
-
-      // ✅ Save JWT in localStorage/sessionStorage (or cookie)
-      // localStorage.setItem("medistore_token", data.token)
-
-      // ✅ Redirect based on role
       switch (data.user.role) {
         case "CUSTOMER":
           window.location.href = "/"
@@ -65,67 +62,111 @@ export function LoginForm({
         default:
           window.location.href = "/"
       }
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message)
-      } else {
-        setError(String(err))
-      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Login failed")
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className={cn("flex flex-col gap-6", className)}
-      {...props}
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
+      className={cn("w-full max-w-md mx-auto", className)}
     >
-      <FieldGroup>
-        <div className="flex flex-col items-center gap-1 text-center">
-          <h1 className="text-2xl font-bold">Login to your account</h1>
-          <p className="text-muted-foreground text-sm text-balance">
-            Enter your email and password to login
-          </p>
-        </div>
-
-        <Field>
-          <FieldLabel htmlFor="email">Email</FieldLabel>
-          <Input
-            id="email"
-            name="email"
-            type="email"
-            placeholder="m@example.com"
-            required
-          />
-        </Field>
-
-        <Field>
-          <div className="flex items-center">
-            <FieldLabel htmlFor="password">Password</FieldLabel>
-            <a
-              href="#"
-              className="ml-auto text-sm underline-offset-4 hover:underline"
-            >
-              Forgot your password?
-            </a>
+      <Card className="rounded-2xl shadow-xl border border-slate-200/60 dark:border-slate-800 bg-white/80 dark:bg-slate-950/80 backdrop-blur">
+        <CardHeader className="space-y-2 text-center pb-2">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900">
+            <FaShieldAlt className="text-emerald-600 dark:text-emerald-400 text-xl" />
           </div>
-          <Input id="password" name="password" type="password" required />
-        </Field>
+          <h1 className="text-2xl font-bold tracking-tight">
+            Welcome back
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Login to continue to <span className="font-medium text-emerald-600">MediStore</span>
+          </p>
+        </CardHeader>
 
-        {error && (
-          <p className="text-sm text-red-500 text-center">{error}</p>
-        )}
+        <CardContent>
+          <form
+            onSubmit={handleSubmit}
+            className="flex flex-col gap-5"
+            {...props}
+          >
+            <FieldGroup>
+              {/* Email */}
+              <Field>
+                <FieldLabel>Email</FieldLabel>
+                <div className="relative">
+                  <FaEnvelope className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    name="email"
+                    type="email"
+                    placeholder="m@example.com"
+                    required
+                    className="pl-10"
+                  />
+                </div>
+              </Field>
 
-        <Field>
-          <Button type="submit" disabled={loading}>
-            {loading ? "Logging in..." : "Login"}
-          </Button>
-        </Field>
+              {/* Password */}
+              <Field>
+                <div className="flex items-center justify-between">
+                  <FieldLabel>Password</FieldLabel>
+                  <a
+                    href="#"
+                    className="text-xs text-emerald-600 hover:underline"
+                  >
+                    Forgot password?
+                  </a>
+                </div>
+                <div className="relative">
+                  <FaLock className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    name="password"
+                    type="password"
+                    required
+                    className="pl-10"
+                  />
+                </div>
+              </Field>
 
- 
-      </FieldGroup>
-    </form>
+              {/* Error */}
+              {error && (
+                <Alert variant="destructive">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+
+              {/* Submit */}
+              <Button
+                type="submit"
+                disabled={loading}
+                className="group w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
+              >
+                {loading ? (
+                  <span className="flex items-center gap-2">
+                    <FaSpinner className="animate-spin" />
+                    Logging in...
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-2">
+                    Login
+                    <FaArrowRight className="transition-transform group-hover:translate-x-1" />
+                  </span>
+                )}
+              </Button>
+            </FieldGroup>
+
+            {/* Footer */}
+            <p className="text-center text-xs text-muted-foreground">
+              Secure login · Cookies enabled · HIPAA-friendly
+            </p>
+          </form>
+        </CardContent>
+      </Card>
+    </motion.div>
   )
 }

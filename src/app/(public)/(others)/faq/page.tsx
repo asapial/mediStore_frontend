@@ -4,7 +4,8 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Info } from "lucide-react";
+import { BiHelpCircle } from "react-icons/bi";
 import SectionContainer from "@/utils/SectionContainer";
 
 const faqs = [
@@ -38,23 +39,26 @@ const faqs = [
 export default function FAQPage() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
-  // bg-gradient-to-br from-slate-50 to-emerald-50
-
   return (
-    <SectionContainer className="min-h-screen  p-6">
+    <SectionContainer className="min-h-screen p-6 bg-gradient-to-br from-emerald-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
       <div className="max-w-3xl mx-auto">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-10"
+          className="text-center mb-12"
         >
-          {/* <Badge className="mb-3">Help Center</Badge> */}
-          <h1 className="text-4xl font-bold text-slate-800">
-            Frequently Asked Questions
-          </h1>
-          <p className="text-muted-foreground mt-2">
+          <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-700 dark:text-emerald-100 mb-3 px-4 py-1 rounded-full">
+            Help Center
+          </Badge>
+          <div className="flex items-center justify-center gap-2">
+            <BiHelpCircle className="text-emerald-600 dark:text-emerald-400 text-3xl" />
+            <h1 className="text-4xl font-bold text-slate-800 dark:text-gray-100">
+              Frequently Asked Questions
+            </h1>
+          </div>
+          <p className="text-gray-600 dark:text-gray-300 mt-2">
             Find answers to common questions about orders, delivery, and payments
           </p>
         </motion.div>
@@ -72,21 +76,23 @@ export default function FAQPage() {
                 transition={{ duration: 0.3, delay: index * 0.05 }}
               >
                 <Card
-                  className="rounded-2xl shadow-sm border border-emerald-100 bg-white/80 backdrop-blur cursor-pointer"
-                  onClick={() =>
-                    setOpenIndex(isOpen ? null : index)
-                  }
+                  className="relative rounded-2xl shadow-md border border-emerald-100 bg-white/80 backdrop-blur-lg cursor-pointer hover:shadow-xl transition-shadow duration-300 dark:bg-slate-800 dark:border-slate-700"
+                  onClick={() => setOpenIndex(isOpen ? null : index)}
                 >
                   <CardContent className="p-5">
                     <div className="flex items-center justify-between">
-                      <h3 className="font-semibold text-slate-800">
-                        {faq.question}
-                      </h3>
+                      <div className="flex items-center gap-2">
+                        <Info className="text-emerald-500 dark:text-emerald-400" />
+                        <h3 className="font-semibold text-slate-800 dark:text-gray-100">
+                          {faq.question}
+                        </h3>
+                      </div>
+
                       <motion.div
                         animate={{ rotate: isOpen ? 180 : 0 }}
                         transition={{ duration: 0.2 }}
                       >
-                        <ChevronDown className="h-5 w-5 text-emerald-600" />
+                        <ChevronDown className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                       </motion.div>
                     </div>
 
@@ -97,9 +103,9 @@ export default function FAQPage() {
                           animate={{ height: "auto", opacity: 1 }}
                           exit={{ height: 0, opacity: 0 }}
                           transition={{ duration: 0.3 }}
-                          className="overflow-hidden"
+                          className="overflow-hidden mt-4"
                         >
-                          <p className="mt-4 text-sm text-muted-foreground leading-relaxed">
+                          <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
                             {faq.answer}
                           </p>
                         </motion.div>

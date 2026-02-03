@@ -21,13 +21,12 @@ export default function TermsAndConditionsPage() {
     <SectionContainer
       className="
         min-h-screen
-        bg-gradient-to-br
-        from-slate-50 via-slate-100 to-slate-200
+        bg-gradient-to-br from-blue-50 via-teal-50 to-indigo-50
         dark:from-slate-950 dark:via-slate-900 dark:to-slate-800
-        py-16 px-4
+        py-16 
       "
     >
-      <div className="space-y-10">
+      <div className="space-y-10 max-w-4xl mx-auto">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -54,12 +53,12 @@ export default function TermsAndConditionsPage() {
             bg-white/80 backdrop-blur
             dark:bg-slate-900/80
             border border-slate-200 dark:border-slate-800
-            shadow-xl
+            shadow-xl hover:shadow-2xl transition-shadow
             space-y-10
           "
         >
           <TermSection
-            icon={<FileText className="h-6 w-6 text-primary" />}
+            icon={<FileText className="h-6 w-6 text-teal-600 dark:text-teal-400" />}
             title="1. Acceptance of Terms"
           >
             By accessing or using this platform, you acknowledge that you have
@@ -67,10 +66,10 @@ export default function TermsAndConditionsPage() {
             Conditions.
           </TermSection>
 
-          <Separator />
+          <Separator className="border-teal-200 dark:border-teal-700" />
 
           <TermSection
-            icon={<UserCheck className="h-6 w-6 text-primary" />}
+            icon={<UserCheck className="h-6 w-6 text-teal-600 dark:text-teal-400" />}
             title="2. User Eligibility"
           >
             You must be at least 18 years old to use our services. By using the
@@ -78,10 +77,10 @@ export default function TermsAndConditionsPage() {
             and complete.
           </TermSection>
 
-          <Separator />
+          <Separator className="border-teal-200 dark:border-teal-700" />
 
           <TermSection
-            icon={<ShoppingCart className="h-6 w-6 text-primary" />}
+            icon={<ShoppingCart className="h-6 w-6 text-teal-600 dark:text-teal-400" />}
             title="3. Orders & Product Information"
           >
             Product descriptions, pricing, and availability are subject to
@@ -89,10 +88,10 @@ export default function TermsAndConditionsPage() {
             order at our discretion.
           </TermSection>
 
-          <Separator />
+          <Separator className="border-teal-200 dark:border-teal-700" />
 
           <TermSection
-            icon={<CreditCard className="h-6 w-6 text-primary" />}
+            icon={<CreditCard className="h-6 w-6 text-teal-600 dark:text-teal-400" />}
             title="4. Payments"
           >
             All payments must be completed through approved payment methods. We
@@ -100,20 +99,20 @@ export default function TermsAndConditionsPage() {
             providers.
           </TermSection>
 
-          <Separator />
+          <Separator className="border-teal-200 dark:border-teal-700" />
 
           <TermSection
-            icon={<Truck className="h-6 w-6 text-primary" />}
+            icon={<Truck className="h-6 w-6 text-teal-600 dark:text-teal-400" />}
             title="5. Shipping & Delivery"
           >
             Delivery times are estimates and may vary due to external factors.
             We are not liable for delays beyond our control.
           </TermSection>
 
-          <Separator />
+          <Separator className="border-teal-200 dark:border-teal-700" />
 
           <TermSection
-            icon={<ShieldAlert className="h-6 w-6 text-primary" />}
+            icon={<ShieldAlert className="h-6 w-6 text-teal-600 dark:text-teal-400" />}
             title="6. Prohibited Use"
           >
             You agree not to misuse the platform, attempt unauthorized access,
@@ -121,36 +120,36 @@ export default function TermsAndConditionsPage() {
             applicable laws or regulations.
           </TermSection>
 
-          <Separator />
+          <Separator className="border-teal-200 dark:border-teal-700" />
 
           <TermSection
-            icon={<RefreshCcw className="h-6 w-6 text-primary" />}
+            icon={<RefreshCcw className="h-6 w-6 text-teal-600 dark:text-teal-400" />}
             title="7. Modifications to Terms"
           >
             We reserve the right to update these Terms at any time. Continued use
             of the platform constitutes acceptance of the revised Terms.
           </TermSection>
 
-          <Separator />
+          <Separator className="border-teal-200 dark:border-teal-700" />
 
           <TermSection
-            icon={<Scale className="h-6 w-6 text-primary" />}
+            icon={<Scale className="h-6 w-6 text-teal-600 dark:text-teal-400" />}
             title="8. Limitation of Liability"
           >
             We shall not be liable for indirect, incidental, or consequential
             damages arising from your use of the platform.
           </TermSection>
 
-          <Separator />
+          <Separator className="border-teal-200 dark:border-teal-700" />
 
           <TermSection
-            icon={<Mail className="h-6 w-6 text-primary" />}
+            icon={<Mail className="h-6 w-6 text-teal-600 dark:text-teal-400" />}
             title="9. Contact Information"
           >
             For any questions regarding these Terms & Conditions, please contact
             us at{" "}
-            <span className="font-medium text-primary">
-              support@yourdomain.com
+            <span className="font-medium text-teal-600 dark:text-teal-400">
+              support@medistore.com
             </span>
             .
           </TermSection>
@@ -177,7 +176,7 @@ function TermSection({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.4 }}
-      className="flex gap-4"
+      className="flex gap-4 hover:bg-teal-50 dark:hover:bg-slate-800 p-4 rounded-xl transition-colors cursor-pointer"
     >
       <div className="mt-1">{icon}</div>
       <div className="space-y-2">
