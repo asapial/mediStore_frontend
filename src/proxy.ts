@@ -9,6 +9,8 @@ export async function proxy(request: NextRequest) {
   // Get session from your auth service
   const { data } = await userService.getSession();
 
+  // const {}= await useSession
+
   if (data) {
     isAuthenticated = true;
     role = data.user.role.toUpperCase(); // ensure uppercase
@@ -19,9 +21,9 @@ export async function proxy(request: NextRequest) {
   // -------------------------
   // Redirect if not logged in
   // -------------------------
-  if (!isAuthenticated) {
-    return NextResponse.redirect(new URL("/login", request.url));
-  }
+  // if (!isAuthenticated) {
+  //   return NextResponse.redirect(new URL("/login", request.url));
+  // }
 
   // -------------------------
   // CUSTOMER ROUTES
