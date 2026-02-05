@@ -2,7 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Card, CardHeader, CardContent, CardFooter, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardContent,
+  CardFooter,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -10,8 +16,17 @@ import { motion } from "framer-motion";
 import { BiArrowBack, BiCube } from "react-icons/bi";
 import SectionContainer from "@/utils/SectionContainer";
 import { Spinner } from "@/components/ui/spinner";
-import LoadingPage from "@/components/shared/LoadingPage";
 import MedicineLoadingPage from "@/components/shared/LoadingPage";
+
+// ShadCN Dialog
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 interface Medicine {
   name: string;
@@ -43,19 +58,23 @@ export default function OrderDetailsPage() {
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
   const fetchOrder = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/orders/${id}`, {
-        method: "GET",
-        credentials: "include",
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/orders/${id}`,
+        { method: "GET", credentials: "include" }
+      );
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed to fetch order");
       setOrder(data.data);
     } catch (err: unknown) {
       console.error(err);
-      toast.error(err instanceof Error ? err.message : "Error fetching order details");
+      toast.error(
+        err instanceof Error ? err.message : "Error fetching order details"
+      );
     } finally {
       setLoading(false);
     }
@@ -65,14 +84,40 @@ export default function OrderDetailsPage() {
     if (id) fetchOrder();
   }, [id]);
 
-    if (loading) return (
-        <MedicineLoadingPage text="order"></MedicineLoadingPage>
-    );
-  if (!order) {
-    return <p className="text-center py-10 text-muted-foreground">Order not found.</p>;
-  }
+  if (loading)
+    return <MedicineLoadingPage text="order"></MedicineLoadingPage>;
 
-  const totalPrice = order.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  if (!order)
+    return (
+      <p className="text-center py-10 text-muted-foreground">Order not found.</p>
+    );
+
+  const totalPrice = order.items.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
+
+  // ---------------- DELETE ORDER ----------------
+  const handleDeleteOrder = async (orderId: string) => {
+    if (!order) return;
+    try {
+      setLoading(true);
+      console.log(orderId);
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/orders/${orderId}`,
+        { method: "DELETE", credentials: "include" }
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to delete order");
+      toast.success("Order deleted successfully");
+      router.push("/orders");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setLoading(false);
+      setDeleteDialogOpen(false);
+    }
+  };
 
   return (
     <SectionContainer
@@ -85,7 +130,11 @@ export default function OrderDetailsPage() {
           <BiCube className="text-emerald-500 dark:text-blue-400 text-2xl" />
           Order Details
         </h1>
-        <Button onClick={() => router.back()} variant="outline" className="flex items-center gap-1">
+        <Button
+          onClick={() => router.back()}
+          variant="outline"
+          className="flex items-center gap-1"
+        >
           <BiArrowBack /> Back
         </Button>
       </div>
@@ -111,11 +160,12 @@ export default function OrderDetailsPage() {
             <Badge
               variant="secondary"
               className={`uppercase px-3 py-1 font-semibold rounded-full
-                ${order.status === "DELIVERED"
-                  ? "bg-green-500 text-white"
-                  : order.status === "CANCELLED"
-                  ? "bg-red-500 text-white"
-                  : "bg-yellow-400 text-black"
+                ${
+                  order.status === "DELIVERED"
+                    ? "bg-green-500 text-white"
+                    : order.status === "CANCELLED"
+                    ? "bg-red-500 text-white"
+                    : "bg-yellow-400 text-black"
                 }`}
             >
               {order.status}
@@ -143,24 +193,33 @@ export default function OrderDetailsPage() {
                   >
                     <td className="py-2 px-4 w-20">
                       <img
-                        src={item.medicine.image || "https://i.ibb.co/wNXj2FR6/serum-sweet-Purple.png"}
+                        src={
+                          item.medicine.image ||
+                          "https://i.ibb.co/wNXj2FR6/serum-sweet-Purple.png"
+                        }
                         alt={item.medicine.name}
                         className="w-16 h-16 object-cover rounded-lg"
                       />
                     </td>
-                    <td className="py-2 px-4 font-medium text-slate-900 dark:text-slate-100">{item.medicine.name}</td>
-                    <td className="py-2 px-4 text-sm text-slate-600 dark:text-slate-300">{item.medicine.description}</td>
+                    <td className="py-2 px-4 font-medium text-slate-900 dark:text-slate-100">
+                      {item.medicine.name}
+                    </td>
+                    <td className="py-2 px-4 text-sm text-slate-600 dark:text-slate-300">
+                      {item.medicine.description}
+                    </td>
                     <td className="py-2 px-4">{item.quantity}</td>
                     <td className="py-2 px-4">${item.price.toFixed(2)}</td>
-                    <td className="py-2 px-4 font-semibold">${(item.price * item.quantity).toFixed(2)}</td>
+                    <td className="py-2 px-4 font-semibold">
+                      ${(item.price * item.quantity).toFixed(2)}
+                    </td>
                     <td className="py-2 px-4">
                       <Badge
                         variant={
                           item.status === "DELIVERED"
                             ? "default"
                             : item.status === "CANCELLED"
-                              ? "destructive"
-                              : "secondary"
+                            ? "destructive"
+                            : "secondary"
                         }
                       >
                         {item.status}
@@ -176,12 +235,38 @@ export default function OrderDetailsPage() {
             <p className="text-lg font-bold text-slate-900 dark:text-white">
               Total: ${totalPrice.toFixed(2)}
             </p>
-            <Button
-              onClick={() => router.push("/checkout")}
-              className="bg-emerald-500 dark:bg-blue-600 hover:bg-emerald-600 dark:hover:bg-blue-700 px-6"
-            >
-              Proceed to Checkout
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                onClick={() => router.push("/checkout")}
+                className="bg-emerald-500 dark:bg-blue-600 hover:bg-emerald-600 dark:hover:bg-blue-700 px-6"
+              >
+                Proceed to Checkout
+              </Button>
+
+              {order.status !== "DELIVERED" && order.status !== "CANCELLED" && (
+                <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="destructive" className="px-6">
+                      Delete Order
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Confirm Deletion</DialogTitle>
+                    </DialogHeader>
+                    <p>Are you sure you want to delete this order? This action cannot be undone.</p>
+                    <DialogFooter>
+                      <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+                        Cancel
+                      </Button>
+                      <Button variant="destructive" onClick={()=>handleDeleteOrder(order.id)}>
+                        Delete
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              )}
+            </div>
           </CardFooter>
         </Card>
       </motion.div>

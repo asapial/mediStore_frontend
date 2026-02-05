@@ -80,7 +80,7 @@ export function SignupForm({
       setLoading(true)
 
       const res = await fetch(
-        "https://medi-store-backend-ashy.vercel.app/api/auth/register",
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/register`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -108,11 +108,11 @@ export function SignupForm({
   }
 
   return (
-    <motion.form
+    <form
       onSubmit={handleSubmit}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
+      // initial={{ opacity: 0, y: 20 }}
+      // animate={{ opacity: 1, y: 0 }}
+      // transition={{ duration: 0.4 }}
       className={cn(
         "flex flex-col gap-6 rounded-2xl border bg-white/80 dark:bg-slate-950/70 p-8 shadow-xl backdrop-blur",
         className
@@ -266,6 +266,6 @@ export function SignupForm({
           </a>
         </p>
       </FieldGroup>
-    </motion.form>
+    </form>
   )
 }

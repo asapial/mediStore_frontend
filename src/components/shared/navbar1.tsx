@@ -55,7 +55,8 @@ interface Navbar1Props {
       url: string;
     };
   };
-  userRole?: "ADMIN" | "SELLER" | null;
+  userRole?: "ADMIN" | "SELLER" |"CUSTOMER"| null;
+  authenticated?:boolean;
 }
 
 export const Navbar1 = ({
@@ -70,6 +71,7 @@ export const Navbar1 = ({
     signup: { title: "Sign up", url: "/register" },
   },
   userRole = null,
+  authenticated=false,
   className,
 }: Navbar1Props) => {
   // base menu
@@ -82,7 +84,9 @@ export const Navbar1 = ({
 useEffect(() => {
   let roleItems: MenuItem[] = [];
 
-  if (userRole === "ADMIN") {
+  console.log("Authentication value form the navbar : ", authenticated)
+
+  if (userRole === "ADMIN" && authenticated) {
     roleItems.push({
       title: "Dashboard",
       url: "/admin",
@@ -90,7 +94,7 @@ useEffect(() => {
       description: "Admin Panel",
     });
   } 
-  else if (userRole === "SELLER") {
+  else if (userRole === "SELLER" && authenticated) {
     roleItems.push({
       title: "Dashboard",
       url: "/seller/dashboard",
@@ -98,7 +102,7 @@ useEffect(() => {
       description: "Seller Panel",
     });
   } 
-  else if (userRole === "CUSTOMER") {
+  else if (userRole === "CUSTOMER" && authenticated) {
     roleItems.push(
       {
         title: "Cart",
@@ -126,7 +130,7 @@ useEffect(() => {
       ...roleItems,
     ]);
   }
-}, [userRole]);
+}, [userRole,authenticated]);
 
 
   return (
