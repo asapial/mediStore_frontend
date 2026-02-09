@@ -28,7 +28,7 @@ export default function ProfilePage() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/me`, {
+        const res = await fetch(`${process.env.backendBaseUrl}/api/auth/me`, {
           method: "GET",
           credentials: "include",
         });
@@ -92,7 +92,7 @@ export default function ProfilePage() {
         imageUrl = await uploadImageToImgBB(imageFile);
       }
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/update`, {
+      const res = await fetch(`${process.env.backendBaseUrl}/api/auth/update`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

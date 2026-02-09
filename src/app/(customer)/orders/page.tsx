@@ -43,7 +43,7 @@ export default function CustomerOrdersPage() {
   const fetchOrders = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/orders`, {
+      const res = await fetch(`${process.env.backendBaseUrl}/api/orders`, {
         method: "GET",
         credentials: "include",
       });

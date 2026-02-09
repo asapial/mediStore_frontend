@@ -80,7 +80,9 @@ export function SignupForm({
       setLoading(true)
 
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/register`,
+        // `${process.env.backendBaseUrl}/api/auth/register`,
+        // `https://medistorebackend-jet.vercel.app/api/auth/sign-up/email`,
+        `${process.env.backendBaseUrl}/api/auth/sign-up/email`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

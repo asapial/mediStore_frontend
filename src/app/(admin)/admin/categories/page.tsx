@@ -26,7 +26,7 @@ export default function ManageCategoriesPage() {
   const fetchCategories = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/admin/categories`, {
+      const res = await fetch(`${process.env.backendBaseUrl}/api/admin/categories`, {
         method: "GET",
         credentials: "include",
       });
@@ -52,7 +52,7 @@ export default function ManageCategoriesPage() {
       return;
     }
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/admin/categories/${id}`, {
+      const res = await fetch(`${process.env.backendBaseUrl}/api/admin/categories/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

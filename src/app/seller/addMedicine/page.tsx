@@ -37,7 +37,7 @@ export default function AddMedicinePage() {
 
   useEffect(() => {
     const fetchCategories = async () => {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/admin/categories`);
+      const res = await fetch(`${process.env.backendBaseUrl}/api/admin/categories`);
       const data = await res.json();
       setCategories(data.data);
     };
@@ -65,7 +65,7 @@ export default function AddMedicinePage() {
       const payload = { ...form, price: Number(form.price), stock: Number(form.stock) };
       console.log("Medicine Payload:", payload);
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/seller/medicines`, {
+      const res = await fetch(`${process.env.backendBaseUrl}/api/seller/medicines`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

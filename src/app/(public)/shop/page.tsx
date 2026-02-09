@@ -29,7 +29,7 @@ export default function ShopPage() {
   const fetchMedicines = async () => {
     setLoading(true);
     try {
-      let url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/medicines?`;
+      let url = `${process.env.backendBaseUrl}/api/medicines?`;
       if (search) url += `name=${search}&`;
       if (selectedCategory) url += `categoryId=${selectedCategory}&`;
 
@@ -45,7 +45,7 @@ export default function ShopPage() {
 
   const fetchCategories = async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/admin/categories`);
+      const res = await fetch(`${process.env.backendBaseUrl}/api/admin/categories`);
       const data = await res.json();
       setCategories(data.data);
     } catch (err) {

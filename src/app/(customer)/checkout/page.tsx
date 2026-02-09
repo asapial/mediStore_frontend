@@ -50,7 +50,7 @@ export default function CheckoutPage() {
   const fetchCart = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/cart`, {
+      const res = await fetch(`${process.env.backendBaseUrl}/api/cart`, {
         method: "GET",
         credentials: "include",
       });
@@ -80,7 +80,7 @@ export default function CheckoutPage() {
 
     setPlacingOrder(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/orders`, {
+      const res = await fetch(`${process.env.backendBaseUrl}/api/orders`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

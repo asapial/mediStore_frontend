@@ -1,4 +1,3 @@
-"use client";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -12,8 +11,12 @@ import {
 import { FaTruck } from "react-icons/fa";
 import { motion } from "framer-motion";
 import SectionContainer from "@/utils/SectionContainer";
+import { authClient } from "@/lib/auth-client";
 
 export default function HeroSection() {
+
+
+
   const floatingIcons = [
     { Icon: BiCapsule, top: "15%", left: "10%", size: "3rem", delay: 0 },
     { Icon: BiFirstAid, top: "30%", left: "80%", size: "2.5rem", delay: 1 },

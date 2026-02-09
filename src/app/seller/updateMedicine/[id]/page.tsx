@@ -51,7 +51,7 @@ export default function UpdateMedicinePage() {
     const fetchCategories = async () => {
       try {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/admin/categories`
+          `${process.env.backendBaseUrl}/api/admin/categories`
         );
         const data = await res.json();
         setCategories(data.data || []);
@@ -67,7 +67,7 @@ export default function UpdateMedicinePage() {
     const fetchMedicine = async () => {
       try {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/medicines/${medicineId}`
+          `${process.env.backendBaseUrl}/api/medicines/${medicineId}`
         );
         if (!res.ok) throw new Error("Failed to fetch medicine");
         const fetchedData = await res.json();
@@ -128,7 +128,7 @@ export default function UpdateMedicinePage() {
       };
 
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/seller/medicines/${medicineId}`,
+        `${process.env.backendBaseUrl}/api/seller/medicines/${medicineId}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
