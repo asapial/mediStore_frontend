@@ -14,8 +14,7 @@ import {
     BiBandAid
 } from "react-icons/bi";
 import SectionContainer from "@/utils/SectionContainer";
-import { createAuthClient } from "better-auth/react"
-const { useSession } = createAuthClient() 
+
 
 export default function CategoriesSection() {
     const categories = [
@@ -30,18 +29,9 @@ export default function CategoriesSection() {
         // { name: "Respiratory", icon: BiWind, bg: "from-[#e6fff9] to-[#ccfff0]" },
     ];
 
-        const {
-        data: session,
-        isPending, //loading state
-        error, //error object 
-        refetch //refetch the session
-    } = useSession()
 
-    console.log("Form client : ",session)
 
-    if(error){
-        console.log(error)
-    }
+
 
     return (
 

@@ -1,7 +1,5 @@
 import Footer from '@/components/shared/Footer';
 import { Navbar1 } from '@/components/shared/navbar1';
-import { auth } from '@/lib/auth';
-import { authClient } from '@/lib/auth-client';
 import { userService } from '@/services/user.service';
 import { cookies, headers } from 'next/headers';
 import React from 'react'
@@ -13,10 +11,10 @@ function isSessionValid(expiresAt: string) {
 type Role = "CUSTOMER" | "SELLER" | "ADMIN";
 
 export default async function Layout({ children }: { children: React.ReactNode }) {
-    // const { data } = await userService.getSession(); // server-only
-        const data = await auth.api.getSession({
-        headers: await headers()
-    })
+    const { data } = await userService.getSession(); // server-only
+    //     const data = await auth.api.getSession({
+    //     headers: await headers()
+    // })
     console.log("Data form the layout layer :",data)
     let authenticated = false
     const userRole = data?.user?.role;
