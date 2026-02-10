@@ -1,17 +1,14 @@
 import { createAuthClient } from "better-auth/react"
-import { customSessionClient } from "better-auth/client/plugins";
+
+import { nextCookies } from "better-auth/next-js";
+
 // import type { auth } from "@/lib/auth";
 export const authClient = createAuthClient({
     /** The base URL of the server (optional if you're using the same domain) */
-    // baseURL: "https://medistorebackend-jet.vercel.app/api/auth",
-    // baseURL: "http://localhost:5000",
-//    baseURL: typeof window !== "undefined" ? window.location.origin : "",
-//     fetchOptions:{
-//         credentials:"include"
-//     },
-    //  plugins: [customSessionClient<typeof auth>()],
+    // baseURL: "https://medistorebackend-jet.vercel.app",
+    plugins: [nextCookies()]
 
-    
+
 
 })
 

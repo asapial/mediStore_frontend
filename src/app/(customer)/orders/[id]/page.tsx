@@ -64,7 +64,7 @@ export default function OrderDetailsPage() {
     setLoading(true);
     try {
       const res = await fetch(
-        `${process.env.backendBaseUrl}/api/orders/${id}`,
+        `${process.env.NEXT_PUBLIC_backendBaseUrl}/api/orders/${id}`,
         { method: "GET", credentials: "include" }
       );
       const data = await res.json();
@@ -104,7 +104,7 @@ export default function OrderDetailsPage() {
       setLoading(true);
       console.log(orderId);
       const res = await fetch(
-        `${process.env.backendBaseUrl}/api/orders/${orderId}`,
+        `${process.env.NEXT_PUBLIC_backendBaseUrl}/api/orders/${orderId}`,
         { method: "DELETE", credentials: "include" }
       );
       const data = await res.json();

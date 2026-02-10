@@ -40,7 +40,7 @@ export default function SellerMedicinesPage() {
 
   const fetchMedicines = async () => {
     try {
-      const res = await fetch(`${process.env.backendBaseUrl}/api/medicines/own`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_backendBaseUrl}/api/medicines/own`, {
         credentials: "include",
       });
       const data = await res.json();
@@ -57,7 +57,7 @@ export default function SellerMedicinesPage() {
   const handleDelete = async () => {
     if (!deleteId) return;
     try {
-      const res = await fetch(`${process.env.backendBaseUrl}/api/seller/medicines/${deleteId}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_backendBaseUrl}/api/seller/medicines/${deleteId}`, {
         method: "DELETE",
       });
       if (!res.ok) throw new Error("Failed to delete medicine");

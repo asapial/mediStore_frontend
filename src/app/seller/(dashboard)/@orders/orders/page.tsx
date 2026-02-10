@@ -54,7 +54,7 @@ export default function SellerOrdersPage() {
   const fetchOrders = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${process.env.backendBaseUrl}/api/seller/orders`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_backendBaseUrl}/api/seller/orders`, {
         method: "GET",
         credentials: "include",
       });
@@ -85,7 +85,7 @@ export default function SellerOrdersPage() {
     const orderItemIds = order.items.map(item => item.id);
 
     try {
-      const res = await fetch(`${process.env.backendBaseUrl}/api/seller/orders`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_backendBaseUrl}/api/seller/orders`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

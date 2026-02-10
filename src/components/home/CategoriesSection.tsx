@@ -14,6 +14,8 @@ import {
     BiBandAid
 } from "react-icons/bi";
 import SectionContainer from "@/utils/SectionContainer";
+import { createAuthClient } from "better-auth/react"
+const { useSession } = createAuthClient() 
 
 export default function CategoriesSection() {
     const categories = [
@@ -28,7 +30,21 @@ export default function CategoriesSection() {
         // { name: "Respiratory", icon: BiWind, bg: "from-[#e6fff9] to-[#ccfff0]" },
     ];
 
+        const {
+        data: session,
+        isPending, //loading state
+        error, //error object 
+        refetch //refetch the session
+    } = useSession()
+
+    console.log("Form client : ",session)
+
+    if(error){
+        console.log(error)
+    }
+
     return (
+
         <SectionContainer className=" bg-linear-to-r from-[#f9fcff] via-[#eef6ff] to-[#e0f0ff]
 dark:bg-linear-to-r dark:from-gray-800 dark:via-gray-700 dark:to-gray-600 dark:to-gray-600 py-16">
             <h2 className="text-3xl font-bold mb-12 text-center text-gray-800 dark:text-gray-100">

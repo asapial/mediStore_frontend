@@ -48,7 +48,7 @@ export default function AdminOrderDetailsPage() {
   const fetchOrders = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${process.env.backendBaseUrl}/api/admin/order`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_backendBaseUrl}/api/admin/order`, {
         method: "GET",
         credentials: "include",
       });

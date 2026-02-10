@@ -49,7 +49,7 @@ export default function CartPage() {
     const fetchCart = async () => {
         setLoading(true);
         try {
-            const res = await fetch(`${process.env.backendBaseUrl}/api/cart`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_backendBaseUrl}/api/cart`, {
                 method: "GET",
                 credentials: "include",
             });
@@ -83,7 +83,7 @@ export default function CartPage() {
 
     const updateCartItem = async (itemId: string, quantity: number) => {
         try {
-            const res = await fetch(`${process.env.backendBaseUrl}/api/cart/update`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_backendBaseUrl}/api/cart/update`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
@@ -101,7 +101,7 @@ export default function CartPage() {
 
     const removeCartItem = async (itemId: string) => {
         try {
-            const res = await fetch(`${process.env.backendBaseUrl}/api/cart/remove`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_backendBaseUrl}/api/cart/remove`, {
                 method: "DELETE",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",

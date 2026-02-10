@@ -38,7 +38,7 @@ export default function MedicineDetailsPage() {
   const fetchMedicine = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${process.env.backendBaseUrl}/api/medicines/${id}`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_backendBaseUrl}/api/medicines/${id}`);
       const data = await res.json();
       setMedicine(data.data);
     } catch (err) {
@@ -53,7 +53,7 @@ export default function MedicineDetailsPage() {
   const fetchMedicineCartStatus = async () => {
     try {
       const res = await fetch(
-        `${process.env.backendBaseUrl}/api/cart/status/${id}`,
+        `${process.env.NEXT_PUBLIC_backendBaseUrl}/api/cart/status/${id}`,
         { method: "GET", credentials: "include" }
       );
       const data = await res.json();
@@ -76,7 +76,7 @@ export default function MedicineDetailsPage() {
   const handleAddToCart = async () => {
     if (!medicine) return;
     try {
-      const res = await fetch(`${process.env.backendBaseUrl}/api/cart/add`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_backendBaseUrl}/api/cart/add`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

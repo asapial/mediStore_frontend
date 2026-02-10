@@ -1,6 +1,8 @@
 import { betterAuth } from "better-auth";
+
 export const auth = betterAuth({
-        trustedOrigins: ["https://medi-store-frontend-khaki.vercel.app", "http://localhost:3000"],
+    baseURL: "https://medistorebackend-jet.vercel.app",
+    secret: process.env.BETTER_AUTH_SECRET!,
     user: {
         additionalFields: {
             role: {

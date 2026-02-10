@@ -93,7 +93,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
     const fetchProfile = async () => {
       try {
         const res = await fetch(
-          `${process.env.backendBaseUrl}/api/auth/me`,
+          `${process.env.NEXT_PUBLIC_backendBaseUrl}/api/auth/me`,
           { credentials: "include" }
         )
 

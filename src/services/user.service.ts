@@ -11,8 +11,8 @@ const getSession = async () => {
 
         console.log("Cookie Store :",cookieStore.toString());
 
-        // const res= await fetch(`https://medistorebackend-jet.vercel.app/api/auth/get-session`,{
-        const res= await fetch(`${process.env.backendBaseUrl}/api/auth/get-session`,{
+        const res= await fetch(`https://medistorebackend-jet.vercel.app/api/auth/get-session`,{
+        // const res= await fetch(`${baseUrl}/api/auth/get-session`,{
 
 
             headers:{
