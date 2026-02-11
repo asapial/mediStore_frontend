@@ -473,5 +473,5 @@ This project is private and not licensed for public distribution.
 ---
 
 <p align="center">
-  Built with ❤️ using <a href="https://nextjs.org">Next.js</a> and <a href="https://ui.shadcn.com">Shadcn UI</a>
+  Built with ❤️ by <strong>Md Abu Syeed Abdullah</strong>
 </p>
