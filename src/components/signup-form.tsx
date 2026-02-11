@@ -80,7 +80,7 @@ export function SignupForm({
       setLoading(true)
 
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_backendBaseUrl}/api/auth/sign-up/email`,
+        `/api/auth/sign-up/email`,
         // `https://medistorebackend-jet.vercel.app/api/auth/sign-up/email`,
         // `https://medistorebackend-jet.vercel.app/api/auth/sign-up/email`,
         {

@@ -43,7 +43,7 @@ export default function AdminUsersPage() {
     setLoading(true);
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_backendBaseUrl}/api/admin/users`,
+        `/api/admin/users`,
         { credentials: "include" }
       );
       const data = await res.json();
@@ -61,7 +61,7 @@ export default function AdminUsersPage() {
   const toggleBan = async (id: string, ban: boolean) => {
     try {
       await fetch(
-        `${process.env.NEXT_PUBLIC_backendBaseUrl}/api/admin/users/${id}/ban`,
+        `/api/admin/users/${id}/ban`,
         {
           method: "PATCH",
           credentials: "include",
@@ -83,7 +83,7 @@ export default function AdminUsersPage() {
 
     try {
       await fetch(
-        `${process.env.NEXT_PUBLIC_backendBaseUrl}/api/admin/users/${editingUser.id}`,
+        `/api/admin/users/${editingUser.id}`,
         {
           method: "PATCH",
           credentials: "include",

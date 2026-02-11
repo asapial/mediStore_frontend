@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/api/:path*",
-        destination: `${process.env.NEXT_PUBLIC_backendBaseUrl}/api/:path*`,
+        destination: `${process.env.backendBaseUrl}/api/:path*`,
       },
     ];
   },

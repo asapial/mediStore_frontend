@@ -29,7 +29,7 @@ export default function SidebarUserCard() {
     const fetchProfile = async () => {
       try {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_backendBaseUrl}/api/auth/me`,
+          `/api/auth/me`,
           { credentials: "include" }
         );
         const data = await res.json();

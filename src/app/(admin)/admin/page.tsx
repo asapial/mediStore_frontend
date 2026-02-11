@@ -30,7 +30,7 @@ export default function AdminDashboardPage() {
   const fetchStats = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_backendBaseUrl}/api/admin/stats`, {
+      const res = await fetch(`/api/admin/stats`, {
         method: "GET",
         credentials: "include",
       });

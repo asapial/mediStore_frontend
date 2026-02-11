@@ -23,7 +23,7 @@ export default async function Layout({ children }: { children: React.ReactNode }
 
 
   const cookieStore = cookies()
-  const sessionToken = (await cookieStore).get("__Secure-better-auth.session_token")
+  const sessionToken = (await cookieStore).get("__Secure-better-auth.session_token") || (await cookieStore).get("better-auth.session_token")
 
 
     if (
