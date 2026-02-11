@@ -124,6 +124,23 @@
   }
 }
 
+.icon-neutral {
+  @apply text-slate-500;
+}
+.icon-admin {
+  @apply text-indigo-500;
+}
+.icon-seller {
+  @apply text-emerald-500;
+}
+.icon-cart {
+  @apply text-cyan-500;
+}
+.icon-orders {
+  @apply text-violet-500;
+}
+
+
 
 /* make gradiant with this 
 #fafdff,  #0c206d,  #00a4a4 */

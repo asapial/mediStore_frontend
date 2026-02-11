@@ -73,7 +73,7 @@ export default function UpdateMedicinePage() {
         const fetchedData = await res.json();
         const data= fetchedData.data;
 
-        console.log(data)
+
 
         // Always provide default values to avoid controlled/uncontrolled warning
         setForm({

@@ -66,7 +66,7 @@ export default function CustomerOrdersPage() {
     );
 
   if (!orders.length) {
-    return <p className="text-center py-10 text-muted-foreground">No orders found.</p>;
+    return <p className="text-center py-10 text-muted-foreground min-h-screen">No orders found.</p>;
   }
 
   return (

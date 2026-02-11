@@ -8,8 +8,6 @@ export const userService = {
     try {
       const cookieStore = await cookies();
 
-      console.log("Cookie Store:",cookieStore.toString());
-
       const res = await fetch(`${AUTH_URL}/api/auth/me`, {
         headers: {
           Cookie: cookieStore.toString(),

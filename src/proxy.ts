@@ -9,27 +9,27 @@ export async function proxy(request: NextRequest) {
 
 
   // Get session from your auth service
-const { data } = await userService.getSession();
+  const { data } = await userService.getSession();
 
-if (data?.user?.role) {
-  isAuthenticated = true;
-  role = data.user.role;
-}
+  if (data?.user?.role) {
+    isAuthenticated = true;
+    role = data.user.role;
+  }
 
   const pathname = request.nextUrl.pathname;
 
 
   //* User is not authenticated at all
-  // if (!isAuthenticated) {
-  //   return NextResponse.redirect(new URL("/login", request.url));
-  // }
+  if (!isAuthenticated) {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
 
-  console.log("Is authenticated form the proxy :", isAuthenticated);
+  // console.log("Is authenticated form the proxy :", isAuthenticated);
 
   // -------------------------
   // CUSTOMER ROUTES
   // -------------------------
-  const customerRoutes = ["/cart", "/checkout", "/orders", "/profile"];
+  const customerRoutes = ["/cart", "/checkout", "/orders"];
 
   if (role === "CUSTOMER") {
     // Customers cannot access admin or seller routes
@@ -45,7 +45,7 @@ if (data?.user?.role) {
 
   if (role === "SELLER") {
     // Sellers cannot access admin routes or customer-specific pages
-    if (pathname.startsWith("/admin") || pathname.startsWith("/cart") || pathname.startsWith("/orders") || pathname.startsWith("/profile")) {
+    if (pathname.startsWith("/admin") || pathname.startsWith("/cart") || pathname.startsWith("/orders")) {
       return NextResponse.redirect(new URL("/seller/dashboard", request.url));
     }
   }
@@ -57,7 +57,7 @@ if (data?.user?.role) {
 
   if (role === "ADMIN") {
     // Admin cannot access seller or customer routes
-    if (pathname.startsWith("/seller") || pathname.startsWith("/cart") || pathname.startsWith("/checkout") || pathname.startsWith("/orders") || pathname.startsWith("/profile")) {
+    if (pathname.startsWith("/seller") || pathname.startsWith("/cart") || pathname.startsWith("/checkout") || pathname.startsWith("/orders")) {
       return NextResponse.redirect(new URL("/admin", request.url));
     }
   }
@@ -65,7 +65,7 @@ if (data?.user?.role) {
   // -------------------------
   // Default: allow access
   // -------------------------
-  console.log("User role:", role, "Accessing:", pathname);
+  // console.log("User role:", role, "Accessing:", pathname);
   return NextResponse.next();
 }
 

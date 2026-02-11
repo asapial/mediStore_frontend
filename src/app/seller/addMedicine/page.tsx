@@ -63,8 +63,6 @@ export default function AddMedicinePage() {
     try {
       setLoading(true);
       const payload = { ...form, price: Number(form.price), stock: Number(form.stock) };
-      console.log("Medicine Payload:", payload);
-
       const res = await fetch(`/api/seller/medicines`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -78,7 +76,7 @@ export default function AddMedicinePage() {
       }
 
       const data = await res.json();
-      console.log("Medicine created:", data);
+
 
     } catch (error: unknown) {
       console.error("Add medicine error:", error);

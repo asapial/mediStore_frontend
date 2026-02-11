@@ -102,7 +102,7 @@ export default function OrderDetailsPage() {
     if (!order) return;
     try {
       setLoading(true);
-      console.log(orderId);
+      // console.log(orderId);
       const res = await fetch(
         `/api/orders/${orderId}`,
         { method: "DELETE", credentials: "include" }
