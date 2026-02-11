@@ -27,7 +27,7 @@
 
 The application is live and accessible at the following URL:
 
-> **[https://medi-store-frontend-khaki.vercel.app/](https://medi-store-frontend-khaki.vercel.app/)**
+> **[https://medi-store-frontend-khaki.vercel.app](https://medi-store-frontend-khaki.vercel.app)**
 
 ---
 

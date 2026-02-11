@@ -2,14 +2,39 @@
 
 import { useEffect, useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Table, TableHeader, TableBody, TableRow, TableCell, TableHead } from "@/components/ui/table";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableCell,
+  TableHead,
+} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { FaEdit, FaSave, FaTimes } from "react-icons/fa";
+import {
+  FaEdit,
+  FaSave,
+  FaTimes,
+  FaPlus,
+  FaTrash,
+} from "react-icons/fa";
 import { Spinner } from "@/components/ui/spinner";
 import SectionContainer from "@/utils/SectionContainer";
 import MedicineLoadingPage from "@/components/shared/LoadingPage";
+
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
 
 interface Category {
   id: string;
@@ -18,24 +43,32 @@ interface Category {
 
 export default function ManageCategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editingName, setEditingName] = useState<string>("");
   const [loading, setLoading] = useState(true);
 
-  // Fetch categories
+  // Create
+  const [newCategory, setNewCategory] = useState("");
+  const [creating, setCreating] = useState(false);
+
+  // Edit
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingName, setEditingName] = useState("");
+
+  // Delete
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  /* ================= FETCH ================= */
   const fetchCategories = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/admin/categories`, {
-        method: "GET",
+      const res = await fetch("/api/admin/categories", {
         credentials: "include",
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Failed to fetch categories");
+      if (!res.ok) throw new Error(data.message);
       setCategories(data.data);
     } catch (err: unknown) {
-      console.error(err);
-      toast.error(err instanceof Error ? err.message : "Error fetching categories");
+      toast.error(err instanceof Error ? err.message : "Failed to fetch categories");
     } finally {
       setLoading(false);
     }
@@ -45,12 +78,42 @@ export default function ManageCategoriesPage() {
     fetchCategories();
   }, []);
 
-  // Update category
+  /* ================= CREATE ================= */
+  const createCategory = async () => {
+    if (!newCategory.trim()) {
+      toast.error("Category name cannot be empty");
+      return;
+    }
+
+    try {
+      setCreating(true);
+      const res = await fetch("/api/admin/categories", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ name: newCategory }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+
+      toast.success("Category added");
+      setNewCategory("");
+      fetchCategories();
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Create failed");
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  /* ================= UPDATE ================= */
   const updateCategory = async (id: string) => {
     if (!editingName.trim()) {
       toast.error("Category name cannot be empty");
       return;
     }
+
     try {
       const res = await fetch(`/api/admin/categories/${id}`, {
         method: "PUT",
@@ -58,95 +121,165 @@ export default function ManageCategoriesPage() {
         credentials: "include",
         body: JSON.stringify({ name: editingName }),
       });
+
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Failed to update category");
-      toast.success("Category updated successfully");
+      if (!res.ok) throw new Error(data.message);
+
+      toast.success("Category updated");
       setEditingId(null);
       setEditingName("");
       fetchCategories();
     } catch (err: unknown) {
-      console.error(err);
-      toast.error(err instanceof Error ? err.message : "Error updating category");
+      toast.error(err instanceof Error ? err.message : "Update failed");
+    }
+  };
+
+  /* ================= DELETE ================= */
+  const deleteCategory = async () => {
+    if (!deleteId) return;
+
+    try {
+      setDeleting(true);
+      const res = await fetch(`/api/admin/categories/${deleteId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+
+      toast.success("Category deleted");
+      setDeleteId(null);
+      fetchCategories();
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Delete failed");
+    } finally {
+      setDeleting(false);
     }
   };
 
   return (
-    <SectionContainer className="bg-gradient-to-br from-emerald-50 to-white dark:from-slate-900 dark:to-slate-800 py-10">
-      <h1 className="text-4xl font-extrabold mb-8 text-emerald-800 dark:text-emerald-400">
+    <SectionContainer className="py-10">
+      <h1 className="text-4xl font-bold mb-8 text-emerald-800">
         Manage Categories
       </h1>
 
-      {loading ? (
-<MedicineLoadingPage text="categories"></MedicineLoadingPage>
-      ) : categories.length === 0 ? (
-        <p className="text-center py-10 text-muted-foreground text-lg">No categories found.</p>
-      ) : (
-        <Card className="overflow-x-auto rounded-xl shadow-md hover:shadow-xl transition-shadow border border-emerald-200 dark:border-slate-700">
-          <CardHeader className=" dark:bg-slate-800 rounded-t-xl">
-            <CardTitle className="text-2xl text-emerald-700 text-center">Categories</CardTitle>
-          </CardHeader>
+      {/* ADD */}
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle>Add New Category</CardTitle>
+        </CardHeader>
+        <CardContent className="flex gap-3">
+          <Input
+            placeholder="Category name"
+            value={newCategory}
+            onChange={(e) => setNewCategory(e.target.value)}
+          />
+          <Button onClick={createCategory} disabled={creating}>
+            {creating ? <Spinner /> : <FaPlus />}
+            Add
+          </Button>
+        </CardContent>
+      </Card>
 
+      {/* LIST */}
+      {loading ? (
+        <MedicineLoadingPage text="categories" />
+      ) : (
+        <Card>
           <CardContent className="p-0">
-            <Table className="min-w-full">
-              <TableHeader className=" bg-emerald-50">
+            <Table>
+              <TableHeader>
                 <TableRow>
                   <TableHead>ID</TableHead>
                   <TableHead>Name</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead className="text-center">Actions</TableHead>
                 </TableRow>
               </TableHeader>
 
               <TableBody>
-                {categories.map((category) => (
-                  <TableRow
-                    key={category.id}
-                    className={`transition-colors hover:bg-emerald-50 dark:hover:bg-slate-800 ${
-                      editingId === category.id ? "bg-emerald-200 dark:bg-slate-700" : ""
-                    }`}
-                  >
-                    <TableCell className="font-mono">{category.id}</TableCell>
+                {categories.map((cat) => (
+                  <TableRow key={cat.id}>
+                    <TableCell className="font-mono">{cat.id}</TableCell>
 
                     <TableCell>
-                      {editingId === category.id ? (
+                      {editingId === cat.id ? (
                         <Input
                           value={editingName}
                           onChange={(e) => setEditingName(e.target.value)}
-                          className="bg-white dark:bg-slate-900 border-emerald-300 dark:border-slate-600"
                         />
                       ) : (
-                        <span className="text-emerald-700 dark:text-emerald-400 font-medium">{category.name}</span>
+                        cat.name
                       )}
                     </TableCell>
 
-                    <TableCell>
-                      {editingId === category.id ? (
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="default"
-                            className="flex items-center gap-2"
-                            onClick={() => updateCategory(category.id)}
-                          >
-                            <FaSave /> Save
+                    <TableCell className="flex justify-center gap-2">
+                      {editingId === cat.id ? (
+                        <>
+                          <Button size="sm" onClick={() => updateCategory(cat.id)}>
+                            <FaSave />
                           </Button>
                           <Button
                             size="sm"
                             variant="outline"
-                            className="flex items-center gap-2"
-                            onClick={() => { setEditingId(null); setEditingName(""); }}
+                            onClick={() => setEditingId(null)}
                           >
-                            <FaTimes /> Cancel
+                            <FaTimes />
                           </Button>
-                        </div>
+                        </>
                       ) : (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="flex items-center gap-2 hover:bg-emerald-50 dark:hover:bg-slate-700"
-                          onClick={() => { setEditingId(category.id); setEditingName(category.name); }}
-                        >
-                          <FaEdit /> Edit
-                        </Button>
+                        <>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setEditingId(cat.id);
+                              setEditingName(cat.name);
+                            }}
+                          >
+                            <FaEdit />
+                          </Button>
+
+                          {/* DELETE DIALOG */}
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => setDeleteId(cat.id)}
+                              >
+                                <FaTrash />
+                              </Button>
+                            </AlertDialogTrigger>
+
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                  Delete category?
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This action cannot be undone. This will
+                                  permanently delete the category.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+
+                              <AlertDialogFooter>
+                                <AlertDialogCancel
+                                  onClick={() => setDeleteId(null)}
+                                >
+                                  Cancel
+                                </AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={deleteCategory}
+                                  disabled={deleting}
+                                  className="bg-red-600 hover:bg-red-700"
+                                >
+                                  {deleting ? <Spinner /> : "Delete"}
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </>
                       )}
                     </TableCell>
                   </TableRow>

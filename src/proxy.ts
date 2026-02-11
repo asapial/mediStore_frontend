@@ -17,6 +17,23 @@ export async function proxy(request: NextRequest) {
   }
 
   const pathname = request.nextUrl.pathname;
+  
+  // -------------------------
+  // SHOP RULES
+  // -------------------------
+  const isShopRoot = pathname === "/shop";
+  const isShopDetail =
+    pathname.startsWith("/shop/") && pathname.split("/").length === 3;
+
+  // 🔓 Allow public shop page
+  if (isShopRoot) {
+    return NextResponse.next();
+  }
+
+  // 🔒 Protect /shop/:id
+  if (isShopDetail && !isAuthenticated) {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
 
 
   //* User is not authenticated at all

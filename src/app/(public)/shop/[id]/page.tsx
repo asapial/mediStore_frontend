@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import SectionContainer from "@/utils/SectionContainer";
 import { motion } from "framer-motion";
 import { BiCategory, BiDollar, BiUser, BiBuilding, BiCartAlt, BiPlus, BiMinus } from "react-icons/bi";
+import MedicineLoadingPage from "@/components/shared/LoadingPage";
 
 
 interface Category { id: string; name: string; }
@@ -94,7 +95,7 @@ export default function MedicineDetailsPage() {
   };
 
   if (loading || !medicine) {
-    return <p className="text-center py-10 text-muted-foreground">Loading medicine details...</p>;
+    return <MedicineLoadingPage text="medicines"></MedicineLoadingPage>
   }
 
   return (
