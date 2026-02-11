@@ -1,11 +1,39 @@
-# 💊 MediStore Frontend
+<p align="center">
+  <img src="public/logo/medistore-high-resolution-logo-transparent.png" alt="MediStore Logo" width="250" />
+</p>
 
-A modern, full-featured **online medicine e-commerce platform** built with **Next.js 16**, **TypeScript**, and **Tailwind CSS 4**. MediStore provides a seamless shopping experience for customers, a powerful dashboard for sellers to manage medicines and orders, and a comprehensive admin panel for platform-wide management.
+<h1 align="center">💊 MediStore Frontend</h1>
+
+<p align="center">
+  A modern, full-featured <strong>online medicine e-commerce platform</strong> built with <strong>Next.js 16</strong>, <strong>TypeScript</strong>, and <strong>Tailwind CSS 4</strong>.
+</p>
+
+<p align="center">
+  <a href="https://medi-store-frontend-khaki.vercel.app/">
+    <img src="https://img.shields.io/badge/🌐_Live_Demo-Visit_Site-00b894?style=for-the-badge" alt="Live Demo" />
+  </a>
+  <img src="https://img.shields.io/badge/Next.js-16-black?style=for-the-badge&logo=next.js" alt="Next.js 16" />
+  <img src="https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS 4" />
+  <img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React 19" />
+  <img src="https://img.shields.io/badge/Deployed_on-Vercel-000?style=for-the-badge&logo=vercel" alt="Vercel" />
+</p>
+
+<p align="center">
+  MediStore provides a seamless shopping experience for customers, a powerful dashboard for sellers to manage medicines and orders, and a comprehensive admin panel for platform-wide management.
+</p>
+
+## 🌐 Live Demo
+
+The application is live and accessible at the following URL:
+
+> **[https://medi-store-frontend-khaki.vercel.app/](https://medi-store-frontend-khaki.vercel.app/)**
 
 ---
 
 ## 📋 Table of Contents
 
+- [Live Demo](#-live-demo)
 - [Features](#-features)
 - [Tech Stack](#-tech-stack)
 - [Project Structure](#-project-structure)
@@ -432,11 +460,15 @@ Lottie animation files are stored in `src/animation/`:
 
 ## 🚢 Deployment
 
-### Vercel (Recommended)
+### Vercel (Recommended) — Currently Deployed ✅
 
-This project is optimized for deployment on **[Vercel](https://vercel.com)**:
+This project is **live and deployed** on **[Vercel](https://vercel.com)**:
 
-1. Push your code to a Git repository (GitHub, GitLab, Bitbucket)
+🔗 **Production URL:** [https://medi-store-frontend-khaki.vercel.app/](https://medi-store-frontend-khaki.vercel.app/)
+
+**To deploy your own instance:**
+
+1. Fork this repository
 2. Import the project on [Vercel](https://vercel.com/new)
 3. Configure the environment variables in the Vercel dashboard
 4. Deploy!

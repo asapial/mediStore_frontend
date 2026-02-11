@@ -80,5 +80,6 @@ export const config = {
     "/profile",
     "/seller/:path*", // all seller routes
     "/admin/:path*",  // all admin routes
+    "/shop/:path*"
   ],
 };

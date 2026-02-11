@@ -37,7 +37,7 @@ export default function AddMedicinePage() {
 
   useEffect(() => {
     const fetchCategories = async () => {
-      const res = await fetch(`/api/admin/categories`);
+      const res = await fetch(`/api/admin/categories`,{credentials:"include"});
       const data = await res.json();
       setCategories(data.data);
     };
