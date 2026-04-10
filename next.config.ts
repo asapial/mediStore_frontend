@@ -10,7 +10,9 @@ const nextConfig: NextConfig = {
     ],
   },
 
+
   async rewrites() {
+      console.log("backendUrl from config : ",process.env.backendBaseUrl)
     return [
       {
         source: "/api/auth/:path*",

@@ -196,3 +196,141 @@
 .badge-cancelled { background: #FFEBEE; color: #C62828; border: 1px solid #C62828; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
 .badge-instock   { background: #E8F5E9; color: #2E7D32; border: 1px solid #2E7D32; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
 .badge-lowstock  { background: #FFEBEE; color: #C62828; border: 1px solid #C62828; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+
+/* Order status dynamic badges */
+.badge-placed      { background: #E3F0FB; color: #3A6EA5; border: 1px solid #3A6EA5; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+.badge-processing  { background: #FFF3E0; color: #C2703A; border: 1px solid #C2703A; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+.badge-shipped     { background: #EDE7F6; color: #512DA8; border: 1px solid #512DA8; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+.badge-delivered   { background: #E8F5E9; color: #2E7D32; border: 1px solid #2E7D32; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+.badge-requested   { background: #FFF3E0; color: #C2703A; border: 1px solid #C2703A; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+.badge-completed   { background: #E3F0FB; color: #3A6EA5; border: 1px solid #3A6EA5; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+.badge-verified    { background: #E8F5E9; color: #2E7D32; border: 1px solid #2E7D32; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+.badge-inactive    { background: #F5F5F5; color: #757575; border: 1px solid #BDBDBD; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+
+/* ─── Badge aliases (frontend uses these names) ──────────────────────────────── */
+.badge-approved       { background: #E8F5E9; color: #2E7D32; border: 1px solid #2E7D32; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+.badge-rejected       { background: #FFEBEE; color: #C62828; border: 1px solid #C62828; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+.badge-pending        { background: #FFF3E0; color: #C2703A; border: 1px solid #C2703A; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+.badge-active         { background: #E8F5E9; color: #2E7D32; border: 1px solid #2E7D32; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+.badge-cancelled      { background: #FFEBEE; color: #C62828; border: 1px solid #C62828; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+.badge-paused         { background: #E3F0FB; color: #3A6EA5; border: 1px solid #3A6EA5; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+.badge-instock        { background: #E8F5E9; color: #2E7D32; border: 1px solid #2E7D32; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+.badge-lowstock       { background: #FFF3E0; color: #C2703A; border: 1px solid #C2703A; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+.badge-confirmed      { background: #E3F0FB; color: #3A6EA5; border: 1px solid #3A6EA5; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+.badge-out_for_delivery { background: #FFF3E0; color: #C2703A; border: 1px solid #C2703A; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+
+
+/* ─── Reusable button classes ────────────────────────────────────────────────── */
+.medi-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.625rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  background: #1B3A5C;
+  color: #FFFFFF;
+  border: none;
+}
+.medi-btn-primary:hover  { opacity: 0.88; transform: translateY(-1px); }
+.medi-btn-primary:active { opacity: 1.00; transform: translateY(0); }
+
+.medi-btn-accent {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.625rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  background: #C2703A;
+  color: #FFFFFF;
+  border: none;
+}
+.medi-btn-accent:hover  { opacity: 0.88; transform: translateY(-1px); }
+.medi-btn-accent:active { opacity: 1.00; transform: translateY(0); }
+
+.medi-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.625rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  background: transparent;
+  color: #1B3A5C;
+  border: 1px solid #DDD0C4;
+}
+.medi-btn-ghost:hover { background: #EEE4D9; }
+
+/* ─── Input focus ring ───────────────────────────────────────────────────────── */
+input:focus, textarea:focus, select:focus {
+  outline: 2px solid #3A6EA5;
+  outline-offset: 1px;
+}
+
+/* ─── Smooth scrollbar (webkit) ──────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #F5EDE3; }
+::-webkit-scrollbar-thumb { background: #DDD0C4; border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: #C2703A; }
+
+/* ─── Stat card helper ────────────────────────────────────────────────────────── */
+.medi-stat {
+  background: #FFFFFF;
+  border-radius: 1rem;
+  border: 1px solid #DDD0C4;
+  padding: 1.5rem;
+  box-shadow: 0 2px 12px rgba(27, 58, 92, 0.07);
+  transition: box-shadow 0.2s ease;
+}
+.medi-stat:hover { box-shadow: 0 6px 24px rgba(27, 58, 92, 0.14); }
+
+/* ─── Table helpers ──────────────────────────────────────────────────────────── */
+.medi-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.medi-table th {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #8A6650;
+  background: #F5EDE3;
+  border-bottom: 2px solid #DDD0C4;
+}
+.medi-table td {
+  padding: 0.875rem 1rem;
+  font-size: 0.875rem;
+  color: #5C4033;
+  border-bottom: 1px solid #EEE4D9;
+  vertical-align: middle;
+}
+.medi-table tr:last-child td { border-bottom: none; }
+.medi-table tr:hover td { background: #FBF7F4; }
+
+/* ─── Empty state ────────────────────────────────────────────────────────────── */
+.medi-empty {
+  text-align: center;
+  padding: 5rem 2rem;
+  color: #8A6650;
+}
+.medi-empty-icon {
+  font-size: 3.5rem;
+  opacity: 0.18;
+  margin-bottom: 1rem;
+}
