@@ -46,73 +46,104 @@
   --radius-4xl: calc(var(--radius) + 16px);
 }
 
+/* ─────────────────────────────────────────────────────────────────────────────
+   MediStore Brand Palette
+   Primary / Brand    — Deep Navy  #1B3A5C
+   Accent / CTA       — Warm Amber #C2703A
+   Background         — Cream      #F5EDE3
+   Surface / Card     — White      #FFFFFF
+   Links / Info       — Sky Blue   #3A6EA5
+   Success / Stock    — Sage       #2E7D32
+   Error / Danger     — Alert Red  #C62828
+   Body Text          — Espresso   #5C4033
+   Muted / Metadata   — Warm Taupe #8A6650
+───────────────────────────────────────────────────────────────────────────── */
+
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+
+  /* Brand tokens (use via var() or Tailwind arbitrary) */
+  --brand-navy:     #1B3A5C;
+  --brand-amber:    #C2703A;
+  --brand-cream:    #F5EDE3;
+  --brand-sky:      #3A6EA5;
+  --brand-sage:     #2E7D32;
+  --brand-red:      #C62828;
+  --brand-espresso: #5C4033;
+  --brand-taupe:    #8A6650;
+
+  /* System tokens mapped to brand */
+  --background:           #F5EDE3;
+  --foreground:           #5C4033;
+  --card:                 #FFFFFF;
+  --card-foreground:      #5C4033;
+  --popover:              #FFFFFF;
+  --popover-foreground:   #5C4033;
+  --primary:              #1B3A5C;
+  --primary-foreground:   #FFFFFF;
+  --secondary:            #F0E4D7;
+  --secondary-foreground: #5C4033;
+  --muted:                #EEE4D9;
+  --muted-foreground:     #8A6650;
+  --accent:               #C2703A;
+  --accent-foreground:    #FFFFFF;
+  --destructive:          #C62828;
+  --border:               #DDD0C4;
+  --input:                #EAE0D5;
+  --ring:                 #3A6EA5;
+
+  /* Charts */
+  --chart-1: #1B3A5C;
+  --chart-2: #C2703A;
+  --chart-3: #3A6EA5;
+  --chart-4: #2E7D32;
+  --chart-5: #8A6650;
+
+  /* Sidebar — Deep Navy base */
+  --sidebar:                    #1B3A5C;
+  --sidebar-foreground:         #F5EDE3;
+  --sidebar-primary:            #C2703A;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent:             #243F63;
+  --sidebar-accent-foreground:  #F5EDE3;
+  --sidebar-border:             #14304F;
+  --sidebar-ring:               #3A6EA5;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --background:           #0F1E2E;
+  --foreground:           #F5EDE3;
+  --card:                 #162838;
+  --card-foreground:      #F5EDE3;
+  --popover:              #162838;
+  --popover-foreground:   #F5EDE3;
+  --primary:              #3A6EA5;
+  --primary-foreground:   #FFFFFF;
+  --secondary:            #1B3A5C;
+  --secondary-foreground: #F5EDE3;
+  --muted:                #1F3245;
+  --muted-foreground:     #8A6650;
+  --accent:               #C2703A;
+  --accent-foreground:    #FFFFFF;
+  --destructive:          #C62828;
+  --border:               #243F63;
+  --input:                #1F3245;
+  --ring:                 #3A6EA5;
+
+  --chart-1: #3A6EA5;
+  --chart-2: #C2703A;
+  --chart-3: #2E7D32;
+  --chart-4: #8A6650;
+  --chart-5: #1B3A5C;
+
+  --sidebar:                    #0F1E2E;
+  --sidebar-foreground:         #F5EDE3;
+  --sidebar-primary:            #C2703A;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent:             #1B3A5C;
+  --sidebar-accent-foreground:  #F5EDE3;
+  --sidebar-border:             #162838;
+  --sidebar-ring:               #3A6EA5;
 }
 
 @layer base {
@@ -124,23 +155,44 @@
   }
 }
 
-.icon-neutral {
-  @apply text-slate-500;
-}
-.icon-admin {
-  @apply text-indigo-500;
-}
-.icon-seller {
-  @apply text-emerald-500;
-}
-.icon-cart {
-  @apply text-cyan-500;
-}
-.icon-orders {
-  @apply text-violet-500;
+/* ─── Icon utility classes ───────────────────────────────────────────────── */
+.icon-neutral  { color: #8A6650; }
+.icon-admin    { color: #1B3A5C; }
+.icon-seller   { color: #2E7D32; }
+.icon-cart     { color: #3A6EA5; }
+.icon-orders   { color: #C2703A; }
+.icon-wallet   { color: #C2703A; }
+.icon-rx       { color: #C62828; }
+.icon-sub      { color: #3A6EA5; }
+.icon-alert    { color: #C62828; }
+.icon-batch    { color: #2E7D32; }
+.icon-search   { color: #1B3A5C; }
+
+/* ─── Reusable page / card helpers ──────────────────────────────────────── */
+.medi-page {
+  min-height: 100vh;
+  padding: 2rem;
+  background: linear-gradient(135deg, #F5EDE3 0%, #EEE4D9 100%);
 }
 
+.medi-card {
+  background: #FFFFFF;
+  border-radius: 0.75rem;
+  border: 1px solid #DDD0C4;
+  box-shadow: 0 2px 12px rgba(27, 58, 92, 0.07);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+.medi-card:hover {
+  box-shadow: 0 8px 28px rgba(27, 58, 92, 0.14);
+  transform: translateY(-2px);
+}
 
-
-/* make gradiant with this 
-#fafdff,  #0c206d,  #00a4a4 */
+/* Status badges */
+.badge-pending   { background: #FFF3E0; color: #C2703A; border: 1px solid #C2703A; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+.badge-approved  { background: #E8F5E9; color: #2E7D32; border: 1px solid #2E7D32; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+.badge-rejected  { background: #FFEBEE; color: #C62828; border: 1px solid #C62828; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+.badge-active    { background: #E3F0FB; color: #3A6EA5; border: 1px solid #3A6EA5; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+.badge-paused    { background: #F5EDE3; color: #8A6650; border: 1px solid #8A6650; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+.badge-cancelled { background: #FFEBEE; color: #C62828; border: 1px solid #C62828; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+.badge-instock   { background: #E8F5E9; color: #2E7D32; border: 1px solid #2E7D32; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+.badge-lowstock  { background: #FFEBEE; color: #C62828; border: 1px solid #C62828; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
