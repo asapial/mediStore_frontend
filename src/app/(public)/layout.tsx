@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic';
-import Footer from '@/components/shared/Footer';
+import Footer from '@/components/home/Footer';
+import Navbar from '@/components/shared/Navbar';
 import { Navbar1 } from '@/components/shared/navbar1';
 import { userService } from '@/services/user.service';
 import { cookies, headers } from 'next/headers';
@@ -21,8 +22,8 @@ export default async function Layout({ children }: { children: React.ReactNode }
 
 
 
-//   const cookieStore = cookies()
-//   const sessionToken = (await cookieStore).get("__Secure-better-auth.session_token") || (await cookieStore).get("better-auth.session_token")
+    //   const cookieStore = cookies()
+    //   const sessionToken = (await cookieStore).get("__Secure-better-auth.session_token") || (await cookieStore).get("better-auth.session_token")
 
     if (data?.user) {
         authenticated = true;
@@ -35,13 +36,18 @@ export default async function Layout({ children }: { children: React.ReactNode }
         <div>
             <div className='max-w-7xl mx-auto'>
                 {/* <Navbar1  authenticated={authenticated} userRole={role}  userImage={userImage}/> */}
+
+                {/* Header & Navigation */}
+                <Navbar />
             </div>
             {children}
             <div className=''>
                 {/* <Footer></Footer> */}
             </div>
+            {/* Site footer */}
+            <Footer />
         </div>
     );
 }
 
-   
+

@@ -23,7 +23,6 @@ const STATUS_COLORS: Record<OrderStatus, string> = {
   PLACED: "#3A6EA5", PROCESSING: "#C2703A", SHIPPED: "#512DA8",
   DELIVERED: "#2E7D32", CANCELLED: "#C62828",
 };
-
 const NEXT_STATUS: Partial<Record<OrderStatus, OrderStatus>> = {
   PLACED: "PROCESSING", PROCESSING: "SHIPPED", SHIPPED: "DELIVERED",
 };
@@ -47,46 +46,44 @@ export default function SellerOrdersPage() {
   useEffect(() => { fetchOrders(); }, []);
 
   const statuses: OrderStatus[] = ["PLACED", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"];
+  const count    = (s: OrderStatus | "ALL") =>
+    s === "ALL" ? orders.length : orders.filter(o => o.status === s).length;
   const filtered = filter === "ALL" ? orders : orders.filter(o => o.status === filter);
-  const count    = (s: OrderStatus | "ALL") => s === "ALL" ? orders.length : orders.filter(o => o.status === s).length;
 
-  // Advance order status (and reduce stock on SHIPPED)
+  /* ── Advance status  ──────────────────────────────────────────────────────── */
   const advanceStatus = async (order: Order) => {
     const next = NEXT_STATUS[order.status];
     if (!next) return;
     setUpdating(order.id);
     try {
-      // 1. Update all item statuses
-      const itemIds = order.items.map(i => i.id);
-      const res = await fetch(`/api/seller/orders/${order.id}/items`, {
-        method: "PATCH", credentials: "include",
+      // Correct endpoint: PUT /api/seller/orders  body: { orderId, orderItemIds[], status }
+      const res = await fetch("/api/seller/orders", {
+        method: "PUT",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderItemIds: itemIds, status: next }),
+        body: JSON.stringify({
+          orderId:      order.id,
+          orderItemIds: order.items.map(i => i.id),
+          status:       next,
+        }),
       });
-      if (!res.ok) throw new Error((await res.json()).message || "Status update failed");
-      toast.success(`Order moved to ${next}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Update failed");
 
-      // 2. When shipped → deduct stock from each medicine
-      if (next === "SHIPPED") {
-        const stockUpdates = order.items.map(item =>
-          fetch(`/api/seller/medicines/${item.medicine.id}`, {
-            method: "PUT", credentials: "include",
-            headers: { "Content-Type": "application/json" },
-            // We send a negative adjustment signal; frontend computes new in place
-            body: JSON.stringify({ stockDecrement: item.quantity }),
-          })
-        );
-        await Promise.allSettled(stockUpdates);
-        toast.success("Stock adjusted for shipped items");
-      }
+      toast.success(
+        next === "SHIPPED"
+          ? `Order marked as ${next} · stock auto-adjusted`
+          : `Order moved to ${next}`
+      );
 
-      // 3. Update local state
-      setOrders(prev => prev.map(o =>
-        o.id === order.id ? {
-          ...o, status: next,
-          items: o.items.map(i => ({ ...i, status: next })),
-        } : o
-      ));
+      // Update local state optimistically
+      setOrders(prev =>
+        prev.map(o =>
+          o.id === order.id
+            ? { ...o, status: next, items: o.items.map(i => ({ ...i, status: next })) }
+            : o
+        )
+      );
     } catch (err: any) {
       toast.error(err.message || "Failed to update status");
     } finally {
@@ -95,15 +92,14 @@ export default function SellerOrdersPage() {
   };
 
   const stats = [
-    { label: "Total",    val: orders.length,          color: "#1B3A5C", icon: <FaClipboardList /> },
-    { label: "Pending",  val: count("PLACED") + count("PROCESSING"), color: "#C2703A", icon: <FaBox /> },
-    { label: "In Transit", val: count("SHIPPED"),     color: "#512DA8", icon: <FaTruck /> },
-    { label: "Delivered",  val: count("DELIVERED"),   color: "#2E7D32", icon: <FaCheckCircle /> },
+    { label: "Total",      val: orders.length,                        color: "#1B3A5C", icon: <FaClipboardList /> },
+    { label: "Pending",    val: count("PLACED") + count("PROCESSING"), color: "#C2703A", icon: <FaBox /> },
+    { label: "In Transit", val: count("SHIPPED"),                      color: "#512DA8", icon: <FaTruck /> },
+    { label: "Delivered",  val: count("DELIVERED"),                    color: "#2E7D32", icon: <FaCheckCircle /> },
   ];
 
   return (
     <div className="medi-page">
-      {/* Header */}
       <div className="mb-8 flex items-center gap-3">
         <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: "#C2703A" }}>
           <FaClipboardList className="text-white text-lg" />
@@ -119,9 +115,7 @@ export default function SellerOrdersPage() {
         {stats.map(s => (
           <div key={s.label} className="medi-card p-5 flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-              style={{ background: s.color + "18", color: s.color }}>
-              {s.icon}
-            </div>
+              style={{ background: s.color + "18", color: s.color }}>{s.icon}</div>
             <div>
               <p className="text-2xl font-black leading-none" style={{ color: s.color }}>{s.val}</p>
               <p className="text-xs mt-1 font-semibold" style={{ color: "#8A6650" }}>{s.label}</p>
@@ -130,7 +124,7 @@ export default function SellerOrdersPage() {
         ))}
       </div>
 
-      {/* Filter tabs */}
+      {/* Filters */}
       <div className="flex gap-2 mb-6 flex-wrap">
         {(["ALL", ...statuses] as const).map(f => (
           <button key={f} onClick={() => setFilter(f)}
@@ -163,7 +157,7 @@ export default function SellerOrdersPage() {
                 <motion.div key={order.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.04 }} className="medi-card overflow-hidden">
 
-                  {/* Order header */}
+                  {/* Header */}
                   <div className="flex flex-wrap items-center justify-between gap-2 px-5 py-4"
                     style={{ background: "linear-gradient(90deg,#F5EDE3 0%,#FFF 100%)", borderBottom: "1px solid #DDD0C4" }}>
                     <div>
@@ -195,12 +189,12 @@ export default function SellerOrdersPage() {
                       <FaMapMarkerAlt style={{ color: "#C2703A", marginTop: 2, fontSize: 12 }} />
                       <div>
                         <p className="text-xs font-semibold" style={{ color: "#8A6650" }}>Delivery Address</p>
-                        <p className="text-sm" style={{ color: "#5C4033", maxWidth: 320 }}>{order.address || "—"}</p>
+                        <p className="text-sm" style={{ color: "#5C4033", maxWidth: 340 }}>{order.address || "—"}</p>
                       </div>
                     </div>
                   </div>
 
-                  {/* Items preview + expand */}
+                  {/* Items */}
                   <div className="px-5 py-3">
                     <div className="flex items-center justify-between mb-2">
                       <p className="text-xs font-semibold uppercase" style={{ color: "#8A6650" }}>
@@ -209,37 +203,29 @@ export default function SellerOrdersPage() {
                       <button onClick={() => setExpanded(isExpanded ? null : order.id)}
                         className="flex items-center gap-1 text-xs font-semibold"
                         style={{ color: "#3A6EA5" }}>
-                        {isExpanded ? <><FaChevronUp />Hide items</> : <><FaChevronDown />View items</>}
+                        {isExpanded ? <><FaChevronUp />Hide</> : <><FaChevronDown />View items</>}
                       </button>
                     </div>
 
-                    {/* Collapsed: icon strip */}
                     {!isExpanded && (
-                      <div className="flex items-center gap-2">
-                        <div className="flex -space-x-2">
-                          {order.items.slice(0, 5).map(it => (
-                            <div key={it.id} className="w-8 h-8 rounded-full overflow-hidden border-2 border-white"
-                              style={{ background: "#EEE4D9" }}>
-                              {it.medicine.image
-                                ? <img src={it.medicine.image} alt={it.medicine.name} className="w-full h-full object-cover" />
-                                : <div className="w-full h-full flex items-center justify-center text-sm">💊</div>}
-                            </div>
-                          ))}
-                          {order.items.length > 5 && (
-                            <div className="w-8 h-8 rounded-full border-2 border-white flex items-center justify-center text-xs font-bold"
-                              style={{ background: "#DDD0C4", color: "#5C4033" }}>
-                              +{order.items.length - 5}
-                            </div>
-                          )}
-                        </div>
-                        <span className="text-xs" style={{ color: "#8A6650" }}>
-                          {order.items.map(i => i.medicine.name).join(", ").slice(0, 60)}
-                          {order.items.map(i => i.medicine.name).join(", ").length > 60 ? "…" : ""}
-                        </span>
+                      <div className="flex -space-x-2">
+                        {order.items.slice(0, 6).map(it => (
+                          <div key={it.id} className="w-8 h-8 rounded-full overflow-hidden border-2 border-white"
+                            style={{ background: "#EEE4D9" }}>
+                            {it.medicine.image
+                              ? <img src={it.medicine.image} alt="" className="w-full h-full object-cover" />
+                              : <div className="w-full h-full flex items-center justify-center text-sm">💊</div>}
+                          </div>
+                        ))}
+                        {order.items.length > 6 && (
+                          <div className="w-8 h-8 rounded-full border-2 border-white flex items-center justify-center text-xs font-bold"
+                            style={{ background: "#DDD0C4", color: "#5C4033" }}>
+                            +{order.items.length - 6}
+                          </div>
+                        )}
                       </div>
                     )}
 
-                    {/* Expanded: full list */}
                     {isExpanded && (
                       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-2 mt-2">
                         {order.items.map(item => (
@@ -247,13 +233,13 @@ export default function SellerOrdersPage() {
                             style={{ background: "#F5EDE3" }}>
                             <div className="w-10 h-10 rounded-lg flex-shrink-0 overflow-hidden" style={{ background: "#EEE4D9" }}>
                               {item.medicine.image
-                                ? <img src={item.medicine.image} alt={item.medicine.name} className="w-full h-full object-cover" />
+                                ? <img src={item.medicine.image} alt="" className="w-full h-full object-cover" />
                                 : <div className="w-full h-full flex items-center justify-center">💊</div>}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="font-semibold text-sm truncate" style={{ color: "#1B3A5C" }}>{item.medicine.name}</p>
+                              <p className="font-semibold text-sm" style={{ color: "#1B3A5C" }}>{item.medicine.name}</p>
                               <p className="text-xs" style={{ color: "#8A6650" }}>
-                                {item.quantity} × ${item.price.toFixed(2)} = ${(item.quantity * item.price).toFixed(2)}
+                                {item.quantity} × ${item.price.toFixed(2)} = <strong style={{ color: "#C2703A" }}>${(item.quantity * item.price).toFixed(2)}</strong>
                               </p>
                             </div>
                             <span className={`badge-${item.status.toLowerCase()}`} style={{ fontSize: "0.65rem" }}>
@@ -267,20 +253,18 @@ export default function SellerOrdersPage() {
 
                   {/* Action footer */}
                   {nextStatus && (
-                    <div className="px-5 py-3 flex items-center justify-between gap-3"
+                    <div className="px-5 py-3 flex items-center justify-between gap-3 flex-wrap"
                       style={{ borderTop: "1px solid #EEE4D9", background: "#FAFAFA" }}>
                       <p className="text-xs" style={{ color: "#8A6650" }}>
                         {nextStatus === "SHIPPED"
-                          ? "⚠ Marking as Shipped will reduce stock for all items in this order"
-                          : `Next step: mark as ${nextStatus}`}
+                          ? "⚠ Marking Shipped will automatically deduct stock for all items"
+                          : `Next: mark order as ${nextStatus}`}
                       </p>
-                      <button onClick={() => advanceStatus(order)}
+                      <button
+                        onClick={() => advanceStatus(order)}
                         disabled={updating === order.id}
-                        className="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold disabled:opacity-60 transition-all"
-                        style={{
-                          background: STATUS_COLORS[nextStatus],
-                          color: "#FFF",
-                        }}>
+                        className="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-bold disabled:opacity-60 transition-all shadow-sm"
+                        style={{ background: STATUS_COLORS[nextStatus], color: "#FFF" }}>
                         {updating === order.id ? "Updating…" : (
                           <>
                             {nextStatus === "PROCESSING" && <FaBox />}

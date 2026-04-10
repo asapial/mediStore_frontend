@@ -20,8 +20,7 @@ export default function Home() {
     <div className="">
 
       <div className="min-h-screen bg-background text-foreground">
-        {/* Header & Navigation */}
-        <Navbar />
+
 
         {/* Main hero slider */}
         <HeroBanner />
@@ -50,8 +49,7 @@ export default function Home() {
         {/* Email newsletter CTA */}
         <Newsletter />
 
-        {/* Site footer */}
-        <Footer />
+
       </div>
     </div>
   );
