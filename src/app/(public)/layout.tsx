@@ -34,11 +34,11 @@ export default async function Layout({ children }: { children: React.ReactNode }
     return (
         <div>
             <div className='max-w-7xl mx-auto'>
-                <Navbar1  authenticated={authenticated} userRole={role}  userImage={userImage}/>
+                {/* <Navbar1  authenticated={authenticated} userRole={role}  userImage={userImage}/> */}
             </div>
             {children}
             <div className=''>
-                <Footer></Footer>
+                {/* <Footer></Footer> */}
             </div>
         </div>
     );

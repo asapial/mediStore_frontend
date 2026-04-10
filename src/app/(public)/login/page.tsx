@@ -15,19 +15,7 @@ export default function LoginPage() {
           
           {/* ================= LEFT: LOGIN FORM ================= */}
           <div className="flex flex-col justify-between p-8 md:p-12">
-            
-            {/* Brand Header */}
-            {/* <div className="flex items-center gap-3 mb-8">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900">
-                <FaClinicMedical className="text-emerald-600 dark:text-emerald-400 text-xl" />
-              </div>
-              <div>
-                <h2 className="text-lg font-bold leading-tight">MediStore</h2>
-                <p className="text-xs text-muted-foreground">
-                  Trusted Digital Pharmacy
-                </p>
-              </div>
-            </div> */}
+
 
             {/* Login Form */}
             <div className="flex flex-1 items-center justify-center">

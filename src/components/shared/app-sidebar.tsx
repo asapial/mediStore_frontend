@@ -97,16 +97,16 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
           { credentials: "include" }
         )
 
-        if (!res.ok) {
-          router.push("/login")
-          return
-        }
+        // if (!res.ok) {
+        //   router.push("/login")
+        //   return
+        // }
 
         const data = await res.json()
         setUserRole(data?.user?.role ?? null)
       } catch (error) {
-        console.error("Failed to fetch user:", error)
-        router.push("/login")
+        // console.error("Failed to fetch user:", error)
+        // router.push("/login")
       } finally {
         setLoading(false)
       }
