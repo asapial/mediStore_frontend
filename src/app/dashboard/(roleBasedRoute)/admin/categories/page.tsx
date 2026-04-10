@@ -2,9 +2,9 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaLayerGroup, FaPlus, FaTrash, FaEdit, FaSave, FaTimes, FaSearch } from "react-icons/fa";
+import { FaLayerGroup, FaPlus, FaTrash, FaEdit, FaSave, FaTimes, FaSearch, FaStar } from "react-icons/fa";
 
-interface Category { id: string; name: string; _count?: { medicines: number } }
+interface Category { id: string; name: string; isFeatured?: boolean; _count?: { medicines: number } }
 
 export default function ManageCategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -57,6 +57,17 @@ export default function ManageCategoriesPage() {
     } catch (e: any) { toast.error(e.message || "Failed"); }
   };
 
+  const toggleFeatured = async (cat: Category) => {
+    try {
+      await fetch(`/api/admin/categories/${cat.id}/featured`, {
+        method: "PATCH", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+      });
+      toast.success(cat.isFeatured ? "Removed from featured" : "Marked as featured");
+      fetchCats();
+    } catch { toast.error("Failed to toggle featured"); }
+  };
+
   const del = async (id: string, name: string) => {
     if (!confirm(`Delete category "${name}"? All attached medicines will lose this category.`)) return;
     setDeleting(id);
@@ -104,6 +115,12 @@ export default function ManageCategoriesPage() {
             {categories.filter(c => (c._count?.medicines ?? 0) === 0).length}
           </p>
           <p className="text-xs font-semibold uppercase mt-1" style={{ color: "#8A6650" }}>Empty</p>
+        </div>
+        <div className="medi-card p-4 text-center">
+          <p className="text-3xl font-black" style={{ color: "#C2703A" }}>
+            {categories.filter(c => c.isFeatured).length} / 9
+          </p>
+          <p className="text-xs font-semibold uppercase mt-1" style={{ color: "#8A6650" }}>Featured Strip</p>
         </div>
       </div>
 
@@ -189,6 +206,11 @@ export default function ManageCategoriesPage() {
 
                     {/* Actions */}
                     <div className="flex items-center gap-2 flex-shrink-0">
+                      {/* Featured toggle */}
+                      <button onClick={() => toggleFeatured(cat)} title={cat.isFeatured ? "Remove from category strip" : "Show in category strip"}
+                        className="p-2 rounded-lg transition-colors" style={{ background: cat.isFeatured ? "#FFF8E1" : "#F5EDE3", color: cat.isFeatured ? "#F59E0B" : "#8A6650" }}>
+                        <FaStar className={cat.isFeatured ? "text-amber-400" : "text-muted-foreground/40"} />
+                      </button>
                       {editId === cat.id ? (
                         <>
                           <button onClick={() => update(cat.id)}

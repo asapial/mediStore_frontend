@@ -1,0 +1,137 @@
+"use client";
+import { useState, useEffect } from "react";
+import { toast } from "sonner";
+import { motion, AnimatePresence } from "framer-motion";
+import { FaNewspaper, FaSearch, FaTrash, FaEye } from "react-icons/fa";
+
+interface Blog {
+  id:string; title:string; summary:string; slug:string; image?:string; tags:string[];
+  isPublished:boolean; isFeatured:boolean; createdAt:string;
+  author:{id:string;name:string;image?:string};
+}
+
+export default function AdminBlogsPage() {
+  const [blogs,   setBlogs]   = useState<Blog[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search,  setSearch]  = useState("");
+  const [filter,  setFilter]  = useState<"all"|"pending"|"published"|"featured">("all");
+
+  const load = () => fetch("/api/blogs/admin/all",{credentials:"include"}).then(r=>r.json()).then(d=>setBlogs(d.data||[])).finally(()=>setLoading(false));
+  useEffect(()=>{ load(); },[]);
+
+  const update = async (id:string, data:Partial<{isPublished:boolean;isFeatured:boolean}>) => {
+    const res = await fetch(`/api/blogs/admin/${id}`,{method:"PATCH",credentials:"include",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)});
+    if (res.ok){ toast.success("Blog updated"); load(); } else toast.error("Failed");
+  };
+
+  const del = async (id:string) => {
+    if (!confirm("Delete this blog post?")) return;
+    await fetch(`/api/blogs/admin/${id}`,{method:"DELETE",credentials:"include"});
+    toast.success("Blog deleted"); load();
+  };
+
+  const filtered = blogs.filter(b=>
+    (filter==="all"||(filter==="pending"&&!b.isPublished)||(filter==="published"&&b.isPublished&&!b.isFeatured)||(filter==="featured"&&b.isFeatured)) &&
+    b.title.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const pendingCount = blogs.filter(b=>!b.isPublished).length;
+  const featCount    = blogs.filter(b=>b.isFeatured).length;
+
+  return (
+    <div className="medi-page">
+      {/* Header */}
+      <div className="mb-8 flex items-center gap-3">
+        <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{background:"#1B3A5C"}}>
+          <FaNewspaper className="text-white text-lg" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold" style={{color:"#1B3A5C"}}>Blog Management</h1>
+          <p className="text-sm" style={{color:"#8A6650"}}>{blogs.length} total · {pendingCount} pending · {featCount} featured on homepage</p>
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-4 gap-4 mb-7">
+        {[
+          {label:"Total",      val:blogs.length,                                       color:"#1B3A5C"},
+          {label:"Pending",    val:pendingCount,                                        color:"#C2703A"},
+          {label:"Published",  val:blogs.filter(b=>b.isPublished).length,               color:"#2E7D32"},
+          {label:"Featured",   val:featCount,                                           color:"#8A6650"},
+        ].map(s=>(
+          <div key={s.label} className="medi-card p-4 text-center">
+            <p className="text-3xl font-black" style={{color:s.color}}>{s.val}</p>
+            <p className="text-xs font-semibold uppercase mt-1" style={{color:"#8A6650"}}>{s.label}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Filters + search */}
+      <div className="flex flex-wrap gap-3 mb-5">
+        {(["all","pending","published","featured"] as const).map(f=>(
+          <button key={f} onClick={()=>setFilter(f)} className="capitalize text-sm px-4 py-1.5 rounded-full font-semibold border transition-colors"
+            style={filter===f?{background:"#1B3A5C",color:"#FFF",borderColor:"#1B3A5C"}:{background:"#FFF",color:"#5C4033",borderColor:"#DDD0C4"}}>
+            {f}
+          </button>
+        ))}
+        <div className="relative ml-auto">
+          <FaSearch className="absolute left-3 top-2.5" style={{color:"#8A6650",fontSize:12}} />
+          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search blog titles…"
+            className="border rounded-xl pl-8 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C2703A40] w-60"
+            style={{borderColor:"#DDD0C4",background:"#FFF",color:"#5C4033"}} />
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="space-y-3">{Array.from({length:5}).map((_,i)=><div key={i} className="medi-card h-20 animate-pulse"/>)}</div>
+      ) : (
+        <div className="space-y-3">
+          <AnimatePresence>
+          {filtered.map((b,i)=>(
+            <motion.div key={b.id} initial={{opacity:0,y:6}} animate={{opacity:1,y:0}} transition={{delay:i*0.03}}
+              className="medi-card p-4 flex gap-4 items-center flex-wrap"
+              style={{borderLeft:`4px solid ${b.isFeatured?"#C2703A":b.isPublished?"#2E7D32":"#DDD0C4"}`}}>
+              {b.image && <img src={b.image} alt="" className="w-14 h-14 rounded-xl object-cover flex-shrink-0" />}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                  <p className="font-bold truncate" style={{color:"#1B3A5C"}}>{b.title}</p>
+                  {b.isFeatured   && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{background:"#FFF3E0",color:"#C2703A"}}>⭐ Featured</span>}
+                  {b.isPublished  && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{background:"#E8F5E9",color:"#2E7D32"}}>Published</span>}
+                  {!b.isPublished && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{background:"#F5EDE3",color:"#8A6650"}}>Draft</span>}
+                </div>
+                <p className="text-xs" style={{color:"#8A6650"}}>by {b.author.name} · {new Date(b.createdAt).toLocaleDateString()}</p>
+                <div className="flex gap-1 mt-1 flex-wrap">
+                  {b.tags.map(t=><span key={t} className="text-[10px] px-1.5 py-0.5 rounded" style={{background:"#F5EDE3",color:"#8A6650"}}>{t}</span>)}
+                </div>
+              </div>
+              <div className="flex items-center gap-2 flex-wrap flex-shrink-0">
+                <a href={`/blog/${b.slug}`} target="_blank"
+                  className="p-2 rounded-lg" style={{background:"#E3F0FB",color:"#3A6EA5"}} title="Preview blog">
+                  <FaEye style={{fontSize:12}} />
+                </a>
+                <button onClick={()=>update(b.id,{isPublished:!b.isPublished})}
+                  className="text-xs font-bold px-3 py-1.5 rounded-lg"
+                  style={b.isPublished?{background:"#F5EDE3",color:"#8A6650"}:{background:"#E8F5E9",color:"#2E7D32"}}>
+                  {b.isPublished?"Unpublish":"Publish"}
+                </button>
+                <button onClick={()=>update(b.id,{isFeatured:!b.isFeatured})}
+                  className="text-xs font-bold px-3 py-1.5 rounded-lg"
+                  style={b.isFeatured?{background:"#FFF3E0",color:"#C2703A"}:{background:"#F5EDE3",color:"#8A6650"}}>
+                  {b.isFeatured?"Unfeature":"⭐ Feature"}
+                </button>
+                <button onClick={()=>del(b.id)} className="p-2 rounded-lg" style={{background:"#FFEBEE",color:"#C62828"}}><FaTrash style={{fontSize:12}} /></button>
+              </div>
+            </motion.div>
+          ))}
+          </AnimatePresence>
+          {filtered.length===0 && (
+            <div className="text-center py-16 medi-card">
+              <FaNewspaper className="mx-auto text-4xl mb-3 opacity-20" style={{color:"#1B3A5C"}} />
+              <p style={{color:"#8A6650"}}>No blog posts found</p>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}

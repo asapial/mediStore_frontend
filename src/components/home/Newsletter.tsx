@@ -1,67 +1,84 @@
 "use client";
 
 import { useState } from "react";
-import { Mail, ArrowRight } from "lucide-react";
+import { Send, CheckCircle, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 
 export default function Newsletter() {
-  const [email, setEmail] = useState("");
-  const [submitted, setSubmitted] = useState(false);
+  const [email,       setEmail]       = useState("");
+  const [name,        setName]        = useState("");
+  const [submitting,  setSubmitting]  = useState(false);
+  const [subscribed,  setSubscribed]  = useState(false);
 
-  const handleSubmit = () => {
-    if (email.includes("@")) {
-      setSubmitted(true);
-      setEmail("");
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) { toast.error("Enter your email"); return; }
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/newsletter/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim(), name: name.trim() || undefined }),
+      });
+      const data = await res.json();
+      if (res.status === 409) {
+        toast.info("You're already subscribed! 🎉");
+        setSubscribed(true);
+        return;
+      }
+      if (!res.ok) throw new Error(data.message || "Subscription failed");
+      setSubscribed(true);
+      toast.success("You're subscribed! Welcome to the ProPharm family 💊");
+    } catch (err: any) {
+      toast.error(err.message || "Something went wrong");
+    } finally {
+      setSubmitting(false);
     }
   };
 
   return (
-    <section className="py-16 bg-gradient-to-br from-emerald-600 via-teal-600 to-emerald-700 dark:from-emerald-800 dark:via-teal-800 dark:to-emerald-900 relative overflow-hidden">
-      {/* Decorative circles */}
-      <div className="absolute -left-16 -top-16 w-64 h-64 rounded-full bg-white/5" />
-      <div className="absolute -right-16 -bottom-16 w-80 h-80 rounded-full bg-white/5" />
-      <div className="absolute left-1/4 top-0 w-32 h-32 rounded-full bg-white/5" />
-
-      <div className="max-w-3xl mx-auto px-4 text-center relative z-10">
-        <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center mx-auto mb-5">
+    <section className="py-16 bg-emerald-600 dark:bg-emerald-800">
+      <div className="max-w-2xl mx-auto px-4 text-center">
+        <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-5">
           <Mail className="w-7 h-7 text-white" />
         </div>
-        <h2 className="text-3xl md:text-4xl font-black text-white mb-3">
-          Get Health Tips & Exclusive Offers
-        </h2>
-        <p className="text-emerald-100 text-base mb-8 max-w-xl mx-auto leading-relaxed">
-          Subscribe to our newsletter and get 10% off your first order, plus weekly health tips from our team of pharmacists.
+        <h2 className="text-3xl font-black text-white mb-2">Stay Healthy, Stay Updated</h2>
+        <p className="text-white/80 text-sm mb-8 leading-relaxed">
+          Subscribe for exclusive health tips, flash sale alerts, and special discounts delivered to your inbox.
         </p>
 
-        {submitted ? (
-          <div className="bg-white/20 backdrop-blur border border-white/30 rounded-2xl px-8 py-5 inline-block">
-            <p className="text-white font-bold text-lg">✅ You're subscribed!</p>
-            <p className="text-emerald-100 text-sm mt-1">Check your email for your 10% discount code.</p>
+        {subscribed ? (
+          <div className="flex items-center justify-center gap-3 bg-white/20 rounded-2xl px-6 py-4">
+            <CheckCircle className="w-6 h-6 text-white" />
+            <p className="text-white font-semibold">You're subscribed — thank you! 🎉</p>
           </div>
         ) : (
-          <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+          <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
+            <Input
+              type="text"
+              placeholder="Your name (optional)"
+              value={name}
+              onChange={e => setName(e.target.value)}
+              className="bg-white/20 border-white/30 text-white placeholder:text-white/60 focus-visible:ring-white/50 sm:w-44 flex-shrink-0"
+            />
             <Input
               type="email"
-              placeholder="Enter your email address..."
+              placeholder="Your email address"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-              className="bg-white/20 backdrop-blur border-white/30 text-white placeholder:text-emerald-200 focus-visible:ring-white/50 flex-1 h-12 rounded-xl"
+              onChange={e => setEmail(e.target.value)}
+              required
+              className="flex-1 bg-white/20 border-white/30 text-white placeholder:text-white/60 focus-visible:ring-white/50"
             />
-            <Button
-              onClick={handleSubmit}
-              className="bg-white text-emerald-700 hover:bg-emerald-50 font-bold h-12 px-6 rounded-xl shadow-lg hover:scale-105 transition-all"
-            >
-              Subscribe
-              <ArrowRight className="w-4 h-4 ml-1" />
+            <Button type="submit" disabled={submitting}
+              className="bg-white hover:bg-white/90 text-emerald-700 font-bold px-6 flex-shrink-0">
+              {submitting ? "…" : <><Send className="w-4 h-4 mr-1" /> Subscribe</>}
             </Button>
-          </div>
+          </form>
         )}
 
-        <p className="text-emerald-200 text-xs mt-4">
-          🔒 No spam. Unsubscribe anytime. We respect your privacy.
-        </p>
+        <p className="text-white/50 text-xs mt-4">No spam, ever. Unsubscribe anytime.</p>
       </div>
     </section>
   );

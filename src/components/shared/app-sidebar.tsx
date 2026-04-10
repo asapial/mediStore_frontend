@@ -37,6 +37,12 @@ import {
   FaIdCard,
   FaStore,
   FaSitemap,
+  FaBolt,
+  FaNewspaper,
+  FaCommentDots,
+  FaEnvelope,
+  FaImage,
+  FaStar,
 } from "react-icons/fa"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -241,6 +247,15 @@ const navData: NavItem[] = [
     group: "Account",
   },
 
+  {
+    title: "Flash Sale",
+    url: "/dashboard/seller/flash-sale",
+    role: "SELLER",
+    icon: FaBolt,
+    iconClass: "icon-alert",
+    group: "Sales",
+  },
+
   // ── ADMIN ──────────────────────────────────────────────────────────────────
   {
     title: "Dashboard",
@@ -313,6 +328,64 @@ const navData: NavItem[] = [
     icon: FaWallet,
     iconClass: "icon-wallet",
     group: "Finance",
+  },
+
+  // ── ADMIN: Homepage CMS ───────────────────────────────────
+  {
+    title: "Promo Banners",
+    url: "/dashboard/admin/banners",
+    role: "ADMIN",
+    icon: FaImage,
+    iconClass: "icon-neutral",
+    group: "Homepage CMS",
+  },
+  {
+    title: "Features Strip",
+    url: "/dashboard/admin/platform-features",
+    role: "ADMIN",
+    icon: FaStar,
+    iconClass: "icon-neutral",
+    group: "Homepage CMS",
+  },
+  {
+    title: "Featured Products",
+    url: "/dashboard/admin/featured-products",
+    role: "ADMIN",
+    icon: FaStore,
+    iconClass: "icon-neutral",
+    group: "Homepage CMS",
+  },
+  {
+    title: "Flash Sales",
+    url: "/dashboard/admin/flash-sale",
+    role: "ADMIN",
+    icon: FaBolt,
+    iconClass: "icon-alert",
+    group: "Homepage CMS",
+  },
+  {
+    title: "Health Blogs",
+    url: "/dashboard/admin/blogs",
+    role: "ADMIN",
+    icon: FaNewspaper,
+    iconClass: "icon-neutral",
+    group: "Homepage CMS",
+  },
+  {
+    title: "Testimonials",
+    url: "/dashboard/admin/testimonials",
+    role: "ADMIN",
+    icon: FaCommentDots,
+    iconClass: "icon-neutral",
+    group: "Homepage CMS",
+  },
+  {
+    title: "Newsletter",
+    url: "/dashboard/admin/newsletter",
+    role: "ADMIN",
+    icon: FaEnvelope,
+    iconClass: "icon-neutral",
+    group: "Homepage CMS",
   },
 ]
 

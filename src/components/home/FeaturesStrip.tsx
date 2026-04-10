@@ -1,27 +1,41 @@
-import { Truck, ShieldCheck, RotateCcw, Headphones, CreditCard, Clock } from "lucide-react";
+"use client";
 
-const features = [
-  { icon: Truck, title: "Free Delivery", desc: "On orders over $50", color: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-950/40" },
-  { icon: ShieldCheck, title: "Genuine Products", desc: "100% authentic & certified", color: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-950/40" },
-  { icon: RotateCcw, title: "Easy Returns", desc: "30-day hassle-free return", color: "text-violet-500", bg: "bg-violet-50 dark:bg-violet-950/40" },
-  { icon: Headphones, title: "24/7 Support", desc: "Licensed pharmacists online", color: "text-rose-500", bg: "bg-rose-50 dark:bg-rose-950/40" },
-  { icon: CreditCard, title: "Secure Payment", desc: "Encrypted transactions", color: "text-amber-500", bg: "bg-amber-50 dark:bg-amber-950/40" },
-  { icon: Clock, title: "Same Day Dispatch", desc: "Order before 2 PM", color: "text-teal-500", bg: "bg-teal-50 dark:bg-teal-950/40" },
+import { useEffect, useState } from "react";
+
+interface Feature { id: string; title: string; description: string; icon: string; }
+
+const FALLBACK: Feature[] = [
+  { id:"f1", title:"Free Shipping",      description:"On all orders over $30",    icon:"🚚" },
+  { id:"f2", title:"Licensed Pharmacy",  description:"Verified & certified store", icon:"🏥" },
+  { id:"f3", title:"24/7 Support",       description:"Dedicated health advisors",  icon:"💬" },
+  { id:"f4", title:"Secure Payments",    description:"100% encrypted transactions",icon:"🔒" },
 ];
 
 export default function FeaturesStrip() {
+  const [features, setFeatures] = useState<Feature[]>([]);
+  const [loaded,   setLoaded]   = useState(false);
+
+  useEffect(() => {
+    fetch("/api/platform-features?isActive=true")
+      .then(r => r.json())
+      .then(d => { setFeatures(d.data || []); setLoaded(true); })
+      .catch(() => setLoaded(true));
+  }, []);
+
+  const items = loaded && features.length > 0 ? features : FALLBACK;
+
   return (
-    <section className="py-10 border-y border-border bg-background">
+    <section className="py-8 border-y border-border bg-background">
       <div className="max-w-7xl mx-auto px-4">
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-          {features.map(({ icon: Icon, title, desc, color, bg }) => (
-            <div key={title} className="flex flex-col items-center text-center gap-3 group">
-              <div className={`w-12 h-12 rounded-2xl ${bg} flex items-center justify-center transition-transform group-hover:scale-110`}>
-                <Icon className={`w-5 h-5 ${color}`} />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          {items.map((f) => (
+            <div key={f.id} className="flex items-start gap-3 group">
+              <div className="w-11 h-11 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 flex items-center justify-center text-xl flex-shrink-0 group-hover:scale-110 transition-transform">
+                {f.icon}
               </div>
               <div>
-                <p className="text-sm font-bold text-foreground">{title}</p>
-                <p className="text-xs text-muted-foreground mt-0.5 leading-tight">{desc}</p>
+                <p className="font-semibold text-sm text-foreground">{f.title}</p>
+                <p className="text-xs text-muted-foreground mt-0.5 leading-snug">{f.description}</p>
               </div>
             </div>
           ))}

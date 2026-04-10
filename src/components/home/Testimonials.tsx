@@ -1,131 +1,149 @@
 "use client";
 
-import { useState } from "react";
-import { Star, Quote, ChevronLeft, ChevronRight } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Star, User, Send, X, CheckCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
-const reviews = [
-  {
-    name: "Sarah Johnson",
-    role: "Regular Customer",
-    avatar: "👩",
-    rating: 5,
-    text: "Pharmora has completely changed how I manage my family's health. The quality of their supplements is outstanding, and delivery is always super fast. Highly recommend!",
-    product: "Vitamin C Effervescent",
-  },
-  {
-    name: "Michael Chen",
-    role: "Verified Buyer",
-    avatar: "👨",
-    rating: 5,
-    text: "I've been using Pharmora for over a year. Their prices are competitive, the products are genuine, and the customer service team is incredibly knowledgeable. My go-to pharmacy!",
-    product: "Omega-3 Fish Oil",
-  },
-  {
-    name: "Amelia Rodriguez",
-    role: "Health Enthusiast",
-    avatar: "👩‍🦱",
-    rating: 4,
-    text: "Great selection of organic and natural products. I appreciate that they clearly label ingredients and have detailed product descriptions. The loyalty rewards program is a nice bonus.",
-    product: "Collagen Peptides",
-  },
-  {
-    name: "David Park",
-    role: "Fitness Trainer",
-    avatar: "🧑‍🏋️",
-    rating: 5,
-    text: "As a personal trainer, I recommend Pharmora to all my clients. The sports nutrition range is excellent and the products are exactly as described. Great value for money.",
-    product: "Pre-Workout Powder",
-  },
-  {
-    name: "Emma Watson",
-    role: "New Customer",
-    avatar: "👩‍💼",
-    rating: 5,
-    text: "Placed my first order last week and was blown away by how quickly it arrived. The packaging was professional and the product quality exceeded my expectations.",
-    product: "Probiotic Capsules",
-  },
-];
+interface Testimonial {
+  id: string; content: string; rating: number;
+  user: { id: string; name: string; image?: string };
+  createdAt: string;
+}
 
-const VISIBLE = 3;
+interface SessionUser { id: string; name: string; }
+
+function StarRating({ value, onChange }: { value: number; onChange?: (v: number) => void }) {
+  return (
+    <div className="flex gap-1">
+      {[1,2,3,4,5].map(s => (
+        <button key={s} type="button" onClick={() => onChange?.(s)}>
+          <Star className={`w-5 h-5 transition-colors ${s <= value ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30"} ${onChange ? "cursor-pointer hover:text-amber-400" : "cursor-default"}`} />
+        </button>
+      ))}
+    </div>
+  );
+}
 
 export default function Testimonials() {
-  const [start, setStart] = useState(0);
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+  const [user,         setUser]         = useState<SessionUser | null>(null);
+  const [loading,      setLoading]      = useState(true);
+  const [showForm,     setShowForm]     = useState(false);
+  const [content,      setContent]      = useState("");
+  const [rating,       setRating]       = useState(5);
+  const [submitting,   setSubmitting]   = useState(false);
+  const [submitted,    setSubmitted]    = useState(false);
 
-  const prev = () => setStart((s) => Math.max(0, s - 1));
-  const next = () => setStart((s) => Math.min(reviews.length - VISIBLE, s + 1));
-  const visible = reviews.slice(start, start + VISIBLE);
+  useEffect(() => {
+    fetch("/api/testimonials?approved=true&limit=6")
+      .then(r => r.json())
+      .then(d => setTestimonials(d.data || []))
+      .finally(() => setLoading(false));
+    fetch("/api/auth/me", { credentials: "include" })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => setUser(d?.user ?? null))
+      .catch(() => {});
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!content.trim()) { toast.error("Please write something"); return; }
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/testimonials", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content, rating }),
+      });
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.message || "Failed");
+      setSubmitted(true);
+      setShowForm(false);
+      toast.success("Thank you! Your review is pending approval.");
+    } catch (e: any) { toast.error(e.message); }
+    finally { setSubmitting(false); }
+  };
 
   return (
-    <section className="py-12 bg-background">
+    <section className="py-12 bg-muted/20 dark:bg-muted/5">
       <div className="max-w-7xl mx-auto px-4">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+        <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
           <div>
-            <span className="text-xs uppercase tracking-widest text-emerald-500 font-semibold">Testimonials</span>
-            <h2 className="text-2xl md:text-3xl font-black text-foreground mt-1">What Our Customers Say</h2>
+            <h2 className="text-2xl font-black text-foreground">What Customers Say</h2>
+            <p className="text-sm text-muted-foreground mt-1">Real reviews from our community</p>
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={prev}
-              disabled={start === 0}
-              className="w-9 h-9 rounded-full border border-border flex items-center justify-center hover:border-emerald-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <button
-              onClick={next}
-              disabled={start >= reviews.length - VISIBLE}
-              className="w-9 h-9 rounded-full border border-border flex items-center justify-center hover:border-emerald-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
+          {user && !submitted && (
+            <Button onClick={() => setShowForm(!showForm)} size="sm"
+              className="bg-emerald-500 hover:bg-emerald-600 text-white">
+              {showForm ? <><X className="w-4 h-4 mr-1" /> Cancel</> : <><Star className="w-4 h-4 mr-1" /> Write a Review</>}
+            </Button>
+          )}
+          {submitted && (
+            <span className="flex items-center gap-1.5 text-sm text-emerald-600 font-semibold">
+              <CheckCircle className="w-4 h-4" /> Review submitted — pending approval
+            </span>
+          )}
+          {!user && (
+            <a href="/login" className="text-sm text-emerald-600 hover:underline font-medium">Sign in to leave a review →</a>
+          )}
         </div>
 
-        {/* Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {visible.map((review) => (
-            <div
-              key={review.name}
-              className="bg-card border border-border rounded-2xl p-6 flex flex-col gap-4 hover:border-emerald-300 dark:hover:border-emerald-700 hover:shadow-lg transition-all"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-xl">{review.avatar}</div>
+        {/* Submission form */}
+        {showForm && (
+          <form onSubmit={handleSubmit}
+            className="mb-8 p-6 rounded-2xl border border-border bg-background shadow-sm">
+            <h3 className="font-bold mb-4">Your Review</h3>
+            <div className="mb-3">
+              <label className="text-sm font-medium mb-1 block">Rating</label>
+              <StarRating value={rating} onChange={setRating} />
+            </div>
+            <textarea value={content} onChange={e => setContent(e.target.value)} rows={4}
+              placeholder="Share your experience with our pharmacy…"
+              className="w-full border border-border rounded-xl p-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-emerald-400 bg-background" />
+            <div className="flex justify-end mt-3">
+              <Button type="submit" disabled={submitting}
+                className="bg-emerald-500 hover:bg-emerald-600 text-white">
+                <Send className="w-4 h-4 mr-1" />
+                {submitting ? "Submitting…" : "Submit Review"}
+              </Button>
+            </div>
+          </form>
+        )}
+
+        {loading ? (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="rounded-2xl border border-border p-5 space-y-3 bg-background">
+                <div className="flex gap-2"><div className="w-10 h-10 rounded-full bg-muted animate-pulse"></div><div className="flex-1 space-y-1"><div className="h-3 bg-muted rounded animate-pulse w-1/2"></div><div className="h-2.5 bg-muted rounded animate-pulse w-1/3"></div></div></div>
+                <div className="h-3 bg-muted rounded animate-pulse"></div>
+                <div className="h-3 bg-muted rounded animate-pulse w-4/5"></div>
+              </div>
+            ))}
+          </div>
+        ) : testimonials.length === 0 ? (
+          <p className="text-center text-muted-foreground py-10">No reviews yet. Be the first!</p>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {testimonials.map(t => (
+              <div key={t.id} className="bg-background border border-border rounded-2xl p-5 hover:shadow-md transition-all">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-full overflow-hidden bg-muted flex-shrink-0 flex items-center justify-center">
+                    {t.user.image
+                      ? <img src={t.user.image} alt={t.user.name} className="w-full h-full object-cover" />
+                      : <span className="font-bold text-muted-foreground">{t.user.name.charAt(0)}</span>}
+                  </div>
                   <div>
-                    <p className="text-sm font-bold text-foreground">{review.name}</p>
-                    <p className="text-xs text-muted-foreground">{review.role}</p>
+                    <p className="font-semibold text-sm">{t.user.name}</p>
+                    <p className="text-xs text-muted-foreground">{new Date(t.createdAt).toLocaleDateString()}</p>
                   </div>
                 </div>
-                <Quote className="w-8 h-8 text-emerald-200 dark:text-emerald-800" />
+                <StarRating value={t.rating} />
+                <p className="text-sm text-muted-foreground mt-2 leading-relaxed line-clamp-4">"{t.content}"</p>
               </div>
-              <div className="flex">
-                {[1,2,3,4,5].map((s) => (
-                  <Star key={s} className={`w-4 h-4 ${s <= review.rating ? "fill-amber-400 text-amber-400" : "text-muted-foreground/20"}`} />
-                ))}
-              </div>
-              <p className="text-sm text-muted-foreground leading-relaxed flex-1 line-clamp-4">{review.text}</p>
-              <p className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold border-t border-border pt-3">
-                Purchased: {review.product}
-              </p>
-            </div>
-          ))}
-        </div>
-
-        {/* Trust stats */}
-        <div className="mt-10 grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[
-            { val: "2M+", label: "Happy Customers" },
-            { val: "50K+", label: "Products Listed" },
-            { val: "4.8/5", label: "Average Rating" },
-            { val: "99%", label: "Satisfaction Rate" },
-          ].map((stat) => (
-            <div key={stat.label} className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 rounded-2xl p-5 text-center border border-emerald-100 dark:border-emerald-900">
-              <div className="text-2xl md:text-3xl font-black text-emerald-600 dark:text-emerald-400">{stat.val}</div>
-              <div className="text-xs text-muted-foreground mt-1 font-medium">{stat.label}</div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
