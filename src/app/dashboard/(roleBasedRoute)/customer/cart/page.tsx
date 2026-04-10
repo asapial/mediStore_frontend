@@ -1,255 +1,261 @@
 "use client";
-
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { Card, CardHeader, CardContent, CardFooter, CardTitle } from "@/components/ui/card";
-import { Table, TableHeader, TableBody, TableRow, TableCell, TableHead } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Spinner } from "@/components/ui/spinner";
-import { motion } from "framer-motion";
-import { BiTrash, BiCartAlt, BiPackage, BiCategory, BiDollar } from "react-icons/bi";
-import SectionContainer from "@/utils/SectionContainer";
-import MedicineLoadingPage from "@/components/shared/LoadingPage";
+import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  FaShoppingCart, FaTrash, FaMinus, FaPlus, FaCheckSquare,
+  FaSquare, FaArrowRight,
+} from "react-icons/fa";
 
-interface Category { id: string; name: string; }
-interface Medicine {
-    id: string;
-    name: string;
-    description: string;
-    image: string | null;
-    price: number;
-    stock: number;
-    manufacturer: string;
-    sellerId: string;
-    categoryId: string;
-    createdAt: string;
-}
 interface CartItem {
-    id: string;
-    cartId: string;
-    medicineId: string;
-    quantity: number;
-    addedAt: string;
-    medicine: Medicine;
-}
-interface CartData {
-    items: CartItem[];
-    totalQuantity: number;
-    totalPrice: number;
+  id: string; cartId: string; medicineId: string;
+  quantity: number; addedAt: string;
+  medicine: {
+    id: string; name: string; description: string;
+    image: string | null; price: number; stock: number;
+    manufacturer: string; categoryId: string;
+  };
 }
 
 export default function CartPage() {
-    const [cart, setCart] = useState<CartData | null>(null);
-    const [loading, setLoading] = useState(false);
-    const router = useRouter();
+  const [items,    setItems]    = useState<CartItem[]>([]);
+  const [loading,  setLoading]  = useState(true);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [removing, setRemoving] = useState<string | null>(null);
+  const router = useRouter();
 
-    const fetchCart = async () => {
-        setLoading(true);
-        try {
-            const res = await fetch(`/api/cart`, {
-                method: "GET",
-                credentials: "include",
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.message || "Failed to fetch cart");
-            setCart(data.data);
-        } catch (err: unknown) {
-            console.error(err);
-            toast.error(err instanceof Error ? err.message : "Error fetching cart");
-        } finally {
-            setLoading(false);
-        }
-    };
+  const fetchCart = async () => {
+    setLoading(true);
+    try {
+      const res  = await fetch("/api/cart", { credentials: "include" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+      const cartItems: CartItem[] = data.data?.items || [];
+      setItems(cartItems);
+      // Select all by default
+      setSelected(new Set(cartItems.map(i => i.id)));
+    } catch (err: any) { toast.error(err.message || "Failed to load cart"); }
+    finally { setLoading(false); }
+  };
 
-    useEffect(() => { fetchCart(); }, []);
+  useEffect(() => { fetchCart(); }, []);
 
-    const handleQuantityChange = (itemId: string, value: number) => {
-        setCart((prev) => {
-            if (!prev) return prev;
-            const updatedItems = prev.items.map((item) =>
-                item.id === itemId ? { ...item, quantity: value } : item
-            );
-            return {
-                ...prev,
-                items: updatedItems,
-                totalQuantity: updatedItems.reduce((sum, i) => sum + i.quantity, 0),
-                totalPrice: updatedItems.reduce((sum, i) => sum + i.quantity * i.medicine.price, 0),
-            };
-        });
-    };
+  const toggleSelect = (id: string) =>
+    setSelected(p => {
+      const n = new Set(p);
+      n.has(id) ? n.delete(id) : n.add(id);
+      return n;
+    });
 
-    const updateCartItem = async (itemId: string, quantity: number) => {
-        try {
-            const res = await fetch(`/api/cart/update`, {
-                method: "PATCH",
-                headers: { "Content-Type": "application/json" },
-                credentials: "include",
-                body: JSON.stringify({ itemId, quantity }),
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.message || "Failed to update cart item");
-            toast.success("Cart updated successfully");
-            fetchCart();
-        } catch (err: unknown) {
-            console.error(err);
-            toast.error(err instanceof Error ? err.message : "Error updating cart");
-        }
-    };
+  const toggleAll = () => {
+    if (selected.size === items.length) setSelected(new Set());
+    else setSelected(new Set(items.map(i => i.id)));
+  };
 
-    const removeCartItem = async (itemId: string) => {
-        try {
-            const res = await fetch(`/api/cart/remove`, {
-                method: "DELETE",
-                headers: { "Content-Type": "application/json" },
-                credentials: "include",
-                body: JSON.stringify({ itemId }),
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.message || "Failed to remove item");
-            toast.success("Item removed from cart");
-            setCart((prev) => {
-                if (!prev) return prev;
-                const updatedItems = prev.items.filter((i) => i.id !== itemId);
-                return {
-                    ...prev,
-                    items: updatedItems,
-                    totalQuantity: updatedItems.reduce((sum, i) => sum + i.quantity, 0),
-                    totalPrice: updatedItems.reduce((sum, i) => sum + i.quantity * i.medicine.price, 0),
-                };
-            });
-        } catch (err: unknown) {
-            console.error(err);
-            toast.error(err instanceof Error ? err.message : "Error removing item");
-        }
-    };
+  const updateQty = async (itemId: string, qty: number) => {
+    if (qty < 1) return;
+    try {
+      const res = await fetch("/api/cart/update", {
+        method: "PATCH", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ itemId, quantity: qty }),
+      });
+      if (!res.ok) throw new Error();
+      setItems(p => p.map(i => i.id === itemId ? { ...i, quantity: qty } : i));
+    } catch { toast.error("Failed to update quantity"); }
+  };
 
-    if (loading) return (
-        <MedicineLoadingPage text="medicines"></MedicineLoadingPage>
-    );
-    if (!cart || cart.items.length === 0)
-        return <p className="text-center py-10 text-slate-500 min-h-screen bg-gradient-to-br from-emerald-50 via-emerald-100/10 to-emerald-50  dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">Your cart is empty.</p>;
+  const removeItem = async (itemId: string) => {
+    setRemoving(itemId);
+    try {
+      const res = await fetch("/api/cart/remove", {
+        method: "DELETE", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ itemId }),
+      });
+      if (!res.ok) throw new Error();
+      setItems(p => p.filter(i => i.id !== itemId));
+      setSelected(p => { const n = new Set(p); n.delete(itemId); return n; });
+      toast.success("Item removed");
+    } catch { toast.error("Failed to remove"); }
+    finally { setRemoving(null); }
+  };
 
-    return (
-        <SectionContainer className="bg-gradient-to-br from-emerald-50 via-emerald-100/10 to-emerald-50  dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
-            <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2 my-5">
-                <BiCartAlt className="text-emerald-600 text-3xl" /> My Cart
-            </h1>
+  const selectedItems = items.filter(i => selected.has(i.id));
+  const subtotal      = selectedItems.reduce((s, i) => s + i.quantity * i.medicine.price, 0);
+  const totalQty      = selectedItems.reduce((s, i) => s + i.quantity, 0);
 
-            <Card className="overflow-x-auto shadow-lg border border-slate-200 dark:border-slate-700 my-5">
-                <CardHeader>
-                    <CardTitle className="text-lg md:text-xl text-slate-900 dark:text-white">
-                        Items in your cart
-                    </CardTitle>
-                </CardHeader>
+  const goCheckout = () => {
+    if (selectedItems.length === 0) { toast.error("Select at least one item"); return; }
+    // Store selected items in sessionStorage for checkout
+    sessionStorage.setItem("checkoutItems", JSON.stringify(selectedItems));
+    router.push("/dashboard/customer/checkout");
+  };
 
-                <CardContent className="p-0">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Image</TableHead>
-                                <TableHead>Medicine</TableHead>
-                                <TableHead>Price</TableHead>
-                                <TableHead>Quantity</TableHead>
-                                <TableHead>Subtotal</TableHead>
-                                <TableHead>Stock Status</TableHead>
-                                <TableHead>Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
+  if (loading) return (
+    <div className="medi-page flex items-center justify-center min-h-[60vh]">
+      <p style={{ color: "#8A6650" }}>Loading cart…</p>
+    </div>
+  );
 
-                        <TableBody>
-                            {cart.items.map((item) => (
-                                <motion.tr
-                                    key={item.id}
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.3 }}
-                                    whileHover={{ scale: 1.02, backgroundColor: "#f0fdf4" }}
-                                    className="transition-colors rounded-md"
-                                >
-                                    <TableCell>
-                                        <img
-                                            src={item.medicine.image || "https://via.placeholder.com/100"}
-                                            alt={item.medicine.name}
-                                            className="w-20 h-20 object-cover rounded-md"
-                                        />
-                                    </TableCell>
-                                    <TableCell className="font-medium flex flex-col gap-1">
-                                        <span>{item.medicine.name}</span>
-                                        <div className="flex items-center gap-1 text-slate-500 text-xs">
-                                            <BiPackage /> {item.medicine.manufacturer}
-                                            <BiCategory /> Category: {item.medicine.categoryId}
-                                        </div>
-                                    </TableCell>
-                                    <TableCell><BiDollar className="inline mr-1" />{item.medicine.price.toFixed(2)}</TableCell>
-                                    <TableCell>
-                                        <div className="flex items-center gap-2">
-                                            <Input
-                                                type="number"
-                                                min={1}
-                                                max={item.medicine.stock}
-                                                value={item.quantity}
-                                                onChange={(e) =>
-                                                    handleQuantityChange(item.id, Math.max(1, Number(e.target.value)))
-                                                }
-                                                onBlur={(e) =>
-                                                    updateCartItem(item.id, Math.max(1, Number(e.target.value)))
-                                                }
-                                                className="w-16 text-center border-0 focus:ring-1 focus:ring-emerald-400 rounded"
-                                            />
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>${(item.quantity * item.medicine.price).toFixed(2)}</TableCell>
-                                    <TableCell>
-                                        <Badge
-                                            variant={
-                                                item.medicine.stock === 0
-                                                    ? "destructive"
-                                                    : item.quantity > item.medicine.stock
-                                                        ? "secondary"
-                                                        : "default"
-                                            }
-                                        >
-                                            {item.medicine.stock === 0
-                                                ? "Out of stock"
-                                                : item.quantity > item.medicine.stock
-                                                    ? "Low stock"
-                                                    : "In stock"}
-                                        </Badge>
-                                    </TableCell>
-                                    <TableCell>
-                                        <Button
-                                            type="button"
-                                            variant="destructive"
-                                            size="sm"
-                                            onClick={() => removeCartItem(item.id)}
-                                            className="flex items-center gap-1"
-                                        >
-                                            <BiTrash /> Remove
-                                        </Button>
-                                    </TableCell>
-                                </motion.tr>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </CardContent>
+  if (items.length === 0) return (
+    <div className="medi-page text-center py-20">
+      <FaShoppingCart className="mx-auto text-6xl mb-4 opacity-20" style={{ color: "#1B3A5C" }} />
+      <p className="text-xl font-bold mb-2" style={{ color: "#1B3A5C" }}>Your cart is empty</p>
+      <p style={{ color: "#8A6650" }}>Browse medicines to add items to your cart.</p>
+      <button onClick={() => router.push("/shop")} className="medi-btn-primary mt-6">
+        Shop Now
+      </button>
+    </div>
+  );
 
-                <CardFooter className="flex flex-col md:flex-row justify-between items-center gap-4">
-                    <div className="space-y-1 text-slate-900 dark:text-white">
-                        <p className="text-lg font-semibold">Total Quantity: {cart.totalQuantity}</p>
-                        <p className="text-xl font-bold text-emerald-600">Total Price: ${cart.totalPrice.toFixed(2)}</p>
+  return (
+    <div className="medi-page">
+      {/* Header */}
+      <div className="mb-6 flex items-center justify-between flex-wrap gap-3">
+        <div className="flex items-center gap-3">
+          <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: "#1B3A5C" }}>
+            <FaShoppingCart className="text-white text-lg" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold" style={{ color: "#1B3A5C" }}>My Cart</h1>
+            <p className="text-sm" style={{ color: "#8A6650" }}>
+              {items.length} item{items.length !== 1 ? "s" : ""} · {selected.size} selected
+            </p>
+          </div>
+        </div>
+        {/* Select all toggle */}
+        <button onClick={toggleAll}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold"
+          style={{ background: "#F5EDE3", color: "#5C4033", border: "1px solid #DDD0C4" }}>
+          {selected.size === items.length
+            ? <FaCheckSquare style={{ color: "#2E7D32" }} />
+            : <FaSquare style={{ color: "#8A6650" }} />}
+          {selected.size === items.length ? "Deselect All" : "Select All"}
+        </button>
+      </div>
+
+      <div className="grid lg:grid-cols-3 gap-6">
+        {/* Items list */}
+        <div className="lg:col-span-2 space-y-3">
+          <AnimatePresence>
+            {items.map((item, i) => {
+              const isSelected = selected.has(item.id);
+              return (
+                <motion.div key={item.id}
+                  initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, x: -20 }} transition={{ delay: i * 0.04 }}
+                  className="medi-card p-4 flex items-start gap-4 cursor-pointer transition-all"
+                  style={{ borderLeft: `4px solid ${isSelected ? "#2E7D32" : "#DDD0C4"}` }}
+                  onClick={() => toggleSelect(item.id)}>
+
+                  {/* Checkbox */}
+                  <div className="flex-shrink-0 mt-1">
+                    {isSelected
+                      ? <FaCheckSquare style={{ color: "#2E7D32", fontSize: 18 }} />
+                      : <FaSquare style={{ color: "#DDD0C4", fontSize: 18 }} />}
+                  </div>
+
+                  {/* Image */}
+                  <div className="w-16 h-16 rounded-xl flex-shrink-0 overflow-hidden"
+                    style={{ background: "#EEE4D9" }}
+                    onClick={e => e.stopPropagation()}>
+                    {item.medicine.image
+                      ? <img src={item.medicine.image} alt={item.medicine.name} className="w-full h-full object-cover" />
+                      : <div className="w-full h-full flex items-center justify-center text-2xl">💊</div>}
+                  </div>
+
+                  {/* Info */}
+                  <div className="flex-1 min-w-0" onClick={e => e.stopPropagation()}>
+                    <h3 className="font-bold text-sm" style={{ color: "#1B3A5C" }}>{item.medicine.name}</h3>
+                    <p className="text-xs mt-0.5" style={{ color: "#8A6650" }}>{item.medicine.manufacturer}</p>
+                    <div className="flex items-center gap-4 mt-2">
+                      <span className="font-bold" style={{ color: "#C2703A" }}>
+                        ${item.medicine.price.toFixed(2)}
+                      </span>
+                      <span className={`badge-${item.medicine.stock === 0 ? "rejected" : item.medicine.stock < 10 ? "lowstock" : "instock"}`}>
+                        {item.medicine.stock === 0 ? "Out of Stock" : item.medicine.stock < 10 ? "Low Stock" : "In Stock"}
+                      </span>
                     </div>
+                  </div>
 
-                    <Button
-                        className="bg-emerald-600 dark:bg-emerald-500 hover:bg-emerald-700 px-6 transition-all flex items-center gap-2"
-                        onClick={() => router.push("/checkout")}
-                    >
-                        Proceed to Checkout <BiCartAlt />
-                    </Button>
-                </CardFooter>
-            </Card>
-        </SectionContainer>
-    );
+                  {/* Qty + Remove */}
+                  <div className="flex flex-col items-end gap-3 flex-shrink-0"
+                    onClick={e => e.stopPropagation()}>
+                    {/* Qty stepper */}
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => updateQty(item.id, item.quantity - 1)}
+                        disabled={item.quantity <= 1}
+                        className="w-7 h-7 rounded-lg flex items-center justify-center font-bold disabled:opacity-40"
+                        style={{ background: "#EEE4D9", color: "#5C4033" }}>
+                        <FaMinus style={{ fontSize: 10 }} />
+                      </button>
+                      <span className="w-8 text-center font-bold text-sm" style={{ color: "#1B3A5C" }}>
+                        {item.quantity}
+                      </span>
+                      <button onClick={() => updateQty(item.id, item.quantity + 1)}
+                        disabled={item.quantity >= item.medicine.stock}
+                        className="w-7 h-7 rounded-lg flex items-center justify-center font-bold disabled:opacity-40"
+                        style={{ background: "#EEE4D9", color: "#5C4033" }}>
+                        <FaPlus style={{ fontSize: 10 }} />
+                      </button>
+                    </div>
+                    {/* Subtotal */}
+                    <p className="text-sm font-black" style={{ color: "#1B3A5C" }}>
+                      ${(item.quantity * item.medicine.price).toFixed(2)}
+                    </p>
+                    {/* Remove */}
+                    <button onClick={() => removeItem(item.id)}
+                      disabled={removing === item.id}
+                      className="text-xs flex items-center gap-1 disabled:opacity-40"
+                      style={{ color: "#C62828" }}>
+                      <FaTrash style={{ fontSize: 10 }} /> Remove
+                    </button>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
+        </div>
+
+        {/* Order summary */}
+        <div className="medi-card p-6 h-fit sticky top-4">
+          <h2 className="font-bold text-lg mb-4" style={{ color: "#1B3A5C" }}>Order Summary</h2>
+          <div className="space-y-3 mb-4">
+            <div className="flex justify-between text-sm">
+              <span style={{ color: "#8A6650" }}>Selected items</span>
+              <span style={{ color: "#5C4033" }}>{selectedItems.length}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span style={{ color: "#8A6650" }}>Total quantity</span>
+              <span style={{ color: "#5C4033" }}>{totalQty}</span>
+            </div>
+            {selectedItems.map(item => (
+              <div key={item.id} className="flex justify-between text-xs" style={{ color: "#8A6650" }}>
+                <span className="truncate max-w-[60%]">{item.medicine.name} ×{item.quantity}</span>
+                <span>${(item.quantity * item.medicine.price).toFixed(2)}</span>
+              </div>
+            ))}
+            <div className="border-t pt-3" style={{ borderColor: "#DDD0C4" }}>
+              <div className="flex justify-between">
+                <span className="font-bold" style={{ color: "#1B3A5C" }}>Subtotal</span>
+                <span className="font-black text-lg" style={{ color: "#C2703A" }}>${subtotal.toFixed(2)}</span>
+              </div>
+            </div>
+          </div>
+          <button onClick={goCheckout}
+            disabled={selectedItems.length === 0}
+            className="medi-btn-accent w-full flex items-center justify-center gap-2 disabled:opacity-50">
+            Proceed to Checkout <FaArrowRight />
+          </button>
+          {selectedItems.length < items.length && (
+            <p className="text-xs text-center mt-2" style={{ color: "#8A6650" }}>
+              {items.length - selectedItems.length} unselected item{items.length - selectedItems.length > 1 ? "s" : ""} won't be ordered
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }

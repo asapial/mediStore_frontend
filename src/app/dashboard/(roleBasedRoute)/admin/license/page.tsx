@@ -2,16 +2,20 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaIdCard, FaCheckCircle, FaTimesCircle, FaClock, FaUser, FaExternalLinkAlt } from "react-icons/fa";
+import {
+  FaIdCard, FaCheckCircle, FaTimesCircle, FaClock,
+  FaExternalLinkAlt, FaTrash,
+} from "react-icons/fa";
 
 type LicenseStatus = "PENDING" | "VERIFIED" | "REJECTED";
 interface License {
-  id: string; licenseNumber: string; documentUrl: string; status: LicenseStatus;
-  adminNote?: string; createdAt: string; seller: { id: string; name: string; email: string; };
+  id: string; licenseNumber: string; documentUrl: string;
+  status: LicenseStatus; adminNote?: string; createdAt: string;
+  seller: { id: string; name: string; email: string };
 }
 
 const tabs: LicenseStatus[] = ["PENDING", "VERIFIED", "REJECTED"];
-const tabColors: Record<LicenseStatus, string> = {
+const TAB_COLORS: Record<LicenseStatus, string> = {
   PENDING: "#C2703A", VERIFIED: "#2E7D32", REJECTED: "#C62828",
 };
 
@@ -51,6 +55,20 @@ export default function AdminLicensePage() {
     finally { setActing(null); }
   };
 
+  const deleteLicense = async (licenseId: string, sellerName: string) => {
+    if (!confirm(`Delete license for ${sellerName}? This cannot be undone.`)) return;
+    setActing(licenseId);
+    try {
+      const res = await fetch(`/api/seller-license/${licenseId}`, {
+        method: "DELETE", credentials: "include",
+      });
+      if (!res.ok) throw new Error("Failed");
+      toast.success("License deleted");
+      setLicenses(p => p.filter(l => l.id !== licenseId));
+    } catch { toast.error("Delete failed"); }
+    finally { setActing(null); }
+  };
+
   const filtered = licenses.filter(l => l.status === tab);
   const count = (s: LicenseStatus) => licenses.filter(l => l.status === s).length;
 
@@ -62,7 +80,7 @@ export default function AdminLicensePage() {
         </div>
         <div>
           <h1 className="text-2xl font-bold" style={{ color: "#1B3A5C" }}>Seller License Verification</h1>
-          <p className="text-sm" style={{ color: "#8A6650" }}>Review and approve seller pharmacy licenses</p>
+          <p className="text-sm" style={{ color: "#8A6650" }}>Review, approve, and manage seller pharmacy licenses</p>
         </div>
       </div>
 
@@ -70,7 +88,7 @@ export default function AdminLicensePage() {
       <div className="grid grid-cols-3 gap-4 mb-6">
         {tabs.map(t => (
           <div key={t} className="medi-card p-5 text-center">
-            <p className="text-3xl font-black" style={{ color: tabColors[t] }}>{count(t)}</p>
+            <p className="text-3xl font-black" style={{ color: TAB_COLORS[t] }}>{count(t)}</p>
             <p className="text-xs uppercase tracking-wide font-semibold mt-1" style={{ color: "#8A6650" }}>{t}</p>
           </div>
         ))}
@@ -82,9 +100,9 @@ export default function AdminLicensePage() {
           <button key={t} onClick={() => setTab(t)}
             className="px-5 py-2 rounded-full text-sm font-semibold transition-all"
             style={{
-              background: tab === t ? tabColors[t] : "#F5EDE3",
+              background: tab === t ? TAB_COLORS[t] : "#F5EDE3",
               color: tab === t ? "#FFF" : "#5C4033",
-              border: `1px solid ${tabColors[t]}`,
+              border: `1px solid ${TAB_COLORS[t]}`,
             }}>
             {t} ({count(t)})
           </button>
@@ -95,7 +113,7 @@ export default function AdminLicensePage() {
         <p className="text-center py-16" style={{ color: "#8A6650" }}>Loading licenses…</p>
       ) : filtered.length === 0 ? (
         <div className="text-center py-16 medi-card">
-          <FaIdCard className="mx-auto text-4xl mb-3 opacity-20" style={{ color: tabColors[tab] }} />
+          <FaIdCard className="mx-auto text-4xl mb-3 opacity-20" style={{ color: TAB_COLORS[tab] }} />
           <p style={{ color: "#8A6650" }}>No {tab.toLowerCase()} licenses.</p>
         </div>
       ) : (
@@ -104,6 +122,7 @@ export default function AdminLicensePage() {
             {filtered.map((lic, i) => (
               <motion.div key={lic.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.05 }} className="medi-card p-5">
+                {/* Seller info */}
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm"
                     style={{ background: "#1B3A5C" }}>
@@ -113,7 +132,10 @@ export default function AdminLicensePage() {
                     <p className="font-bold text-sm truncate" style={{ color: "#1B3A5C" }}>{lic.seller.name}</p>
                     <p className="text-xs truncate" style={{ color: "#8A6650" }}>{lic.seller.email}</p>
                   </div>
+                  <span className={`badge-${lic.status.toLowerCase()}`}>{lic.status}</span>
                 </div>
+
+                {/* Details */}
                 <div className="space-y-2 text-sm mb-4">
                   <div className="flex justify-between">
                     <span style={{ color: "#8A6650" }}>License #</span>
@@ -124,17 +146,20 @@ export default function AdminLicensePage() {
                     <span style={{ color: "#5C4033" }}>{new Date(lic.createdAt).toLocaleDateString()}</span>
                   </div>
                 </div>
+
                 <a href={lic.documentUrl} target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 text-xs mb-4 font-semibold"
-                  style={{ color: "#3A6EA5" }}>
+                  className="flex items-center gap-1.5 text-xs mb-4 font-semibold" style={{ color: "#3A6EA5" }}>
                   <FaExternalLinkAlt /> View Document
                 </a>
+
                 {lic.adminNote && (
                   <div className="rounded-lg p-3 text-xs mb-4"
                     style={{ background: lic.status === "VERIFIED" ? "#E8F5E9" : "#FFEBEE", color: lic.status === "VERIFIED" ? "#2E7D32" : "#C62828" }}>
                     {lic.adminNote}
                   </div>
                 )}
+
+                {/* PENDING: review actions */}
                 {lic.status === "PENDING" && (
                   reviewing === lic.seller.id ? (
                     <div className="space-y-2">
@@ -157,10 +182,47 @@ export default function AdminLicensePage() {
                         className="text-xs w-full text-center" style={{ color: "#8A6650" }}>Cancel</button>
                     </div>
                   ) : (
-                    <button onClick={() => setReviewing(lic.seller.id)} className="medi-btn-primary w-full text-sm flex items-center justify-center gap-1">
+                    <button onClick={() => setReviewing(lic.seller.id)}
+                      className="medi-btn-primary w-full text-sm flex items-center justify-center gap-1">
                       <FaClock /> Review License
                     </button>
                   )
+                )}
+
+                {/* VERIFIED / REJECTED: re-review + delete */}
+                {(lic.status === "VERIFIED" || lic.status === "REJECTED") && (
+                  <div className="flex gap-2 mt-2">
+                    <button onClick={() => setReviewing(lic.seller.id)}
+                      className="flex-1 py-1.5 rounded-lg text-xs font-semibold"
+                      style={{ background: "#F5EDE3", color: "#5C4033", border: "1px solid #DDD0C4" }}>
+                      Re-review
+                    </button>
+                    <button onClick={() => deleteLicense(lic.id, lic.seller.name)}
+                      disabled={acting === lic.id}
+                      className="px-3 py-1.5 rounded-lg text-xs font-semibold disabled:opacity-50"
+                      style={{ background: "#FFEBEE", color: "#C62828", border: "1px solid #C62828" }}>
+                      <FaTrash />
+                    </button>
+                  </div>
+                )}
+
+                {/* Re-review panel for VERIFIED/REJECTED */}
+                {reviewing === lic.seller.id && lic.status !== "PENDING" && (
+                  <div className="space-y-2 mt-3">
+                    <textarea rows={2} value={adminNote} onChange={e => setAdminNote(e.target.value)}
+                      placeholder="Update note (optional)" className="w-full border rounded-lg px-3 py-2 text-sm resize-none"
+                      style={{ borderColor: "#DDD0C4", background: "#FFF" }} />
+                    <div className="flex gap-2">
+                      <button disabled={!!acting} onClick={() => review(lic.seller.id, "VERIFIED")}
+                        className="flex-1 py-1.5 rounded-lg text-sm font-semibold"
+                        style={{ background: "#2E7D32", color: "#FFF" }}>Verify</button>
+                      <button disabled={!!acting} onClick={() => review(lic.seller.id, "REJECTED")}
+                        className="flex-1 py-1.5 rounded-lg text-sm font-semibold"
+                        style={{ background: "#C62828", color: "#FFF" }}>Reject</button>
+                    </div>
+                    <button onClick={() => { setReviewing(null); setAdminNote(""); }}
+                      className="text-xs w-full text-center" style={{ color: "#8A6650" }}>Cancel</button>
+                  </div>
                 )}
               </motion.div>
             ))}

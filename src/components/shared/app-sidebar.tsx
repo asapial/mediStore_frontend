@@ -161,6 +161,14 @@ const navData: NavItem[] = [
     group: "Manage",
   },
   {
+    title: "My Medicines",
+    url: "/dashboard/seller/medicines",
+    role: "SELLER",
+    icon: FaPills,
+    iconClass: "icon-rx",
+    group: "Manage",
+  },
+  {
     title: "License Verification",
     url: "/dashboard/seller/license",
     role: "SELLER",

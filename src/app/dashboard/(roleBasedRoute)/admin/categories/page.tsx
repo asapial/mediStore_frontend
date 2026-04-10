@@ -1,294 +1,219 @@
 "use client";
-
 import { useEffect, useState } from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableCell,
-  TableHead,
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import {
-  FaEdit,
-  FaSave,
-  FaTimes,
-  FaPlus,
-  FaTrash,
-} from "react-icons/fa";
-import { Spinner } from "@/components/ui/spinner";
-import SectionContainer from "@/utils/SectionContainer";
-import MedicineLoadingPage from "@/components/shared/LoadingPage";
+import { motion, AnimatePresence } from "framer-motion";
+import { FaLayerGroup, FaPlus, FaTrash, FaEdit, FaSave, FaTimes, FaSearch } from "react-icons/fa";
 
-import {
-  AlertDialog,
-  AlertDialogTrigger,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogCancel,
-  AlertDialogAction,
-} from "@/components/ui/alert-dialog";
-
-interface Category {
-  id: string;
-  name: string;
-}
+interface Category { id: string; name: string; _count?: { medicines: number } }
 
 export default function ManageCategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading,    setLoading]    = useState(true);
+  const [newCat,     setNewCat]     = useState("");
+  const [creating,   setCreating]   = useState(false);
+  const [editId,     setEditId]     = useState<string | null>(null);
+  const [editName,   setEditName]   = useState("");
+  const [deleting,   setDeleting]   = useState<string | null>(null);
+  const [search,     setSearch]     = useState("");
 
-  // Create
-  const [newCategory, setNewCategory] = useState("");
-  const [creating, setCreating] = useState(false);
-
-  // Edit
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editingName, setEditingName] = useState("");
-
-  // Delete
-  const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [deleting, setDeleting] = useState(false);
-
-  /* ================= FETCH ================= */
-  const fetchCategories = async () => {
+  const fetchCats = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/admin/categories", {
-        credentials: "include",
-      });
+      const res  = await fetch("/api/admin/categories", { credentials: "include" });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
-      setCategories(data.data);
-    } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "Failed to fetch categories");
-    } finally {
-      setLoading(false);
-    }
+      setCategories(data.data || []);
+    } catch { toast.error("Failed to load categories"); }
+    finally { setLoading(false); }
   };
 
-  useEffect(() => {
-    fetchCategories();
-  }, []);
+  useEffect(() => { fetchCats(); }, []);
 
-  /* ================= CREATE ================= */
-  const createCategory = async () => {
-    if (!newCategory.trim()) {
-      toast.error("Category name cannot be empty");
-      return;
-    }
-
+  const create = async () => {
+    if (!newCat.trim()) { toast.error("Category name required"); return; }
+    setCreating(true);
     try {
-      setCreating(true);
       const res = await fetch("/api/admin/categories", {
-        method: "POST",
+        method: "POST", credentials: "include",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ name: newCategory }),
+        body: JSON.stringify({ name: newCat.trim() }),
       });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
-
-      toast.success("Category added");
-      setNewCategory("");
-      fetchCategories();
-    } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "Create failed");
-    } finally {
-      setCreating(false);
-    }
+      if (!res.ok) throw new Error((await res.json()).message);
+      toast.success("Category created");
+      setNewCat(""); fetchCats();
+    } catch (e: any) { toast.error(e.message || "Failed"); }
+    finally { setCreating(false); }
   };
 
-  /* ================= UPDATE ================= */
-  const updateCategory = async (id: string) => {
-    if (!editingName.trim()) {
-      toast.error("Category name cannot be empty");
-      return;
-    }
-
+  const update = async (id: string) => {
+    if (!editName.trim()) { toast.error("Category name required"); return; }
     try {
       const res = await fetch(`/api/admin/categories/${id}`, {
-        method: "PUT",
+        method: "PUT", credentials: "include",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ name: editingName }),
+        body: JSON.stringify({ name: editName.trim() }),
       });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
-
-      toast.success("Category updated");
-      setEditingId(null);
-      setEditingName("");
-      fetchCategories();
-    } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "Update failed");
-    }
+      if (!res.ok) throw new Error((await res.json()).message);
+      toast.success("Category updated"); setEditId(null); fetchCats();
+    } catch (e: any) { toast.error(e.message || "Failed"); }
   };
 
-  /* ================= DELETE ================= */
-  const deleteCategory = async () => {
-    if (!deleteId) return;
-
+  const del = async (id: string, name: string) => {
+    if (!confirm(`Delete category "${name}"? All attached medicines will lose this category.`)) return;
+    setDeleting(id);
     try {
-      setDeleting(true);
-      const res = await fetch(`/api/admin/categories/${deleteId}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
-
-      toast.success("Category deleted");
-      setDeleteId(null);
-      fetchCategories();
-    } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "Delete failed");
-    } finally {
-      setDeleting(false);
-    }
+      const res = await fetch(`/api/admin/categories/${id}`, { method: "DELETE", credentials: "include" });
+      if (!res.ok) throw new Error((await res.json()).message);
+      toast.success("Category deleted"); fetchCats();
+    } catch (e: any) { toast.error(e.message || "Failed"); }
+    finally { setDeleting(null); }
   };
+
+  const filtered = categories.filter(c =>
+    c.name.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
-    <SectionContainer className="py-10">
-      <h1 className="text-4xl font-bold mb-8 text-emerald-800">
-        Manage Categories
-      </h1>
+    <div className="medi-page">
+      {/* Header */}
+      <div className="mb-8 flex items-center gap-3">
+        <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: "#1B3A5C" }}>
+          <FaLayerGroup className="text-white text-lg" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold" style={{ color: "#1B3A5C" }}>Manage Categories</h1>
+          <p className="text-sm" style={{ color: "#8A6650" }}>
+            {categories.length} categor{categories.length !== 1 ? "ies" : "y"}
+          </p>
+        </div>
+      </div>
 
-      {/* ADD */}
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>Add New Category</CardTitle>
-        </CardHeader>
-        <CardContent className="flex gap-3">
-          <Input
-            placeholder="Category name"
-            value={newCategory}
-            onChange={(e) => setNewCategory(e.target.value)}
-          />
-          <Button onClick={createCategory} disabled={creating}>
-            {creating ? <Spinner /> : <FaPlus />}
-            Add
-          </Button>
-        </CardContent>
-      </Card>
+      {/* Stats bar */}
+      <div className="grid grid-cols-3 gap-4 mb-7">
+        <div className="medi-card p-4 text-center">
+          <p className="text-3xl font-black" style={{ color: "#1B3A5C" }}>{categories.length}</p>
+          <p className="text-xs font-semibold uppercase mt-1" style={{ color: "#8A6650" }}>Total</p>
+        </div>
+        <div className="medi-card p-4 text-center">
+          <p className="text-3xl font-black" style={{ color: "#2E7D32" }}>
+            {categories.filter(c => (c._count?.medicines ?? 0) > 0).length}
+          </p>
+          <p className="text-xs font-semibold uppercase mt-1" style={{ color: "#8A6650" }}>Active</p>
+        </div>
+        <div className="medi-card p-4 text-center">
+          <p className="text-3xl font-black" style={{ color: "#C2703A" }}>
+            {categories.filter(c => (c._count?.medicines ?? 0) === 0).length}
+          </p>
+          <p className="text-xs font-semibold uppercase mt-1" style={{ color: "#8A6650" }}>Empty</p>
+        </div>
+      </div>
 
-      {/* LIST */}
-      {loading ? (
-        <MedicineLoadingPage text="categories" />
-      ) : (
-        <Card>
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>ID</TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead className="text-center">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
+      <div className="grid lg:grid-cols-3 gap-6">
+        {/* Create form */}
+        <div className="medi-card p-6 h-fit">
+          <h2 className="font-bold mb-4 flex items-center gap-2" style={{ color: "#1B3A5C" }}>
+            <FaPlus style={{ color: "#C2703A" }} /> Add Category
+          </h2>
+          <input value={newCat} onChange={e => setNewCat(e.target.value)}
+            onKeyDown={e => e.key === "Enter" && create()}
+            placeholder="Category name (press Enter)"
+            className="w-full border rounded-lg px-3 py-2.5 text-sm mb-3"
+            style={{ borderColor: "#DDD0C4", background: "#FFF", color: "#5C4033" }} />
+          <button onClick={create} disabled={creating || !newCat.trim()}
+            className="medi-btn-accent w-full disabled:opacity-60">
+            {creating ? "Creating…" : "Add Category"}
+          </button>
 
-              <TableBody>
-                {categories.map((cat) => (
-                  <TableRow key={cat.id}>
-                    <TableCell className="font-mono">{cat.id}</TableCell>
-
-                    <TableCell>
-                      {editingId === cat.id ? (
-                        <Input
-                          value={editingName}
-                          onChange={(e) => setEditingName(e.target.value)}
-                        />
-                      ) : (
-                        cat.name
-                      )}
-                    </TableCell>
-
-                    <TableCell className="flex justify-center gap-2">
-                      {editingId === cat.id ? (
-                        <>
-                          <Button size="sm" onClick={() => updateCategory(cat.id)}>
-                            <FaSave />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => setEditingId(null)}
-                          >
-                            <FaTimes />
-                          </Button>
-                        </>
-                      ) : (
-                        <>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => {
-                              setEditingId(cat.id);
-                              setEditingName(cat.name);
-                            }}
-                          >
-                            <FaEdit />
-                          </Button>
-
-                          {/* DELETE DIALOG */}
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button
-                                size="sm"
-                                variant="destructive"
-                                onClick={() => setDeleteId(cat.id)}
-                              >
-                                <FaTrash />
-                              </Button>
-                            </AlertDialogTrigger>
-
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>
-                                  Delete category?
-                                </AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  This action cannot be undone. This will
-                                  permanently delete the category.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-
-                              <AlertDialogFooter>
-                                <AlertDialogCancel
-                                  onClick={() => setDeleteId(null)}
-                                >
-                                  Cancel
-                                </AlertDialogCancel>
-                                <AlertDialogAction
-                                  onClick={deleteCategory}
-                                  disabled={deleting}
-                                  className="bg-red-600 hover:bg-red-700"
-                                >
-                                  {deleting ? <Spinner /> : "Delete"}
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </>
-                      )}
-                    </TableCell>
-                  </TableRow>
+          {/* Quick stats list */}
+          {categories.length > 0 && (
+            <div className="mt-6 border-t pt-4" style={{ borderColor: "#DDD0C4" }}>
+              <p className="text-xs font-semibold uppercase mb-3" style={{ color: "#8A6650" }}>Top by Medicines</p>
+              {[...categories]
+                .sort((a, b) => (b._count?.medicines ?? 0) - (a._count?.medicines ?? 0))
+                .slice(0, 5)
+                .map(c => (
+                  <div key={c.id} className="flex items-center justify-between text-sm py-1.5 border-b" style={{ borderColor: "#EEE4D9" }}>
+                    <span truncate style={{ color: "#5C4033" }}>{c.name}</span>
+                    <span className="font-bold" style={{ color: "#1B3A5C" }}>{c._count?.medicines ?? 0}</span>
+                  </div>
                 ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      )}
-    </SectionContainer>
+            </div>
+          )}
+        </div>
+
+        {/* Categories list */}
+        <div className="lg:col-span-2">
+          {/* Search */}
+          <div className="relative mb-4">
+            <FaSearch className="absolute left-3 top-3" style={{ color: "#8A6650", fontSize: 12 }} />
+            <input value={search} onChange={e => setSearch(e.target.value)}
+              placeholder="Search categories…"
+              className="w-full border rounded-xl pl-8 pr-4 py-2.5 text-sm"
+              style={{ borderColor: "#DDD0C4", background: "#FFF", color: "#5C4033" }} />
+          </div>
+
+          {loading ? (
+            <p className="text-center py-12" style={{ color: "#8A6650" }}>Loading…</p>
+          ) : filtered.length === 0 ? (
+            <div className="text-center py-12 medi-card">
+              <FaLayerGroup className="mx-auto text-4xl mb-3 opacity-20" style={{ color: "#1B3A5C" }} />
+              <p style={{ color: "#8A6650" }}>No categories found.</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <AnimatePresence>
+                {filtered.map((cat, i) => (
+                  <motion.div key={cat.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.03 }} className="medi-card p-4 flex items-center gap-4">
+                    {/* Color dot */}
+                    <div className="w-9 h-9 rounded-xl flex-shrink-0 flex items-center justify-center font-bold text-white text-sm"
+                      style={{ background: `hsl(${(i * 47) % 360}, 55%, 45%)` }}>
+                      {cat.name.charAt(0).toUpperCase()}
+                    </div>
+
+                    {/* Name */}
+                    <div className="flex-1">
+                      {editId === cat.id ? (
+                        <input autoFocus value={editName} onChange={e => setEditName(e.target.value)}
+                          onKeyDown={e => { if (e.key === "Enter") update(cat.id); if (e.key === "Escape") setEditId(null); }}
+                          className="w-full border rounded-lg px-3 py-1.5 text-sm"
+                          style={{ borderColor: "#C2703A", background: "#FFF", color: "#5C4033" }} />
+                      ) : (
+                        <div>
+                          <p className="font-semibold text-sm" style={{ color: "#1B3A5C" }}>{cat.name}</p>
+                          <p className="text-xs" style={{ color: "#8A6650" }}>
+                            {cat._count?.medicines ?? 0} medicine{(cat._count?.medicines ?? 0) !== 1 ? "s" : ""}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      {editId === cat.id ? (
+                        <>
+                          <button onClick={() => update(cat.id)}
+                            className="p-2 rounded-lg" style={{ background: "#E8F5E9", color: "#2E7D32" }}><FaSave /></button>
+                          <button onClick={() => setEditId(null)}
+                            className="p-2 rounded-lg" style={{ background: "#F5EDE3", color: "#8A6650" }}><FaTimes /></button>
+                        </>
+                      ) : (
+                        <>
+                          <button onClick={() => { setEditId(cat.id); setEditName(cat.name); }}
+                            className="p-2 rounded-lg" style={{ background: "#E3F0FB", color: "#3A6EA5" }}><FaEdit /></button>
+                          <button onClick={() => del(cat.id, cat.name)}
+                            disabled={deleting === cat.id}
+                            className="p-2 rounded-lg disabled:opacity-40"
+                            style={{ background: "#FFEBEE", color: "#C62828" }}><FaTrash /></button>
+                        </>
+                      )}
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }

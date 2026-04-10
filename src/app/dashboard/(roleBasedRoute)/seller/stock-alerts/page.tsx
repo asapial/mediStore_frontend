@@ -34,7 +34,7 @@ export default function SellerStockAlertsPage() {
 
   const fetchMeds = async () => {
     try {
-      const res  = await fetch("/api/medicines/my", { credentials: "include" });
+      const res  = await fetch("/api/medicines/own", { credentials: "include" });
       const data = await res.json();
       setMedicines(data.data || []);
     } catch {}

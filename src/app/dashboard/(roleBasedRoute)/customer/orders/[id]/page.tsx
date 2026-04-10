@@ -1,275 +1,220 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import {
-  Card,
-  CardHeader,
-  CardContent,
-  CardFooter,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
-import { BiArrowBack, BiCube } from "react-icons/bi";
-import SectionContainer from "@/utils/SectionContainer";
-import { Spinner } from "@/components/ui/spinner";
-import MedicineLoadingPage from "@/components/shared/LoadingPage";
-
-// ShadCN Dialog
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-
-interface Medicine {
-  name: string;
-  description: string;
-  price: number;
-  image: string | null;
-}
+  FaClipboardList, FaArrowLeft, FaMapMarkerAlt, FaCalendar,
+  FaBoxOpen, FaTruck, FaCheckCircle, FaTimesCircle, FaClock,
+  FaReceipt, FaTrash,
+} from "react-icons/fa";
 
 interface OrderItem {
-  id: string;
-  medicineId: string;
-  quantity: number;
-  price: number;
-  status: string;
-  medicine: Medicine;
+  id: string; medicineId: string; quantity: number; price: number; status: string;
+  medicine: { name: string; description: string; price: number; image: string | null; manufacturer?: string };
 }
-
 interface Order {
-  id: string;
-  status: string;
-  address: string;
-  createdAt: string;
+  id: string; status: string; address: string; createdAt: string;
   items: OrderItem[];
 }
 
+const STATUS_STEPS = ["PLACED", "PROCESSING", "SHIPPED", "DELIVERED"];
+const STATUS_ICON: Record<string, any> = {
+  PLACED:     <FaClock       style={{ color: "#C2703A" }} />,
+  PROCESSING: <FaBoxOpen     style={{ color: "#3A6EA5" }} />,
+  SHIPPED:    <FaTruck       style={{ color: "#8A4EA5" }} />,
+  DELIVERED:  <FaCheckCircle style={{ color: "#2E7D32" }} />,
+  CANCELLED:  <FaTimesCircle style={{ color: "#C62828" }} />,
+};
+
 export default function OrderDetailsPage() {
-  const { id } = useParams();
-  const router = useRouter();
-  const [order, setOrder] = useState<Order | null>(null);
+  const { id }   = useParams();
+  const router   = useRouter();
+  const [order,  setOrder]   = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
-
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-
-  const fetchOrder = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch(
-        `/api/orders/${id}`,
-        { method: "GET", credentials: "include" }
-      );
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Failed to fetch order");
-      setOrder(data.data);
-    } catch (err: unknown) {
-      console.error(err);
-      toast.error(
-        err instanceof Error ? err.message : "Error fetching order details"
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
-    if (id) fetchOrder();
+    if (!id) return;
+    fetch(`/api/orders/${id}`, { credentials: "include" })
+      .then(r => r.json())
+      .then(d => { if (d.data) setOrder(d.data); else toast.error(d.message); })
+      .catch(() => toast.error("Failed to load order"))
+      .finally(() => setLoading(false));
   }, [id]);
 
-  if (loading)
-    return <MedicineLoadingPage text="order"></MedicineLoadingPage>;
-
-  if (!order)
-    return (
-      <p className="text-center py-10 text-muted-foreground">Order not found.</p>
-    );
-
-  const totalPrice = order.items.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
-
-  // ---------------- DELETE ORDER ----------------
-  const handleDeleteOrder = async (orderId: string) => {
-    if (!order) return;
+  const handleDelete = async () => {
+    if (!order || !confirm("Cancel this order? This cannot be undone.")) return;
+    setDeleting(true);
     try {
-      setLoading(true);
-      // console.log(orderId);
-      const res = await fetch(
-        `/api/orders/${orderId}`,
-        { method: "DELETE", credentials: "include" }
-      );
+      const res  = await fetch(`/api/orders/${order.id}`, { method: "DELETE", credentials: "include" });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Failed to delete order");
-      toast.success("Order deleted successfully");
-      router.push("/orders");
-    } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "Something went wrong");
-    } finally {
-      setLoading(false);
-      setDeleteDialogOpen(false);
-    }
+      if (!res.ok) throw new Error(data.message);
+      toast.success("Order cancelled");
+      router.push("/dashboard/customer/orders");
+    } catch (err: any) { toast.error(err.message || "Failed"); }
+    finally { setDeleting(false); }
   };
 
+  if (loading) return <div className="medi-page flex items-center justify-center"><p style={{ color: "#8A6650" }}>Loading…</p></div>;
+  if (!order)  return <div className="medi-page text-center py-20"><p style={{ color: "#8A6650" }}>Order not found.</p></div>;
+
+  const total = order.items.reduce((s, i) => s + i.price * i.quantity, 0);
+  const stepIdx = STATUS_STEPS.indexOf(order.status);
+
   return (
-    <SectionContainer
-      className="min-h-screen p-5 md:p-8 space-y-6
-        bg-gradient-to-br from-emerald-50 via-emerald-100 to-emerald-50
-        dark:from-slate-900 dark:via-slate-800 dark:to-slate-900"
-    >
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-3xl font-extrabold text-foreground dark:text-white flex items-center gap-2">
-          <BiCube className="text-emerald-500 dark:text-blue-400 text-2xl" />
-          Order Details
-        </h1>
-        <Button
-          onClick={() => router.back()}
-          variant="outline"
-          className="flex items-center gap-1"
-        >
-          <BiArrowBack /> Back
-        </Button>
+    <div className="medi-page">
+      {/* Back + Header */}
+      <div className="flex items-center gap-3 mb-8">
+        <button onClick={() => router.push("/dashboard/customer/orders")}
+          className="p-2 rounded-xl" style={{ background: "#F5EDE3", color: "#5C4033" }}>
+          <FaArrowLeft />
+        </button>
+        <div className="flex items-center gap-3">
+          <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: "#1B3A5C" }}>
+            <FaReceipt className="text-white text-lg" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold" style={{ color: "#1B3A5C" }}>Order Details</h1>
+            <p className="text-xs font-mono" style={{ color: "#8A6650" }}>#{order.id}</p>
+          </div>
+        </div>
+        <div className="ml-auto flex items-center gap-2">
+          {STATUS_ICON[order.status]}
+          <span className={`badge-${order.status === "DELIVERED" ? "instock" : order.status === "CANCELLED" ? "rejected" : order.status === "PLACED" ? "pending" : "confirmed"}`}>
+            {order.status}
+          </span>
+        </div>
       </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-      >
-        <Card className="shadow-xl bg-white dark:bg-slate-900 border border-transparent hover:border-emerald-300 dark:hover:border-blue-600 transition-all">
-          <CardHeader className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
-            <div className="space-y-1">
-              <CardTitle className="text-lg md:text-xl font-bold text-slate-900 dark:text-white">
-                Order ID: {order.id}
-              </CardTitle>
-              <p className="text-sm text-slate-600 dark:text-slate-300">
-                Address: {order.address}
-              </p>
-              <p className="text-sm text-slate-600 dark:text-slate-300">
-                Placed on: {new Date(order.createdAt).toLocaleString()}
-              </p>
+      {/* Progress tracker */}
+      {order.status !== "CANCELLED" && (
+        <div className="medi-card p-6 mb-6">
+          <p className="text-xs font-semibold uppercase tracking-wider mb-4" style={{ color: "#8A6650" }}>Order Progress</p>
+          <div className="flex items-center">
+            {STATUS_STEPS.map((step, i) => (
+              <div key={step} className="flex items-center flex-1">
+                <div className="flex flex-col items-center">
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
+                    style={{
+                      background: i <= stepIdx ? "#2E7D32" : "#EEE4D9",
+                      color: i <= stepIdx ? "#FFF" : "#8A6650",
+                    }}>
+                    {i < stepIdx ? "✓" : i + 1}
+                  </div>
+                  <p className="text-xs mt-1 text-center w-16 leading-tight" style={{ color: i <= stepIdx ? "#2E7D32" : "#8A6650" }}>
+                    {step}
+                  </p>
+                </div>
+                {i < STATUS_STEPS.length - 1 && (
+                  <div className="flex-1 h-0.5 mx-1" style={{ background: i < stepIdx ? "#2E7D32" : "#EEE4D9" }} />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="grid lg:grid-cols-3 gap-6">
+        {/* Items */}
+        <div className="lg:col-span-2 space-y-4">
+          <div className="medi-card overflow-hidden">
+            <div className="px-5 py-4 font-bold" style={{ borderBottom: "1px solid #EEE4D9", color: "#1B3A5C" }}>
+              Items ({order.items.length})
             </div>
-            <Badge
-              variant="secondary"
-              className={`uppercase px-3 py-1 font-semibold rounded-full
-                ${
-                  order.status === "DELIVERED"
-                    ? "bg-green-500 text-white"
-                    : order.status === "CANCELLED"
-                    ? "bg-red-500 text-white"
-                    : "bg-yellow-400 text-black"
-                }`}
-            >
-              {order.status}
-            </Badge>
-          </CardHeader>
+            {order.items.map((item, i) => (
+              <motion.div key={item.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                transition={{ delay: i * 0.05 }}
+                className="flex items-center gap-4 px-5 py-4"
+                style={{ borderBottom: i < order.items.length - 1 ? "1px solid #EEE4D9" : "none" }}>
+                {/* Image */}
+                <div className="w-14 h-14 rounded-xl flex-shrink-0 overflow-hidden" style={{ background: "#EEE4D9" }}>
+                  {item.medicine.image
+                    ? <img src={item.medicine.image} alt={item.medicine.name} className="w-full h-full object-cover" />
+                    : <div className="w-full h-full flex items-center justify-center text-2xl">💊</div>}
+                </div>
+                {/* Info */}
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-sm" style={{ color: "#1B3A5C" }}>{item.medicine.name}</p>
+                  {item.medicine.manufacturer && (
+                    <p className="text-xs" style={{ color: "#8A6650" }}>{item.medicine.manufacturer}</p>
+                  )}
+                  {item.medicine.description && (
+                    <p className="text-xs mt-0.5 line-clamp-1" style={{ color: "#8A6650" }}>{item.medicine.description}</p>
+                  )}
+                  <div className="flex items-center gap-3 mt-1">
+                    <span className="text-xs" style={{ color: "#8A6650" }}>
+                      ${item.price.toFixed(2)} × {item.quantity}
+                    </span>
+                    <span className={`badge-${item.status === "DELIVERED" ? "instock" : item.status === "CANCELLED" ? "rejected" : "pending"}`}
+                      style={{ fontSize: "0.65rem" }}>
+                      {item.status}
+                    </span>
+                  </div>
+                </div>
+                {/* Subtotal */}
+                <p className="font-black flex-shrink-0" style={{ color: "#C2703A" }}>
+                  ${(item.price * item.quantity).toFixed(2)}
+                </p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
 
-          <CardContent className="overflow-x-auto mt-2">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-muted-foreground/20 bg-emerald-100 dark:bg-slate-800">
-                  <th className="py-2 px-4">Image</th>
-                  <th className="py-2 px-4">Medicine</th>
-                  <th className="py-2 px-4">Description</th>
-                  <th className="py-2 px-4">Quantity</th>
-                  <th className="py-2 px-4">Price</th>
-                  <th className="py-2 px-4">Subtotal</th>
-                  <th className="py-2 px-4">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {order.items.map((item) => (
-                  <tr
-                    key={item.id}
-                    className="border-b border-muted-foreground/10 hover:bg-emerald-50 dark:hover:bg-slate-700 transition-colors"
-                  >
-                    <td className="py-2 px-4 w-20">
-                      <img
-                        src={
-                          item.medicine.image ||
-                          "https://i.ibb.co/wNXj2FR6/serum-sweet-Purple.png"
-                        }
-                        alt={item.medicine.name}
-                        className="w-16 h-16 object-cover rounded-lg"
-                      />
-                    </td>
-                    <td className="py-2 px-4 font-medium text-slate-900 dark:text-slate-100">
-                      {item.medicine.name}
-                    </td>
-                    <td className="py-2 px-4 text-sm text-slate-600 dark:text-slate-300">
-                      {item.medicine.description}
-                    </td>
-                    <td className="py-2 px-4">{item.quantity}</td>
-                    <td className="py-2 px-4">${item.price.toFixed(2)}</td>
-                    <td className="py-2 px-4 font-semibold">
-                      ${(item.price * item.quantity).toFixed(2)}
-                    </td>
-                    <td className="py-2 px-4">
-                      <Badge
-                        variant={
-                          item.status === "DELIVERED"
-                            ? "default"
-                            : item.status === "CANCELLED"
-                            ? "destructive"
-                            : "secondary"
-                        }
-                      >
-                        {item.status}
-                      </Badge>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </CardContent>
-
-          <CardFooter className="flex flex-col md:flex-row justify-between items-center gap-4 mt-2">
-            <p className="text-lg font-bold text-slate-900 dark:text-white">
-              Total: ${totalPrice.toFixed(2)}
-            </p>
-            <div className="flex gap-2">
-              <Button
-                onClick={() => router.push("/checkout")}
-                className="bg-emerald-500 dark:bg-blue-600 hover:bg-emerald-600 dark:hover:bg-blue-700 px-6"
-              >
-                Proceed to Checkout
-              </Button>
-
-              {order.status !== "DELIVERED" && order.status !== "CANCELLED" && (
-                <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button variant="destructive" className="px-6">
-                      Delete Order
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Confirm Deletion</DialogTitle>
-                    </DialogHeader>
-                    <p>Are you sure you want to delete this order? This action cannot be undone.</p>
-                    <DialogFooter>
-                      <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
-                        Cancel
-                      </Button>
-                      <Button variant="destructive" onClick={()=>handleDeleteOrder(order.id)}>
-                        Delete
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              )}
+        {/* Sidebar info */}
+        <div className="space-y-4">
+          {/* Order info */}
+          <div className="medi-card p-5 space-y-3">
+            <p className="font-bold" style={{ color: "#1B3A5C" }}>Order Information</p>
+            <div className="space-y-2 text-sm">
+              <div className="flex items-start gap-2">
+                <FaCalendar className="flex-shrink-0 mt-0.5" style={{ color: "#8A6650" }} />
+                <div>
+                  <p style={{ color: "#8A6650" }}>Order Date</p>
+                  <p className="font-semibold" style={{ color: "#5C4033" }}>
+                    {new Date(order.createdAt).toLocaleString("en-BD")}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <FaMapMarkerAlt className="flex-shrink-0 mt-0.5" style={{ color: "#C2703A" }} />
+                <div>
+                  <p style={{ color: "#8A6650" }}>Delivery Address</p>
+                  <p className="font-semibold" style={{ color: "#5C4033" }}>{order.address}</p>
+                </div>
+              </div>
             </div>
-          </CardFooter>
-        </Card>
-      </motion.div>
-    </SectionContainer>
+          </div>
+
+          {/* Payment summary */}
+          <div className="medi-card p-5 space-y-3">
+            <p className="font-bold" style={{ color: "#1B3A5C" }}>Payment Summary</p>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span style={{ color: "#8A6650" }}>Subtotal</span>
+                <span style={{ color: "#5C4033" }}>${total.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span style={{ color: "#8A6650" }}>Delivery</span>
+                <span style={{ color: "#2E7D32" }}>Free</span>
+              </div>
+              <div className="flex justify-between font-black text-base pt-1 border-t" style={{ borderColor: "#DDD0C4" }}>
+                <span style={{ color: "#1B3A5C" }}>Total</span>
+                <span style={{ color: "#C2703A" }}>${total.toFixed(2)}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Cancel button */}
+          {order.status !== "DELIVERED" && order.status !== "CANCELLED" && (
+            <button onClick={handleDelete} disabled={deleting}
+              className="w-full py-2.5 rounded-xl text-sm font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
+              style={{ background: "#FFEBEE", color: "#C62828", border: "1px solid #C62828" }}>
+              <FaTrash /> {deleting ? "Cancelling…" : "Cancel Order"}
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
