@@ -2,8 +2,6 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { Clock, User, ArrowLeft, Tag } from "lucide-react";
-import Navbar from "@/components/shared/Navbar";
-import Footer from "@/components/home/Footer";
 
 interface Blog {
   id: string; title: string; summary: string; content: string; slug: string;
@@ -27,7 +25,6 @@ export default function BlogDetailPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
       <div className="max-w-3xl mx-auto px-4 py-12">
         <a href="/blog" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-emerald-600 mb-8 transition-colors">
           <ArrowLeft className="w-4 h-4" /> Back to Blog
@@ -91,7 +88,6 @@ export default function BlogDetailPage() {
           </article>
         )}
       </div>
-      <Footer />
     </div>
   );
 }

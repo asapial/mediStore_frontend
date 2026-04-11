@@ -1,3 +1,4 @@
+import { AmbientBg1_Pharmora, AmbientBg2_Pharmora, AmbientBg3_Pharmora, AmbientBg4_Pharmora, AmbientBg5_Pharmora } from "@/components/background/Ambientbackgrounds";
 import { AppSidebar } from "@/components/shared/app-sidebar"
 import { Separator } from "@/components/ui/separator"
 import {
@@ -28,6 +29,7 @@ export default function Page({
         </header>
         <div className="flex flex-1 flex-col gap-4 ">
           <div className="">
+            <AmbientBg5_Pharmora></AmbientBg5_Pharmora>
             {children}
           </div>
 

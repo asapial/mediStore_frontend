@@ -19,6 +19,8 @@ import { gsap } from "gsap";
 // Replace `image` values with your actual PNG paths inside /public/
 // e.g. "/slides/medicines.png"  →  place file at  public/slides/medicines.png
 // ─────────────────────────────────────────────────────────────────────────────
+
+
 const slides = [
     {
         id: 0,
@@ -37,7 +39,7 @@ const slides = [
         tag: "Up to 30% off",
         tagColor: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/60 dark:text-emerald-300",
         // ── YOUR PNG HERE ──
-        image: "https://i.ibb.co.com/397nzsW2/photo-2026-04-10-08-59-38.jpg",
+        image: "https://i.ibb.co.com/Hp472rnw/photo-2-2026-04-11-10-22-13.jpg",
         imageAlt: "Premium medicines and health products",
         particles: ["💊", "🧪", "🩺", "⚕️", "🏥"],
         floatingChips: [
@@ -62,7 +64,7 @@ const slides = [
         tag: "Best Sellers",
         tagColor: "bg-blue-100 text-blue-700 dark:bg-blue-900/60 dark:text-blue-300",
         // ── YOUR PNG HERE ──
-             image: "https://i.ibb.co.com/397nzsW2/photo-2026-04-10-08-59-38.jpg",
+             image: "https://i.ibb.co.com/99P5Xjqh/photo-3-2026-04-11-10-22-13.jpg",
         imageAlt: "Vitamins and supplements collection",
         particles: ["🌿", "🍋", "🫐", "🌱", "✨"],
         floatingChips: [
@@ -87,7 +89,7 @@ const slides = [
         tag: "Flash Sale 40% off",
         tagColor: "bg-rose-100 text-rose-700 dark:bg-rose-900/60 dark:text-rose-300",
         // ── YOUR PNG HERE ──
-           image: "https://i.ibb.co.com/397nzsW2/photo-2026-04-10-08-59-38.jpg",
+           image: "https://i.ibb.co.com/MkfVDWtz/photo-5-2026-04-11-10-22-13.jpg",
         imageAlt: "Beauty and personal care products",
         particles: ["✨", "💄", "🌸", "💆", "🪷"],
         floatingChips: [
@@ -112,7 +114,7 @@ const slides = [
         tag: "Top Rated Devices",
         tagColor: "bg-green-100 text-green-700 dark:bg-green-900/60 dark:text-green-300",
 
-             image: "https://i.ibb.co.com/397nzsW2/photo-2026-04-10-08-59-38.jpg",
+             image: "https://i.ibb.co.com/8nR9dp6k/photo-6-2026-04-11-10-22-13.jpg",
         imageAlt: "Digital medical devices like thermometer and blood pressure monitor",
 
         particles: ["🩺", "📟", "💓", "⚕️"],
@@ -137,7 +139,7 @@ const slides = [
         accentClass: "from-yellow-400 to-rose-400",
         tag: "Safe & Mild",
         tagColor: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/60 dark:text-yellow-300",
-      image: "https://i.ibb.co.com/397nzsW2/photo-2026-04-10-08-59-38.jpg",
+      image: "https://i.ibb.co.com/0jvLjZWW/photo-7-2026-04-11-10-22-13.jpg",
         imageAlt: "Baby care products like lotion, powder, and oil",
 
         particles: ["🍼", "👶", "🌼", "💛"],
@@ -163,7 +165,7 @@ const slides = [
         tag: "Hot Deals",
         tagColor: "bg-orange-100 text-orange-700 dark:bg-orange-900/60 dark:text-orange-300",
 
-         image: "https://i.ibb.co.com/397nzsW2/photo-2026-04-10-08-59-38.jpg",
+         image: "https://i.ibb.co.com/NdHZxCM9/photo-1-2026-04-11-10-22-13.jpg",
         imageAlt: "Pain relief tablets and gel products",
 
         particles: ["💊", "🔥", "⚡", "🩹"],
@@ -496,7 +498,7 @@ function SlideImagePanel({
                                     alt={slide.imageAlt}
                                     fill
                                     priority
-                                    className="object-contain rounded-[32px] select-none pointer-events-none"
+                                    className=" rounded-[32px] select-none pointer-events-none"
                                     sizes="(max-width: 768px) 256px, 360px"
                                 />
                             </motion.div>
@@ -600,7 +602,7 @@ export default function HeroBanner() {
         gsap.set(progressBarRef.current, { scaleX: 0, transformOrigin: "left center" });
         progressTween.current = gsap.to(progressBarRef.current, {
             scaleX: 1,
-            duration: 5,
+            duration: 7,
             ease: "none",
             onComplete: () => setCurrent((c) => (c + 1) % slides.length),
         });

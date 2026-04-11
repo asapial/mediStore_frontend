@@ -104,6 +104,7 @@ export default function CheckoutPage() {
   // Geolocation
   const [locating, setLocating] = useState(false);
   const [geoCoords, setGeoCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [useGeoAddress, setUseGeoAddress] = useState(false); // true = GPS mode, hide dropdowns
 
   // Coupon
   const [couponCode,     setCouponCode]     = useState("");
@@ -133,8 +134,9 @@ export default function CheckoutPage() {
   const subtotal  = items.reduce((s, i) => s + i.quantity * i.medicine.price, 0);
   const finalTotal = Math.max(0, subtotal - discount);
 
-  const fullAddress = [houseNum, landmark, para, village, thana, upazila, district, division, "Bangladesh"]
-    .filter(Boolean).join(", ");
+  const fullAddress = useGeoAddress && geoCoords
+    ? [houseNum, landmark, `GPS(${geoCoords.lat.toFixed(5)},${geoCoords.lng.toFixed(5)})`, "Bangladesh"].filter(Boolean).join(", ")
+    : [houseNum, landmark, para, village, thana, upazila, district, division, "Bangladesh"].filter(Boolean).join(", ");
 
   // ── Auto-locate ──────────────────────────────────────────────────────────────
   const autoLocate = async () => {
@@ -148,12 +150,12 @@ export default function CheckoutPage() {
           const res  = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=en`);
           const data = await res.json();
           const addr = data.address || {};
-          // Try to extract Bangladesh address parts
           setVillage(addr.suburb || addr.neighbourhood || addr.village || addr.town || "");
           setPara(addr.quarter || addr.hamlet || "");
           setHouseNum(addr.house_number || "");
           setLandmark(addr.road || addr.amenity || "");
-          toast.success("Location detected! Please verify and adjust the address.");
+          setUseGeoAddress(true); // hide the dropdowns
+          toast.success("Location detected! Fill in House No. and any landmark.");
         } catch { toast.error("Could not resolve address from location"); }
         setLocating(false);
       },
@@ -186,11 +188,13 @@ export default function CheckoutPage() {
 
   // ── Place order ──────────────────────────────────────────────────────────────
   const validateAddress = () => {
-    if (!division) { toast.error("Select Division"); return false; }
-    if (!district) { toast.error("Select District"); return false; }
-    if (!upazila)  { toast.error("Select Upazila");  return false; }
-    if (!thana)    { toast.error("Select Thana");    return false; }
-    if (!village)  { toast.error("Enter Village / Moholla"); return false; }
+    if (!useGeoAddress) {
+      if (!division) { toast.error("Select Division"); return false; }
+      if (!district) { toast.error("Select District"); return false; }
+      if (!upazila)  { toast.error("Select Upazila");  return false; }
+      if (!thana)    { toast.error("Select Thana");    return false; }
+      if (!village)  { toast.error("Enter Village / Moholla"); return false; }
+    }
     if (!houseNum) { toast.error("Enter House number / location"); return false; }
     return true;
   };
@@ -310,6 +314,29 @@ export default function CheckoutPage() {
               </div>
             )}
 
+            {/* GPS mode: only House + Landmark */}
+            {useGeoAddress ? (
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm" style={{ background: "#E8F5E9", border: "1px solid #2E7D32" }}>
+                  <FaLocationArrow style={{ color: "#2E7D32" }} />
+                  <span style={{ color: "#2E7D32", fontWeight: 600 }}>GPS location active — only House No. and Landmark needed</span>
+                  <button onClick={() => { setUseGeoAddress(false); setGeoCoords(null); }}
+                    className="ml-auto text-xs underline" style={{ color: "#8A6650" }}>Switch to manual</button>
+                </div>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold mb-1" style={{ color: "#5C4033" }}>House No. / Flat / Building *</label>
+                    <input value={houseNum} onChange={e => setHouseNum(e.target.value)}
+                      placeholder="e.g., House 12, Flat 3B, Road 5" className={SEL} style={STY} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold mb-1" style={{ color: "#5C4033" }}>Landmark / Road</label>
+                    <input value={landmark} onChange={e => setLandmark(e.target.value)}
+                      placeholder="e.g., Near City Hospital, Main Road" className={SEL} style={STY} />
+                  </div>
+                </div>
+              </div>
+            ) : (
             <div className="grid sm:grid-cols-2 gap-4">
               {/* Division */}
               <div>
@@ -372,6 +399,7 @@ export default function CheckoutPage() {
                   placeholder="e.g., Near City Hospital, Main Road" className={SEL} style={STY} />
               </div>
             </div>
+            )}
 
             {/* Address Preview */}
             {fullAddress.replace(/, ?Bangladesh$/, "").trim().length > 5 && (
