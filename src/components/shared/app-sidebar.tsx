@@ -9,6 +9,7 @@ import {
   Sidebar, SidebarContent, SidebarHeader, SidebarRail,
 } from "@/components/ui/sidebar";
 import { authClient } from "@/lib/auth-client";
+import { ThemeToggle } from "../home/Themetoggle";
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
 import {
@@ -277,7 +278,7 @@ function UserPopup({ user, onClose }: { user: UserInfo; onClose: () => void }) {
           ))}
         </div>
 
-        {/* Actions */}
+        {/* Quick links */}
         <div className="p-3 space-y-1">
           {[
             { icon: FaTachometerAlt, label: "Dashboard",     href: user.role === "ADMIN" ? "/dashboard/admin" : user.role === "SELLER" ? "/dashboard/seller" : "/dashboard/customer/orders" },
@@ -295,6 +296,18 @@ function UserPopup({ user, onClose }: { user: UserInfo; onClose: () => void }) {
               {label}
             </Link>
           ))}
+        </div>
+
+        {/* Theme toggle row */}
+        <div className="px-3 pb-2">
+          <div className="flex items-center justify-between px-3 py-2.5 rounded-xl"
+            style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}>
+            <div className="flex items-center gap-2.5">
+              <span className="text-sm" style={{ color: "rgba(194,112,58,0.8)" }}>🌙</span>
+              <span className="text-xs font-semibold" style={{ color: "rgba(245,237,227,0.75)" }}>Theme</span>
+            </div>
+            <ThemeToggle />
+          </div>
         </div>
 
         {/* Logout */}

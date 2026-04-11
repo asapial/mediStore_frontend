@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useTheme } from "next-themes";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -366,11 +366,10 @@ export function AmbientBg1_Pharmora() {
   const { dark, navy, amber } = usePharmoraColors();
 
   return (
-    <div className="pointer-events-none fixed inset-0 overflow-hidden select-none">
+    <div className="pointer-events-none fixed inset-0 overflow-hidden select-none" style={{ zIndex: -1 }}>
       <GlobalKeyframes />
 
       {/* Cream / dark base */}
-      <div className="absolute inset-0 bg-[#F5EDE3] dark:bg-[#100D0A] transition-colors duration-500" />
 
       {/* Large drifting blobs */}
       <div className="absolute -top-48 -left-48 w-[640px] h-[640px] rounded-full blur-[140px]"
@@ -493,9 +492,8 @@ export function AmbientBg2_Pharmora() {
   const { dark, navy, amber, sky } = usePharmoraColors();
 
   return (
-    <div className="pointer-events-none fixed inset-0 overflow-hidden select-none">
+    <div className="pointer-events-none fixed inset-0 overflow-hidden select-none" style={{ zIndex: -1 }}>
       <GlobalKeyframes />
-      <div className="absolute inset-0 bg-[#F5EDE3] dark:bg-[#0C0E14] transition-colors duration-500" />
 
       {/* Cross-hatch grid — molecular graph paper feel */}
       <div className="absolute inset-0 opacity-[0.05] dark:opacity-[0.06]"
@@ -672,9 +670,8 @@ export function AmbientBg3_Pharmora() {
   const { dark, navy, amber, sage } = usePharmoraColors();
 
   return (
-    <div className="pointer-events-none fixed inset-0 overflow-hidden select-none">
+    <div className="pointer-events-none fixed inset-0 overflow-hidden select-none" style={{ zIndex: -1 }}>
       <GlobalKeyframes />
-      <div className="absolute inset-0 bg-[#F5EDE3] dark:bg-[#0F0C0B] transition-colors duration-500" />
 
       {/* Diagonal scan lines — EKG feel */}
       <div className="absolute inset-0 opacity-[0.025] dark:opacity-[0.035]"
@@ -850,9 +847,8 @@ export function AmbientBg4_Pharmora() {
   const { dark, navy, amber, sky } = usePharmoraColors();
 
   return (
-    <div className="pointer-events-none fixed inset-0 overflow-hidden select-none">
+    <div className="pointer-events-none fixed inset-0 overflow-hidden select-none" style={{ zIndex: -1 }}>
       <GlobalKeyframes />
-      <div className="absolute inset-0 bg-[#F5EDE3] dark:bg-[#09080D] transition-colors duration-500" />
 
       {/* Vertical stripe guides — DNA ladder feel */}
       <div className="absolute inset-0 opacity-[0.04] dark:opacity-[0.05]"
@@ -1052,9 +1048,8 @@ export function AmbientBg5_Pharmora() {
   const { dark, navy, amber, sky } = usePharmoraColors();
 
   return (
-    <div className="pointer-events-none fixed inset-0 overflow-hidden select-none">
+    <div className="pointer-events-none fixed inset-0 overflow-hidden select-none" style={{ zIndex: -1 }}>
       <GlobalKeyframes />
-      <div className="absolute inset-0 bg-[#F5EDE3] dark:bg-[#08070F] transition-colors duration-500" />
 
       {/* Star field dot matrix */}
       <div className="absolute inset-0 opacity-[0.05] dark:opacity-[0.07]"
@@ -1082,3 +1077,44 @@ export function AmbientBg5_Pharmora() {
     </div>
   );
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AUTO AMBIENT BG — rotates BG1→BG5 automatically based on current hour
+//
+//  00:00–04:59  →  BG1 "Apothecary"  (pill capsules, late-night pharmacy)
+//  05:00–09:59  →  BG2 "Molecular"   (hexagons, morning energy)
+//  10:00–13:59  →  BG3 "Pulse"       (medical cross + ripples, midday)
+//  14:00–18:59  →  BG4 "DNA / Comet" (comets, afternoon flow)
+//  19:00–23:59  →  BG5 "Starfield"   (orbiting stars, evening/night)
+//
+// Re-checks every 60 seconds so the switch is live.
+// ─────────────────────────────────────────────────────────────────────────────
+export function AutoAmbientBg() {
+  const getIndex = () => {
+    const h = new Date().getHours();
+    if (h < 5)  return 0;   // 00-04 → BG1 Pills/Apothecary
+    if (h < 10) return 1;   // 05-09 → BG2 Molecular
+    if (h < 14) return 2;   // 10-13 → BG3 Pulse
+    if (h < 19) return 3;   // 14-18 → BG4 DNA/Comets
+    return 4;               // 19-23 → BG5 Starfield
+  };
+
+  const [bgIndex, setBgIndex] = useState<number>(getIndex);
+
+  useEffect(() => {
+    const iv = setInterval(() => setBgIndex(getIndex()), 60_000);
+    return () => clearInterval(iv);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const BG_MAP: Record<number, React.FC> = {
+    0: AmbientBg1_Pharmora,
+    1: AmbientBg2_Pharmora,
+    2: AmbientBg3_Pharmora,
+    3: AmbientBg4_Pharmora,
+    4: AmbientBg5_Pharmora,
+  };
+
+  const ActiveBg = BG_MAP[bgIndex] ?? AmbientBg1_Pharmora;
+  return <ActiveBg />;
+}
+

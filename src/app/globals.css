@@ -150,8 +150,20 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    /* Fill the full viewport so the body bg color is always visible
+       behind the ambient particle canvas (which is fixed, z-index:-1) */
+    min-height: 100%;
+    background-color: #F5EDE3;
+  }
+  html.dark {
+    background-color: #0F1E2E;
+  }
   body {
     @apply bg-background text-foreground;
+    min-height: 100vh;
+    /* Smooth background-color transition when toggling light/dark */
+    transition: background-color 0.4s ease, color 0.3s ease;
   }
 }
 
