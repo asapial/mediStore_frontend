@@ -20,6 +20,7 @@ import {
   FaShieldAlt,
   FaUserPlus,
 } from "react-icons/fa"
+import Logo from "./shared/NamePlate"
 
 export function LoginForm({
   className,
@@ -49,19 +50,7 @@ export function LoginForm({
       const data = await res.json()
       if (!res.ok) throw new Error(data.message || "Login failed")
 
-      switch (data.user.role) {
-        case "CUSTOMER":
-          window.location.href = "/"
-          break
-        case "SELLER":
-          window.location.href = "/seller/dashboard"
-          break
-        case "ADMIN":
-          window.location.href = "/admin"
-          break
-        default:
-          window.location.href = "/"
-      }
+        window.location.href="/dashboard"
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed")
     } finally {
@@ -84,10 +73,6 @@ export function LoginForm({
           <h1 className="text-2xl font-bold tracking-tight">
             Welcome back
           </h1>
-          <p className="text-sm text-muted-foreground">
-            Login to continue to{" "}
-            <span className="font-medium text-emerald-600">MediStore</span>
-          </p>
         </CardHeader>
 
         <CardContent>

@@ -149,7 +149,7 @@ export default function TermsAndConditionsPage() {
             For any questions regarding these Terms & Conditions, please contact
             us at{" "}
             <span className="font-medium text-teal-600 dark:text-teal-400">
-              support@medistore.com
+              support@lifeline.com
             </span>
             .
           </TermSection>

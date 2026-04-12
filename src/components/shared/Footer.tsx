@@ -22,7 +22,7 @@ const Footer = () => {
         <div>
           <h2 className="text-2xl font-bold mb-3 flex items-center gap-2">
             <BiCapsule className="text-blue-600 text-3xl animate-bounce" />
-            MediStore
+            LifeLine
           </h2>
           <p className="text-sm opacity-80">
             Your trusted online pharmacy for medicines, vitamins, and healthcare essentials. Fast delivery and genuine products guaranteed.
@@ -89,7 +89,7 @@ const Footer = () => {
         <div>
           <h3 className="text-lg font-semibold mb-3">Contact Us</h3>
           <p className="text-sm flex items-center gap-2">
-            <FaEnvelope className="text-blue-600" /> support@medistore.com
+            <FaEnvelope className="text-blue-600" /> support@lifeline.com
           </p>
           <p className="text-sm flex items-center gap-2 mt-2">
             <FaPhoneAlt className="text-blue-600" /> +880 123 456 789

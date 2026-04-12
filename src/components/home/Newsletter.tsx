@@ -30,7 +30,7 @@ export default function Newsletter() {
       }
       if (!res.ok) throw new Error(data.message || "Subscription failed");
       setSubscribed(true);
-      toast.success("You're subscribed! Welcome to the ProPharm family 💊");
+      toast.success("You're subscribed! Welcome to the LifeLine family 💊");
     } catch (err: any) {
       toast.error(err.message || "Something went wrong");
     } finally {

@@ -20,6 +20,7 @@ import {
   FaUser, FaCog, FaHome, FaChevronDown, FaInbox, FaCheckCircle, FaShieldAlt,
   FaChartBar, FaCreditCard,
 } from "react-icons/fa";
+import Image from "next/image";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 type Role = "CUSTOMER" | "SELLER" | "ADMIN";
@@ -392,12 +393,18 @@ function SidebarLogoHeader() {
   return (
     <div className="px-4 py-4 flex items-center gap-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
       <Link href="/" className="flex items-center gap-2.5 flex-1 min-w-0">
-        <div className="w-8 h-8 rounded-xl flex items-center justify-center font-black text-base flex-shrink-0" style={{ background: "linear-gradient(135deg,#C2703A,#8A4F28)" }}>
-          <FaPills className="w-4 h-4 text-white" />
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center font-black text-base flex-shrink-0 bg-white" >
+                <Image
+                  src="/logo/lifeline_logo.png"
+                  alt=" logo"
+                  width={30}
+                  height={30}
+                  priority
+                />
         </div>
         <div className="min-w-0">
           <p className="font-black text-sm text-white leading-tight tracking-tight">
-            Pro<span style={{ color: "#C2703A" }}>Pharm</span>
+            Life<span style={{ color: "#C2703A" }}>Line</span>
           </p>
           <p className="text-[9px] text-white/40 uppercase tracking-widest">Healthcare Platform</p>
         </div>

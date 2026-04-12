@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { ThemeToggle } from "../home/Themetoggle";
 import { toast } from "sonner";
+import Logo from "./NamePlate";
 
 interface Category { id: string; name: string; }
 interface UserInfo { id: string; name: string; email: string; role: string; image?: string; }
@@ -97,7 +98,7 @@ export default function Navbar() {
   return (
     <header className="w-full sticky top-0 z-50 shadow-sm">
       {/* Top bar */}
-      <div className="bg-emerald-600 dark:bg-emerald-800 text-white text-sm py-2 px-4">
+      {/* <div className="bg-emerald-600 dark:bg-emerald-800 text-white text-sm py-2 px-4">
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1">
@@ -119,20 +120,21 @@ export default function Navbar() {
               : <a href="/login" className="hover:underline opacity-90">Sign In</a>}
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Main navbar */}
       <div className="bg-background border-b border-border px-4 py-3">
         <div className="max-w-7xl mx-auto flex items-center gap-4">
           {/* Logo */}
-          <a href="/" className="flex items-center gap-2 flex-shrink-0">
+          {/* <a href="/" className="flex items-center gap-2 flex-shrink-0">
             <div className="w-9 h-9 rounded-lg bg-emerald-500 flex items-center justify-center">
               <span className="text-white font-black text-lg leading-none">P</span>
             </div>
             <span className="font-black text-xl tracking-tight text-foreground">
               Pro<span className="text-emerald-500">Pharm</span>
             </span>
-          </a>
+          </a> */}
+          <Logo size="lg"></Logo>
 
           {/* ── Category dropdown ─────────────────────────────────────────── */}
           <div ref={catRef} className="hidden md:block relative">
@@ -258,7 +260,7 @@ export default function Navbar() {
                   ) : (
                     <>
                       <div className="px-4 py-3 border-b border-border">
-                        <p className="font-bold text-sm">Welcome to ProPharm</p>
+                        <p className="font-bold text-sm">Welcome to LifeLine</p>
                         <p className="text-xs text-muted-foreground">Sign in to access your account</p>
                       </div>
                       <a href="/login" onClick={() => setProfileOpen(false)}

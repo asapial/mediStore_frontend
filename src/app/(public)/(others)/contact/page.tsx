@@ -57,7 +57,7 @@ export default function ContactPage() {
         {/* Info cards row */}
         <div className="grid sm:grid-cols-3 gap-5 mb-12">
           {[
-            { icon: <Mail className="w-6 h-6" />, title: "Email Us", value: "support@medistore.com", sub: "We reply within 24 hours" },
+            { icon: <Mail className="w-6 h-6" />, title: "Email Us", value: "support@lifeline.com", sub: "We reply within 24 hours" },
             { icon: <Phone className="w-6 h-6" />, title: "Call Us", value: "+880 1234 567 890", sub: "Mon–Sat, 9AM–7PM" },
             { icon: <MapPin className="w-6 h-6" />, title: "Visit Us", value: "Dhaka, Bangladesh", sub: "Level 5, Medix Tower" },
           ].map(({ icon, title, value, sub }, i) => (

@@ -1,5 +1,6 @@
 "use client";
 
+import Logo from "@/components/shared/NamePlate";
 import { SignupForm } from "@/components/signup-form";
 import { motion } from "framer-motion";
 
@@ -23,11 +24,6 @@ export default function SignupPage() {
       <div className="relative min-h-screen flex">
         {/* ── LEFT: Branding Panel ─────────────────────────────── */}
         <div className="hidden lg:flex flex-col w-[42%] p-12 justify-between">
-          {/* Logo */}
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center font-black text-xl text-white" style={{ background: "#2E7D32" }}>P</div>
-            <span className="font-black text-xl text-white tracking-tight">Pro<span style={{ color: "#C2703A" }}>Pharm</span></span>
-          </div>
 
           {/* Hero text */}
           <div className="space-y-8">
@@ -80,18 +76,14 @@ export default function SignupPage() {
             </motion.div>
           </div>
 
-          <p className="text-white/30 text-xs">© {new Date().getFullYear()} ProPharm · Trusted Healthcare</p>
+          <p className="text-white/30 text-xs">© {new Date().getFullYear()} LifeLine · Trusted Healthcare</p>
         </div>
 
         {/* ── RIGHT: Signup Form ───────────────────────────────── */}
         <div className="flex-1 flex items-center justify-center p-6 lg:p-8 overflow-y-auto"
           style={{ background: "rgba(255,255,255,0.03)", backdropFilter: "blur(20px)" }}>
           <div className="w-full max-w-lg py-8">
-            {/* Mobile logo */}
-            <div className="flex items-center gap-3 mb-6 lg:hidden">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-lg text-white" style={{ background: "#2E7D32" }}>P</div>
-              <span className="font-black text-xl text-white tracking-tight">Pro<span style={{ color: "#C2703A" }}>Pharm</span></span>
-            </div>
+
 
             {/* Glass card */}
             <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}

@@ -1,5 +1,6 @@
 import { LoginForm } from "@/components/login-form";
 import LoginAnimationClient from "./loginAnimationClient";
+import Logo from "@/components/shared/NamePlate";
 
 export default function LoginPage() {
   return (
@@ -16,11 +17,7 @@ export default function LoginPage() {
       <div className="relative min-h-screen flex">
         {/* ── LEFT: Branding Panel ─────────────────────────────────── */}
         <div className="hidden lg:flex flex-col w-[46%] p-12 justify-between">
-          {/* Logo */}
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center font-black text-xl text-white" style={{ background: "#C2703A" }}>P</div>
-            <span className="font-black text-xl text-white tracking-tight">Pro<span style={{ color: "#C2703A" }}>Pharm</span></span>
-          </div>
+
 
           {/* Center content */}
           <div className="space-y-8">
@@ -57,7 +54,7 @@ export default function LoginPage() {
             {/* Testimonial */}
             <div className="rounded-2xl p-5" style={{ background: "rgba(255,255,255,0.07)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.1)" }}>
               <p className="text-white/80 text-sm italic leading-relaxed mb-3">
-                "ProPharm has made managing my family's medications so much easier. Fast delivery and authentic products!"
+                "LifeLine has made managing my family's medications so much easier. Fast delivery and authentic products!"
               </p>
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm" style={{ background: "#C2703A", color: "#FFF" }}>A</div>
@@ -70,17 +67,12 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <p className="text-white/30 text-xs">© {new Date().getFullYear()} ProPharm · Secure Healthcare Platform</p>
+          <p className="text-white/30 text-xs">© {new Date().getFullYear()} LifeLine · Secure Healthcare Platform</p>
         </div>
 
         {/* ── RIGHT: Login Form ─────────────────────────────────────── */}
         <div className="flex-1 flex items-center justify-center p-6 lg:p-12" style={{ background: "rgba(255,255,255,0.03)", backdropFilter: "blur(20px)" }}>
           <div className="w-full max-w-md">
-            {/* Mobile logo */}
-            <div className="flex items-center gap-3 mb-8 lg:hidden">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-lg text-white" style={{ background: "#C2703A" }}>P</div>
-              <span className="font-black text-xl text-white tracking-tight">Pro<span style={{ color: "#C2703A" }}>Pharm</span></span>
-            </div>
 
             {/* Glass card wrapping the form */}
             <div className="rounded-3xl p-1" style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05))" }}>

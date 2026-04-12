@@ -48,7 +48,7 @@ export default function MedicineLoadingPage({ text  }: LoadingPageProps) {
         transition={{ delay: 0.2, duration: 0.5 }}
         className="text-2xl md:text-3xl font-bold mb-2 text-center"
       >
-        Loading your {text || "💊MediStore"}...
+        Loading your {text || "💊LifeLine"}...
       </motion.h1>
 
       {/* <motion.p

@@ -130,7 +130,7 @@ export function SignupForm({
         </div>
         <h1 className="text-2xl font-bold">Create your account</h1>
         <p className="text-sm text-muted-foreground">
-          Join MediStore as a customer or seller
+          Join LifeLine as a customer or seller
         </p>
       </div>
       {/* ---------- TOP AVATAR PREVIEW (h-30 w-30) ---------- */}
