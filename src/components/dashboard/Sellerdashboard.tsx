@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import {
   StatsGrid, AlertBanner, Card, SectionTable, TR, TD, Badge,
   ChartLegend, KpiRow,
-} from "@/components/ui/DashboardUI";
+} from "@/components/ui/Dashboardui";
 import { LineChart, BarChart, DoughnutChart } from "@/components/ui/Charts";
 import {
   SELLER_STATS, SELLER_ALERTS, SELLER_FUNNEL, SELLER_CHART_DATA,
@@ -12,13 +12,9 @@ import {
 import type { StatCard } from "@/types/dashboard";
 import { COLORS } from "@/lib/theme";
 
-interface Medicine {
-  id: string; name: string; stock: number; price: number;
-  category?: { name: string };
-}
 interface StockAlert { id: string; medicine?: { name: string; category?: { name: string } }; threshold: number; currentStock: number; }
 
-function mergeStats(base: StatCard[], listings?: number, lowStock?: number): StatCard[] {
+function mergeStats(base: StatCard[], listings?: number): StatCard[] {
   return base.map((s, i) => {
     if (i === 2 && listings !== undefined) return { ...s, value: String(listings) };
     return s;
@@ -34,13 +30,13 @@ export function SellerDashboard() {
   const [lowStocks,  setLowStocks]  = useState<StockAlert[]>([]);
   const { revenue30, topProducts, fulfillment } = SELLER_CHART_DATA;
 
-  // ── Fetch seller medicines ────────────────────────────────────────────────
+  // ── Fetch seller stats (listings count) ────────────────────────────────────
   useEffect(() => {
-    fetch("/api/medicines/own", { credentials: "include" })
+    fetch("/api/seller/stat", { credentials: "include" })
       .then(r => r.json())
       .then(d => {
-        const list: Medicine[] = d?.data?.medicines ?? d?.data ?? [];
-        setStats(prev => mergeStats(prev, list.length));
+        const s = d?.data;
+        if (s) setStats(prev => mergeStats(prev, s.totalMedicines));
       })
       .catch(() => { /* keep mock */ });
   }, []);
@@ -49,10 +45,7 @@ export function SellerDashboard() {
   useEffect(() => {
     fetch("/api/stock-alerts", { credentials: "include" })
       .then(r => r.json())
-      .then(d => {
-        const list: StockAlert[] = d?.data ?? [];
-        setLowStocks(list.slice(0, 5));
-      })
+      .then(d => { const list: StockAlert[] = d?.data ?? []; setLowStocks(list.slice(0, 5)); })
       .catch(() => { /* keep mock */ });
   }, []);
 

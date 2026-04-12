@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import {
   StatsGrid, AlertBanner, Card, SectionTable, TR, TD, Badge, ChartLegend,
-} from "@/components/ui/DashboardUI";
+} from "@/components/ui/Dashboardui";
 import { LineChart, BarChart, DoughnutChart } from "@/components/ui/Charts";
 import {
   ADMIN_STATS, ADMIN_ALERTS, ADMIN_FLAGGED, ADMIN_CHART_DATA,

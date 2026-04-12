@@ -3,7 +3,7 @@
 import {
   StatsGrid, AlertBanner, Card, SectionTable, TR, TD, Badge,
   ChartLegend, KpiRow,
-} from "@/components/ui/DashboardUI";
+} from "@/components/ui/Dashboardui";
 import { BarChart, GroupedBarChart } from "@/components/ui/Charts";
 import {
   WAREHOUSE_STATS, WAREHOUSE_ALERTS, WAREHOUSE_LOCATIONS,

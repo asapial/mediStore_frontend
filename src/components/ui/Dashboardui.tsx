@@ -3,9 +3,11 @@
 import type { StatCard, AlertItem } from "@/types/dashboard";
 import { COLORS } from "@/lib/theme";
 
-// ─── StatCard ─────────────────────────────────────────────────────────────────
+// ─── CSS-variable helpers (dark-mode-safe) ────────────────────────────────────
+// Wherever possible we use Tailwind / CSS variables so both light + dark work.
+// Chart.js datasets still receive JS hex values (they live outside the cascade).
 
-const ACCENT_COLORS: Record<StatCard["accent"], string> = {
+const ACCENT_HEX: Record<StatCard["accent"], string> = {
   amber: COLORS.amber,
   blue:  COLORS.sky,
   green: COLORS.sage,
@@ -13,25 +15,24 @@ const ACCENT_COLORS: Record<StatCard["accent"], string> = {
   navy:  COLORS.navy,
 };
 
+// ─── StatCardItem ─────────────────────────────────────────────────────────────
+
 export function StatCardItem({ stat }: { stat: StatCard }) {
-  const accentColor = ACCENT_COLORS[stat.accent];
-  const trendColor =
-    stat.trend === "up"   ? COLORS.sage :
-    stat.trend === "down" ? COLORS.red  : COLORS.taupe;
+  const borderColor = ACCENT_HEX[stat.accent];
+  const trendClass  =
+    stat.trend === "up"   ? "text-emerald-600 dark:text-emerald-400" :
+    stat.trend === "down" ? "text-red-500 dark:text-red-400"         :
+                            "text-muted-foreground";
 
   return (
     <div
-      style={{
-        background: COLORS.white,
-        borderRadius: 12,
-        padding: "16px 18px",
-        border: "0.5px solid rgba(27,58,92,0.1)",
-        borderTop: `3px solid ${accentColor}`,
-      }}
+      className="bg-card rounded-xl px-4 py-4 border border-border hover:shadow-md
+        transition-shadow duration-200"
+      style={{ borderTop: `3px solid ${borderColor}` }}
     >
-      <p style={{ fontSize: 12, color: COLORS.taupe, marginBottom: 6 }}>{stat.label}</p>
-      <p style={{ fontSize: 26, fontWeight: 500, color: COLORS.navy, lineHeight: 1 }}>{stat.value}</p>
-      <p style={{ fontSize: 12, marginTop: 5, color: trendColor }}>{stat.sub}</p>
+      <p className="text-xs text-muted-foreground mb-1.5">{stat.label}</p>
+      <p className="text-2xl font-semibold text-primary leading-none">{stat.value}</p>
+      <p className={`text-xs mt-1.5 ${trendClass}`}>{stat.sub}</p>
     </div>
   );
 }
@@ -40,14 +41,7 @@ export function StatCardItem({ stat }: { stat: StatCard }) {
 
 export function StatsGrid({ stats }: { stats: StatCard[] }) {
   return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
-        gap: 12,
-        marginBottom: 20,
-      }}
-    >
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-5">
       {stats.map((s) => <StatCardItem key={s.label} stat={s} />)}
     </div>
   );
@@ -55,36 +49,32 @@ export function StatsGrid({ stats }: { stats: StatCard[] }) {
 
 // ─── AlertBanner ─────────────────────────────────────────────────────────────
 
-const ALERT_COLORS: Record<AlertItem["variant"], string> = {
+const ALERT_BORDER: Record<AlertItem["variant"], string> = {
   danger:  COLORS.red,
   info:    COLORS.sky,
   success: COLORS.sage,
   warning: COLORS.amber,
 };
 
+const ALERT_BG: Record<AlertItem["variant"], string> = {
+  danger:  "bg-red-50 dark:bg-red-900/10",
+  info:    "bg-sky-50 dark:bg-sky-900/10",
+  success: "bg-emerald-50 dark:bg-emerald-900/10",
+  warning: "bg-amber-50 dark:bg-amber-900/10",
+};
+
 export function AlertBanner({ alert }: { alert: AlertItem }) {
   return (
     <div
-      style={{
-        background: COLORS.white,
-        borderRadius: 10,
-        borderLeft: `4px solid ${ALERT_COLORS[alert.variant]}`,
-        padding: "14px 18px",
-        marginBottom: 12,
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        gap: 16,
-        border: "0.5px solid rgba(27,58,92,0.08)",
-        borderLeftWidth: 4,
-        borderLeftColor: ALERT_COLORS[alert.variant],
-      }}
+      className={`rounded-xl px-4 py-3 mb-3 flex justify-between items-center gap-4
+        border border-border ${ALERT_BG[alert.variant]}`}
+      style={{ borderLeftWidth: 4, borderLeftColor: ALERT_BORDER[alert.variant] }}
     >
       <div>
-        <p style={{ fontSize: 14, fontWeight: 500, color: COLORS.navy }}>{alert.title}</p>
-        <p style={{ fontSize: 12, color: COLORS.taupe, marginTop: 2 }}>{alert.desc}</p>
+        <p className="text-sm font-medium text-primary">{alert.title}</p>
+        <p className="text-xs text-muted-foreground mt-0.5">{alert.desc}</p>
       </div>
-      <span style={{ fontSize: 12, color: COLORS.sky, cursor: "pointer", whiteSpace: "nowrap" }}>
+      <span className="text-xs text-sky-600 dark:text-sky-400 cursor-pointer whitespace-nowrap hover:underline">
         {alert.action}
       </span>
     </div>
@@ -95,27 +85,25 @@ export function AlertBanner({ alert }: { alert: AlertItem }) {
 
 type BadgeVariant = "green" | "amber" | "red" | "blue" | "navy";
 
-const BADGE_STYLES: Record<BadgeVariant, { bg: string; color: string }> = {
-  green: { bg: COLORS.sageLight,  color: COLORS.sageDark  },
-  amber: { bg: COLORS.amberLight, color: COLORS.amberDark },
-  red:   { bg: COLORS.redLight,   color: COLORS.redDark   },
-  blue:  { bg: COLORS.skyLight,   color: COLORS.skyDark   },
-  navy:  { bg: COLORS.navyLight,  color: COLORS.navyDark  },
+const BADGE_CLASS: Record<BadgeVariant, string> = {
+  green: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300",
+  amber: "bg-amber-100  text-amber-700  dark:bg-amber-900/30  dark:text-amber-300",
+  red:   "bg-red-100   text-red-700   dark:bg-red-900/30   dark:text-red-300",
+  blue:  "bg-sky-100   text-sky-700   dark:bg-sky-900/30   dark:text-sky-300",
+  navy:  "bg-blue-100  text-blue-800  dark:bg-blue-900/30  dark:text-blue-300",
 };
 
-export function Badge({ children, variant = "navy" }: { children: React.ReactNode; variant?: BadgeVariant }) {
-  const { bg, color } = BADGE_STYLES[variant];
+export function Badge({
+  children,
+  variant = "navy",
+}: {
+  children: React.ReactNode;
+  variant?: BadgeVariant;
+}) {
   return (
     <span
-      style={{
-        display: "inline-block",
-        background: bg,
-        color,
-        fontSize: 11,
-        padding: "2px 8px",
-        borderRadius: 20,
-        fontWeight: 500,
-      }}
+      className={`inline-block text-[11px] px-2 py-0.5 rounded-full font-medium
+        ${BADGE_CLASS[variant]}`}
     >
       {children}
     </span>
@@ -128,31 +116,22 @@ export function Card({
   children,
   title,
   subtitle,
-  style,
+  className = "",
 }: {
   children: React.ReactNode;
   title?: string;
   subtitle?: string;
-  style?: React.CSSProperties;
+  className?: string;
 }) {
   return (
-    <div
-      style={{
-        background: COLORS.white,
-        borderRadius: 12,
-        padding: 20,
-        border: "0.5px solid rgba(27,58,92,0.1)",
-        ...style,
-      }}
-    >
+    <div className={`bg-card rounded-xl p-5 border border-border ${className}`}>
       {title && (
-        <p style={{ fontSize: 14, fontWeight: 500, color: COLORS.navy, marginBottom: subtitle ? 3 : 14 }}>
-          {title}
-        </p>
+        <p className="text-sm font-semibold text-primary mb-0.5">{title}</p>
       )}
       {subtitle && (
-        <p style={{ fontSize: 12, color: COLORS.taupe, marginBottom: 14 }}>{subtitle}</p>
+        <p className="text-xs text-muted-foreground mb-3">{subtitle}</p>
       )}
+      {!subtitle && title && <div className="mb-3" />}
       {children}
     </div>
   );
@@ -171,21 +150,15 @@ export function SectionTable({
 }) {
   return (
     <Card title={title}>
-      <div style={{ overflowX: "auto" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse text-[13px]">
           <thead>
             <tr>
               {columns.map((col) => (
                 <th
                   key={col}
-                  style={{
-                    textAlign: "left",
-                    padding: "8px 10px",
-                    color: COLORS.taupe,
-                    fontWeight: 500,
-                    borderBottom: "1px solid rgba(27,58,92,0.08)",
-                    whiteSpace: "nowrap",
-                  }}
+                  className="text-left px-2.5 py-2 text-muted-foreground font-medium
+                    border-b border-border whitespace-nowrap"
                 >
                   {col}
                 </th>
@@ -199,14 +172,12 @@ export function SectionTable({
   );
 }
 
-// ─── TableRow ─────────────────────────────────────────────────────────────────
+// ─── TR / TD ─────────────────────────────────────────────────────────────────
 
 export function TR({ children }: { children: React.ReactNode }) {
   return (
     <tr
-      style={{ borderBottom: "0.5px solid rgba(27,58,92,0.05)", cursor: "default" }}
-      onMouseEnter={(e) => { (e.currentTarget as HTMLTableRowElement).style.background = "rgba(245,237,227,0.5)"; }}
-      onMouseLeave={(e) => { (e.currentTarget as HTMLTableRowElement).style.background = "transparent"; }}
+      className="border-b border-border/50 hover:bg-muted/40 transition-colors cursor-default"
     >
       {children}
     </tr>
@@ -214,36 +185,25 @@ export function TR({ children }: { children: React.ReactNode }) {
 }
 
 export function TD({ children }: { children: React.ReactNode }) {
-  return <td style={{ padding: "9px 10px", color: COLORS.espresso }}>{children}</td>;
+  return (
+    <td className="px-2.5 py-2.5 text-foreground">{children}</td>
+  );
 }
 
 // ─── ProgressBar ─────────────────────────────────────────────────────────────
 
 export function ProgressBar({ pct, color }: { pct: number; color: string }) {
   return (
-    <div
-      style={{
-        height: 8,
-        borderRadius: 4,
-        background: "rgba(27,58,92,0.08)",
-        overflow: "hidden",
-        margin: "6px 0 12px",
-      }}
-    >
+    <div className="h-2 rounded-full bg-border overflow-hidden my-1.5 mb-3">
       <div
-        style={{
-          height: "100%",
-          width: `${pct}%`,
-          borderRadius: 4,
-          background: color,
-          transition: "width 0.6s ease",
-        }}
+        className="h-full rounded-full transition-all duration-500"
+        style={{ width: `${pct}%`, background: color }}
       />
     </div>
   );
 }
 
-// ─── KpiRow ──────────────────────────────────────────────────────────────────
+// ─── KpiRow ───────────────────────────────────────────────────────────────────
 
 export function KpiRow({
   label,
@@ -255,17 +215,11 @@ export function KpiRow({
   bold?: boolean;
 }) {
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 8,
-        marginBottom: 4,
-        fontSize: 13,
-      }}
-    >
-      <span style={{ flex: 1, color: COLORS.taupe, fontWeight: bold ? 500 : 400 }}>{label}</span>
-      <span style={{ fontWeight: bold ? 500 : 400, color: COLORS.navy }}>{value}</span>
+    <div className="flex items-center gap-2 mb-1 text-[13px]">
+      <span className={`flex-1 text-muted-foreground ${bold ? "font-medium" : ""}`}>
+        {label}
+      </span>
+      <span className={`text-primary ${bold ? "font-semibold" : ""}`}>{value}</span>
     </div>
   );
 }
@@ -274,10 +228,16 @@ export function KpiRow({
 
 export function ChartLegend({ items }: { items: { label: string; color: string }[] }) {
   return (
-    <div style={{ display: "flex", flexWrap: "wrap", gap: 14, marginBottom: 10 }}>
+    <div className="flex flex-wrap gap-3 mb-2.5">
       {items.map((item) => (
-        <span key={item.label} style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12, color: COLORS.taupe }}>
-          <span style={{ width: 10, height: 10, borderRadius: 2, background: item.color, display: "inline-block" }} />
+        <span
+          key={item.label}
+          className="flex items-center gap-1 text-[12px] text-muted-foreground"
+        >
+          <span
+            className="inline-block w-2.5 h-2.5 rounded-sm flex-shrink-0"
+            style={{ background: item.color }}
+          />
           {item.label}
         </span>
       ))}
@@ -290,17 +250,11 @@ export function ChartLegend({ items }: { items: { label: string; color: string }
 export function DonutCenter({ value, label }: { value: string; label: string }) {
   return (
     <div
-      style={{
-        position: "absolute",
-        top: "50%",
-        left: "50%",
-        transform: "translate(-50%, -50%)",
-        textAlign: "center",
-        pointerEvents: "none",
-      }}
+      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
+        text-center pointer-events-none"
     >
-      <div style={{ fontSize: 22, fontWeight: 500, color: COLORS.navy }}>{value}</div>
-      <div style={{ fontSize: 11, color: COLORS.taupe }}>{label}</div>
+      <div className="text-xl font-semibold text-primary">{value}</div>
+      <div className="text-[11px] text-muted-foreground">{label}</div>
     </div>
   );
 }
