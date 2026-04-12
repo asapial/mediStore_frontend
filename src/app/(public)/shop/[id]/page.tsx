@@ -4,12 +4,15 @@ import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import {
-  ShoppingCart, Heart, Star, ChevronLeft, Package, User, Tag, Truck,
-  Shield, ArrowRight, Plus, Minus, CheckCircle, AlertCircle,
+  ShoppingCart, Heart, Star, ChevronLeft, Package, User,
+  Truck, Shield, Plus, Minus, CheckCircle,
 } from "lucide-react";
 
 interface Category { id: string; name: string; }
-interface Review { id: string; rating: number; comment?: string; user?: { name: string; image?: string }; createdAt: string; }
+interface Review {
+  id: string; rating: number; comment?: string;
+  user?: { name: string; image?: string }; createdAt: string;
+}
 interface Medicine {
   id: string; name: string; description: string; image: string; price: number;
   stock: number; manufacturer: string; expiryDate?: string; dosage?: string;
@@ -20,7 +23,7 @@ interface Medicine {
 const StarRow = ({ rating }: { rating: number }) => (
   <div className="flex gap-0.5">
     {[1, 2, 3, 4, 5].map(s => (
-      <Star key={s} className={`w-4 h-4 ${s <= Math.round(rating) ? "fill-amber-400 text-amber-400" : "text-gray-300"}`} />
+      <Star key={s} className={`w-4 h-4 ${s <= Math.round(rating) ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30"}`} />
     ))}
   </div>
 );
@@ -32,7 +35,7 @@ export default function ProductDetailPage() {
   const [qty,      setQty]      = useState(1);
   const [adding,   setAdding]   = useState(false);
   const [inCart,   setInCart]   = useState(false);
-  const [tab,      setTab]      = useState<"description" | "details" | "reviews">("description");
+  const [tab, setTab] = useState<"description" | "details" | "reviews">("description");
 
   useEffect(() => {
     if (!id) return;
@@ -43,12 +46,14 @@ export default function ProductDetailPage() {
       .finally(() => setLoading(false));
   }, [id]);
 
+  // ── Add to Cart (fixed endpoint: /api/cart/add) ────────────────────────────
   const handleAddToCart = async () => {
     if (!medicine) return;
     setAdding(true);
     try {
-      const res = await fetch("/api/cart", {
-        method: "POST", credentials: "include",
+      const res = await fetch("/api/cart/add", {
+        method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ medicineId: medicine.id, quantity: qty }),
       });
@@ -64,7 +69,8 @@ export default function ProductDetailPage() {
   const handleWishlist = async () => {
     try {
       const res = await fetch("/api/wishlist", {
-        method: "POST", credentials: "include",
+        method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ medicineId: id }),
       });
@@ -74,20 +80,23 @@ export default function ProductDetailPage() {
     } catch (e: any) { toast.error(e.message || "Login required"); }
   };
 
+  // ── Loading ────────────────────────────────────────────────────────────────
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: "#F5EDE3" }}>
+    <div className="min-h-screen flex items-center justify-center bg-background">
       <div className="text-center">
-        <div className="w-16 h-16 rounded-full border-4 border-t-transparent animate-spin mx-auto mb-4" style={{ borderColor: "#1B3A5C", borderTopColor: "transparent" }} />
-        <p style={{ color: "#8A6650" }}>Loading product…</p>
+        <div className="w-16 h-16 rounded-full border-4 border-primary border-t-transparent animate-spin mx-auto mb-4" />
+        <p className="text-muted-foreground">Loading product…</p>
       </div>
     </div>
   );
 
   if (!medicine) return (
-    <div className="min-h-screen flex flex-col items-center justify-center text-center px-4" style={{ background: "#F5EDE3" }}>
+    <div className="min-h-screen flex flex-col items-center justify-center text-center px-4 bg-background">
       <p className="text-6xl mb-4">💊</p>
-      <h2 className="text-2xl font-black mb-2" style={{ color: "#1B3A5C" }}>Product Not Found</h2>
-      <a href="/shop" className="mt-4 px-6 py-2.5 rounded-xl font-bold text-white" style={{ background: "#1B3A5C" }}>Back to Shop</a>
+      <h2 className="text-2xl font-black mb-2 text-primary">Product Not Found</h2>
+      <a href="/shop" className="mt-4 px-6 py-2.5 rounded-xl font-bold bg-primary text-primary-foreground">
+        Back to Shop
+      </a>
     </div>
   );
 
@@ -96,88 +105,97 @@ export default function ProductDetailPage() {
   const outOfStock = medicine.stock === 0;
 
   return (
-    <div className="min-h-screen" style={{ background: "linear-gradient(135deg,#F5EDE3,#EEE4D9)" }}>
+    <div className="min-h-screen bg-background">
       <div className="max-w-6xl mx-auto px-4 py-8">
+
         {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm mb-8" style={{ color: "#8A6650" }}>
+        <div className="flex items-center gap-2 text-sm mb-8 text-muted-foreground">
           <a href="/shop" className="flex items-center gap-1 hover:text-emerald-600 transition-colors">
             <ChevronLeft className="w-4 h-4" /> Back to Shop
           </a>
           <span>/</span>
-          <span style={{ color: "#1B3A5C" }}>{medicine.name}</span>
+          <span className="text-primary font-medium">{medicine.name}</span>
         </div>
 
-        {/* Main product layout */}
+        {/* Main layout */}
         <div className="grid md:grid-cols-2 gap-8 mb-10">
-          {/* Image */}
+
+          {/* ── Image card ── */}
           <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}
-            className="bg-white rounded-3xl overflow-hidden shadow-lg" style={{ border: "1px solid #DDD0C4" }}>
+            className="bg-card rounded-3xl overflow-hidden shadow-lg border border-border">
             <div className="h-80 md:h-96 flex items-center justify-center relative overflow-hidden">
               {medicine.image
                 ? <img src={medicine.image} alt={medicine.name} className="w-full h-full object-cover" />
                 : <span className="text-9xl">💊</span>}
               {medicine.stock > 0 && medicine.stock <= 10 && (
-                <div className="absolute bottom-4 left-4 px-3 py-1.5 rounded-xl text-xs font-bold" style={{ background: "#FFF3E0", color: "#C2703A" }}>
+                <div className="absolute bottom-4 left-4 px-3 py-1.5 rounded-xl text-xs font-bold
+                  bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300">
                   ⚠️ Only {medicine.stock} left!
                 </div>
               )}
               {outOfStock && (
                 <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                  <span className="bg-red-500 text-white font-black px-6 py-3 rounded-xl text-lg">Out of Stock</span>
+                  <span className="bg-red-500 text-white font-black px-6 py-3 rounded-xl text-lg">
+                    Out of Stock
+                  </span>
                 </div>
               )}
             </div>
           </motion.div>
 
-          {/* Details */}
+          {/* ── Details ── */}
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex flex-col">
-            {/* Category + name */}
-            <span className="text-xs font-semibold px-3 py-1 rounded-full inline-block w-fit mb-3" style={{ background: "#F5EDE3", color: "#8A6650" }}>
+            <span className="text-xs font-semibold px-3 py-1 rounded-full inline-block w-fit mb-3
+              bg-secondary text-muted-foreground">
               {medicine.category.name}
             </span>
-            <h1 className="text-3xl font-black leading-tight mb-2" style={{ color: "#1B3A5C" }}>{medicine.name}</h1>
-            <p className="text-sm mb-1" style={{ color: "#8A6650" }}>by {medicine.manufacturer}</p>
+            <h1 className="text-3xl font-black leading-tight mb-2 text-primary">{medicine.name}</h1>
+            <p className="text-sm mb-1 text-muted-foreground">by {medicine.manufacturer}</p>
 
-            {/* Rating */}
             {avgRating > 0 && (
               <div className="flex items-center gap-2 mb-4">
                 <StarRow rating={avgRating} />
-                <span className="text-sm font-semibold" style={{ color: "#5C4033" }}>{avgRating.toFixed(1)}</span>
-                <span className="text-xs" style={{ color: "#8A6650" }}>({medicine.reviews?.length} reviews)</span>
+                <span className="text-sm font-semibold text-foreground">{avgRating.toFixed(1)}</span>
+                <span className="text-xs text-muted-foreground">({medicine.reviews?.length} reviews)</span>
               </div>
             )}
 
             {/* Price */}
             <div className="flex items-baseline gap-2 mb-4">
-              <span className="text-4xl font-black" style={{ color: "#C2703A" }}>${medicine.price.toFixed(2)}</span>
-              <span className="text-sm" style={{ color: medicine.stock > 0 ? "#2E7D32" : "#C62828" }}>
+              <span className="text-4xl font-black text-accent">${medicine.price.toFixed(2)}</span>
+              <span className={`text-sm font-semibold ${medicine.stock > 0
+                ? "text-emerald-600 dark:text-emerald-400"
+                : "text-destructive"}`}>
                 {medicine.stock > 0 ? `✓ In Stock (${medicine.stock})` : "✗ Out of Stock"}
               </span>
             </div>
 
-            {/* Quantity + Add to cart */}
+            {/* Quantity + Add to Cart */}
             {!outOfStock && (
               <div className="flex items-center gap-3 mb-5">
-                <div className="flex items-center border rounded-xl overflow-hidden" style={{ borderColor: "#DDD0C4" }}>
+                <div className="flex items-center border border-border rounded-xl overflow-hidden">
                   <button onClick={() => setQty(q => Math.max(1, q - 1))}
-                    className="w-10 h-10 flex items-center justify-center hover:bg-gray-50 transition-colors">
-                    <Minus className="w-4 h-4" style={{ color: "#5C4033" }} />
+                    className="w-10 h-10 flex items-center justify-center hover:bg-muted transition-colors">
+                    <Minus className="w-4 h-4 text-foreground" />
                   </button>
-                  <span className="w-12 text-center font-bold" style={{ color: "#1B3A5C" }}>{qty}</span>
+                  <span className="w-12 text-center font-bold text-primary">{qty}</span>
                   <button onClick={() => setQty(q => Math.min(medicine.stock, q + 1))}
-                    className="w-10 h-10 flex items-center justify-center hover:bg-gray-50 transition-colors">
-                    <Plus className="w-4 h-4" style={{ color: "#5C4033" }} />
+                    className="w-10 h-10 flex items-center justify-center hover:bg-muted transition-colors">
+                    <Plus className="w-4 h-4 text-foreground" />
                   </button>
                 </div>
-                <button onClick={handleAddToCart} disabled={adding}
-                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-white transition-all disabled:opacity-70 hover:opacity-90"
-                  style={{ background: inCart ? "#2E7D32" : "#1B3A5C" }}>
+                <button
+                  onClick={handleAddToCart}
+                  disabled={adding}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold
+                    text-white transition-all disabled:opacity-70 hover:opacity-90
+                    ${inCart ? "bg-emerald-600" : "bg-primary"}`}>
                   {inCart ? <CheckCircle className="w-5 h-5" /> : <ShoppingCart className="w-5 h-5" />}
                   {adding ? "Adding…" : inCart ? "Added to Cart ✓" : "Add to Cart"}
                 </button>
                 <button onClick={handleWishlist}
-                  className="w-12 h-12 rounded-xl flex items-center justify-center border hover:bg-red-50 transition-colors"
-                  style={{ borderColor: "#DDD0C4" }}>
+                  className="w-12 h-12 rounded-xl flex items-center justify-center border border-border
+                    hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
                   <Heart className="w-5 h-5 text-red-400" />
                 </button>
               </div>
@@ -187,76 +205,90 @@ export default function ProductDetailPage() {
             <div className="grid grid-cols-3 gap-3 mb-5">
               {[
                 { icon: <Truck className="w-4 h-4" />, label: "Free Delivery", sub: "On orders $50+" },
-                { icon: <Shield className="w-4 h-4" />, label: "Authentic", sub: "Verified seller" },
-                { icon: <Package className="w-4 h-4" />, label: "Returns", sub: "7-day policy" },
+                { icon: <Shield className="w-4 h-4" />, label: "Authentic",     sub: "Verified seller" },
+                { icon: <Package className="w-4 h-4" />, label: "Returns",      sub: "7-day policy"   },
               ].map(({ icon, label, sub }) => (
-                <div key={label} className="text-center p-3 rounded-xl" style={{ background: "#FFF", border: "1px solid #EEE4D9" }}>
-                  <div className="flex justify-center mb-1" style={{ color: "#1B3A5C" }}>{icon}</div>
-                  <p className="text-xs font-bold" style={{ color: "#1B3A5C" }}>{label}</p>
-                  <p className="text-[10px]" style={{ color: "#8A6650" }}>{sub}</p>
+                <div key={label} className="text-center p-3 rounded-xl bg-card border border-border">
+                  <div className="flex justify-center mb-1 text-primary">{icon}</div>
+                  <p className="text-xs font-bold text-primary">{label}</p>
+                  <p className="text-[10px] text-muted-foreground">{sub}</p>
                 </div>
               ))}
             </div>
 
             {/* Seller info */}
-            <div className="rounded-xl p-3 flex items-center gap-3" style={{ background: "#FFF", border: "1px solid #EEE4D9" }}>
-              <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: "#E3F0FB" }}>
-                <User className="w-5 h-5" style={{ color: "#3A6EA5" }} />
+            <div className="rounded-xl p-3 flex items-center gap-3 bg-card border border-border">
+              <div className="w-10 h-10 rounded-full flex items-center justify-center
+                bg-blue-100 dark:bg-blue-900/30">
+                <User className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                <p className="text-xs font-bold" style={{ color: "#1B3A5C" }}>{medicine.seller.name}</p>
-                <p className="text-[11px]" style={{ color: "#8A6650" }}>{medicine.seller.email}</p>
+                <p className="text-xs font-bold text-primary">{medicine.seller.name}</p>
+                <p className="text-[11px] text-muted-foreground">{medicine.seller.email}</p>
               </div>
-              <span className="ml-auto text-[10px] px-2 py-1 rounded-full font-bold" style={{ background: "#E8F5E9", color: "#2E7D32" }}>Verified Seller</span>
+              <span className="ml-auto text-[10px] px-2 py-1 rounded-full font-bold
+                bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">
+                Verified Seller
+              </span>
             </div>
           </motion.div>
         </div>
 
-        {/* Tabs */}
-        <div className="bg-white rounded-3xl overflow-hidden" style={{ border: "1px solid #DDD0C4" }}>
-          <div className="flex border-b" style={{ borderColor: "#EEE4D9" }}>
+        {/* ── Tabs ── */}
+        <div className="bg-card rounded-3xl overflow-hidden border border-border">
+          <div className="flex border-b border-border">
             {(["description", "details", "reviews"] as const).map(t => (
               <button key={t} onClick={() => setTab(t)}
-                className="px-6 py-4 text-sm font-bold capitalize transition-colors"
-                style={tab === t
-                  ? { color: "#1B3A5C", borderBottom: "2px solid #1B3A5C" }
-                  : { color: "#8A6650" }}>
-                {t === "reviews" ? `Reviews (${medicine.reviews?.length || 0})` : t.charAt(0).toUpperCase() + t.slice(1)}
+                className={`px-6 py-4 text-sm font-bold capitalize transition-colors ${
+                  tab === t
+                    ? "text-primary border-b-2 border-primary -mb-px"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}>
+                {t === "reviews"
+                  ? `Reviews (${medicine.reviews?.length || 0})`
+                  : t.charAt(0).toUpperCase() + t.slice(1)}
               </button>
             ))}
           </div>
 
           <div className="p-6">
+            {/* Description */}
             {tab === "description" && (
-              <p className="leading-relaxed" style={{ color: "#5C4033" }}>{medicine.description || "No description available for this product."}</p>
+              <p className="leading-relaxed text-foreground">
+                {medicine.description || "No description available for this product."}
+              </p>
             )}
+
+            {/* Details */}
             {tab === "details" && (
               <div className="grid sm:grid-cols-2 gap-4">
                 {[
                   ["Manufacturer", medicine.manufacturer],
-                  ["Category", medicine.category.name],
-                  ["Sold by", medicine.seller.name],
-                  ["Stock", `${medicine.stock} units`],
-                  ...(medicine.dosage ? [["Dosage", medicine.dosage]] : []),
-                  ...(medicine.expiryDate ? [["Expiry", new Date(medicine.expiryDate).toLocaleDateString()]] : []),
-                  ["Product ID", medicine.id.slice(0, 12) + "…"],
+                  ["Category",    medicine.category.name],
+                  ["Sold by",     medicine.seller.name],
+                  ["Stock",       `${medicine.stock} units`],
+                  ...(medicine.dosage     ? [["Dosage", medicine.dosage]]                                     : []),
+                  ...(medicine.expiryDate ? [["Expiry", new Date(medicine.expiryDate).toLocaleDateString()]]  : []),
+                  ["Product ID",  medicine.id.slice(0, 12) + "…"],
                 ].map(([k, v]) => (
-                  <div key={k} className="flex justify-between items-center py-2.5 border-b" style={{ borderColor: "#EEE4D9" }}>
-                    <span className="text-sm font-semibold" style={{ color: "#8A6650" }}>{k}</span>
-                    <span className="text-sm font-bold" style={{ color: "#1B3A5C" }}>{v}</span>
+                  <div key={k} className="flex justify-between items-center py-2.5 border-b border-border">
+                    <span className="text-sm font-semibold text-muted-foreground">{k}</span>
+                    <span className="text-sm font-bold text-primary">{v}</span>
                   </div>
                 ))}
               </div>
             )}
+
+            {/* Reviews */}
             {tab === "reviews" && (
               medicine.reviews?.length ? (
                 <div className="space-y-4">
                   {/* Rating summary */}
-                  <div className="flex items-center gap-6 mb-6 p-4 rounded-2xl" style={{ background: "#F5EDE3" }}>
+                  <div className="flex items-center gap-6 mb-6 p-4 rounded-2xl bg-secondary">
                     <div className="text-center">
-                      <p className="text-5xl font-black" style={{ color: "#C2703A" }}>{avgRating.toFixed(1)}</p>
+                      <p className="text-5xl font-black text-accent">{avgRating.toFixed(1)}</p>
                       <StarRow rating={avgRating} />
-                      <p className="text-xs mt-1" style={{ color: "#8A6650" }}>{medicine.reviews.length} reviews</p>
+                      <p className="text-xs mt-1 text-muted-foreground">{medicine.reviews.length} reviews</p>
                     </div>
                     <div className="flex-1 space-y-1">
                       {[5, 4, 3, 2, 1].map(s => {
@@ -264,37 +296,42 @@ export default function ProductDetailPage() {
                         const pct = medicine.reviews!.length ? (cnt / medicine.reviews!.length) * 100 : 0;
                         return (
                           <div key={s} className="flex items-center gap-2 text-xs">
-                            <span style={{ color: "#8A6650", minWidth: 8 }}>{s}</span>
+                            <span className="text-muted-foreground w-2">{s}</span>
                             <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                            <div className="flex-1 h-2 rounded-full" style={{ background: "#DDD0C4" }}>
+                            <div className="flex-1 h-2 rounded-full bg-border">
                               <div className="h-2 rounded-full bg-amber-400 transition-all" style={{ width: `${pct}%` }} />
                             </div>
-                            <span style={{ color: "#8A6650", minWidth: 20 }}>{cnt}</span>
+                            <span className="text-muted-foreground w-5 text-right">{cnt}</span>
                           </div>
                         );
                       })}
                     </div>
                   </div>
+
+                  {/* Review cards */}
                   {medicine.reviews.map(r => (
-                    <div key={r.id} className="p-4 rounded-2xl" style={{ background: "#F9F5F1", border: "1px solid #EEE4D9" }}>
+                    <div key={r.id} className="p-4 rounded-2xl bg-muted/40 border border-border">
                       <div className="flex items-center gap-3 mb-2">
-                        <div className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm" style={{ background: "#1B3A5C", color: "#FFF" }}>
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center
+                          font-bold text-sm bg-primary text-primary-foreground">
                           {r.user?.name?.charAt(0) || "U"}
                         </div>
                         <div>
-                          <p className="text-sm font-bold" style={{ color: "#1B3A5C" }}>{r.user?.name || "Anonymous"}</p>
-                          <p className="text-xs" style={{ color: "#8A6650" }}>{new Date(r.createdAt).toLocaleDateString()}</p>
+                          <p className="text-sm font-bold text-primary">{r.user?.name || "Anonymous"}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {new Date(r.createdAt).toLocaleDateString()}
+                          </p>
                         </div>
                         <div className="ml-auto"><StarRow rating={r.rating} /></div>
                       </div>
-                      {r.comment && <p className="text-sm" style={{ color: "#5C4033" }}>{r.comment}</p>}
+                      {r.comment && <p className="text-sm text-foreground">{r.comment}</p>}
                     </div>
                   ))}
                 </div>
               ) : (
                 <div className="text-center py-12">
-                  <Star className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                  <p style={{ color: "#8A6650" }}>No reviews yet. Be the first to review!</p>
+                  <Star className="w-12 h-12 mx-auto mb-3 text-muted-foreground/30" />
+                  <p className="text-muted-foreground">No reviews yet. Be the first to review!</p>
                 </div>
               )
             )}

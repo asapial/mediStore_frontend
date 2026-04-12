@@ -346,3 +346,68 @@ input:focus, textarea:focus, select:focus {
   opacity: 0.18;
   margin-bottom: 1rem;
 }
+
+/* ─── Dark mode overrides ────────────────────────────────────────────────────── */
+.dark .medi-page {
+  background: linear-gradient(135deg, var(--background) 0%, #0f1e2e 100%);
+}
+
+.dark .medi-card {
+  background: var(--card);
+  border-color: var(--border);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+}
+.dark .medi-card:hover {
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.55);
+}
+
+.dark .medi-stat {
+  background: var(--card);
+  border-color: var(--border);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+}
+.dark .medi-stat:hover { box-shadow: 0 6px 24px rgba(0, 0, 0, 0.55); }
+
+.dark .medi-table th {
+  background: var(--muted);
+  color: var(--muted-foreground);
+  border-bottom-color: var(--border);
+}
+.dark .medi-table td {
+  color: var(--foreground);
+  border-bottom-color: var(--border);
+}
+.dark .medi-table tr:hover td { background: rgba(255, 255, 255, 0.04); }
+
+.dark .medi-empty { color: var(--muted-foreground); }
+
+.dark .medi-btn-ghost {
+  color: var(--foreground);
+  border-color: var(--border);
+}
+.dark .medi-btn-ghost:hover { background: var(--muted); }
+
+/* ─── Dark mode scrollbar ─────────────────────────────────────────────────────── */
+.dark ::-webkit-scrollbar-track { background: var(--background); }
+.dark ::-webkit-scrollbar-thumb { background: var(--border); }
+
+/* ─── Dark mode badge overrides ──────────────────────────────────────────────── */
+.dark .badge-pending    { background: rgba(194,112,58,0.2);  color: #FFCC80; border-color: rgba(194,112,58,0.4); }
+.dark .badge-approved,
+.dark .badge-active,
+.dark .badge-instock,
+.dark .badge-delivered,
+.dark .badge-verified   { background: rgba(46,125,50,0.2);   color: #A5D6A7; border-color: rgba(46,125,50,0.4);  }
+.dark .badge-rejected,
+.dark .badge-cancelled,
+.dark .badge-lowstock   { background: rgba(198,40,40,0.2);   color: #EF9A9A; border-color: rgba(198,40,40,0.4);  }
+.dark .badge-placed,
+.dark .badge-active,
+.dark .badge-confirmed,
+.dark .badge-paused,
+.dark .badge-completed  { background: rgba(58,110,165,0.2);  color: #90CAF9; border-color: rgba(58,110,165,0.4); }
+.dark .badge-processing,
+.dark .badge-requested,
+.dark .badge-out_for_delivery { background: rgba(194,112,58,0.2); color: #FFCC80; border-color: rgba(194,112,58,0.4); }
+.dark .badge-shipped    { background: rgba(81,45,168,0.2);   color: #CE93D8; border-color: rgba(81,45,168,0.4);  }
+.dark .badge-inactive   { background: rgba(117,117,117,0.2); color: #BDBDBD; border-color: rgba(117,117,117,0.4);}
