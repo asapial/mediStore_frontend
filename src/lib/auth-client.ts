@@ -6,7 +6,7 @@ import { nextCookies } from "better-auth/next-js";
 export const authClient = createAuthClient({
     /** The base URL of the server (optional if you're using the same domain) */
     // baseURL: "https://medistorebackend-jet.vercel.app",
-    plugins: [nextCookies()]
+    // plugins: [nextCookies()]
 
 
 

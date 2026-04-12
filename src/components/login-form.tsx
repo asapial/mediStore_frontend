@@ -18,6 +18,7 @@ import {
   FaArrowRight,
   FaSpinner,
   FaShieldAlt,
+  FaUserPlus,
 } from "react-icons/fa"
 
 export function LoginForm({
@@ -38,10 +39,7 @@ export function LoginForm({
     try {
       setLoading(true)
 
-      const BASE_URL = process.env.NEXT_PUBLIC_backendBaseUrl
-      // const res = await fetch(`${BASE_URL}/api/auth/login`, {
-      const res = await fetch(`https://medistorebackend-jet.vercel.app/api/auth/sign-in/email`, {
-      // const res = await fetch(`http://localhost:5000/api/auth/sign-in/email`, {
+      const res = await fetch(`/api/auth/sign-in/email`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -87,7 +85,8 @@ export function LoginForm({
             Welcome back
           </h1>
           <p className="text-sm text-muted-foreground">
-            Login to continue to <span className="font-medium text-emerald-600">MediStore</span>
+            Login to continue to{" "}
+            <span className="font-medium text-emerald-600">MediStore</span>
           </p>
         </CardHeader>
 
@@ -142,7 +141,7 @@ export function LoginForm({
                 </Alert>
               )}
 
-              {/* Submit */}
+              {/* Login Button */}
               <Button
                 type="submit"
                 disabled={loading}
@@ -160,12 +159,30 @@ export function LoginForm({
                   </span>
                 )}
               </Button>
-            </FieldGroup>
 
-            {/* Footer */}
-            <p className="text-center text-xs text-muted-foreground">
-              Secure login · Cookies enabled · HIPAA-friendly
-            </p>
+              {/* Divider */}
+              <div className="relative my-2">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">
+                    or
+                  </span>
+                </div>
+              </div>
+
+              {/* Register Option */}
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => (window.location.href = "/register")}
+                className="w-full font-medium flex items-center gap-2"
+              >
+                <FaUserPlus className="text-emerald-600" />
+                Create a new account
+              </Button>
+            </FieldGroup>
           </form>
         </CardContent>
       </Card>

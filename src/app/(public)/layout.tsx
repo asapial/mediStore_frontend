@@ -1,55 +1,26 @@
-import Footer from '@/components/shared/Footer';
-import { Navbar1 } from '@/components/shared/navbar1';
-import { auth } from '@/lib/auth';
-import { authClient } from '@/lib/auth-client';
+export const dynamic = 'force-dynamic';
+import Footer from '@/components/home/Footer';
+import Navbar from '@/components/shared/Navbar';
 import { userService } from '@/services/user.service';
-import { cookies, headers } from 'next/headers';
 import React from 'react'
-
-
-function isSessionValid(expiresAt: string) {
-    return new Date(expiresAt) > new Date();
-}
-type Role = "CUSTOMER" | "SELLER" | "ADMIN";
+import { AutoAmbientBg } from '@/components/background/Ambientbackgrounds';
 
 export default async function Layout({ children }: { children: React.ReactNode }) {
-    // const { data } = await userService.getSession(); // server-only
-        const data = await auth.api.getSession({
-        headers: await headers()
-    })
-    console.log("Data form the layout layer :",data)
-    let authenticated = false
-    const userRole = data?.user?.role;
-    let role: Role | null = null;
-
-
-
-  const cookieStore = cookies()
-  const sessionToken = (await cookieStore).get("__Secure-better-auth.session_token")
-
-
-    if (
-        // data?.session?.expiresAt &&
-        // isSessionValid(data.session.expiresAt)
-        sessionToken && data
-    ) {
-        authenticated = true;
-        role = data.user.role as Role;
-
-
-    }
+    await userService.getSession();
 
     return (
-        <div>
-            <div className='max-w-7xl mx-auto'>
-                <Navbar1  authenticated={authenticated} userRole={role} />
-            </div>
+        <>
+            {/*
+              Ambient background — fixed, z-index: -1
+              Particles are rendered behind ALL page content automatically.
+              No z-index tricks needed on children — normal flow wins.
+            */}
+            <AutoAmbientBg />
+
+            {/* Page content — normal flow, always above z:-1 bg */}
+            <Navbar />
             {children}
-            <div className=''>
-                <Footer></Footer>
-            </div>
-        </div>
+            <Footer />
+        </>
     );
 }
-
-   

@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { ModeToggle } from "../home/themeToggleSwitch";
+// import { ModeToggle } from "../home/themeToggleSwitch";
 
 export default function SidebarHeaderWithLog() {
 
@@ -31,7 +31,7 @@ export default function SidebarHeaderWithLog() {
 
             {/* Dark/Light Mode Toggle */}
             <div className="flex items-center gap-2">
-                        <ModeToggle></ModeToggle>
+                        {/* <ModeToggle></ModeToggle> */}
             </div>
         </div>
     );

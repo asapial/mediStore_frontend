@@ -1,40 +1,30 @@
 import { env } from "@/env";
-import { cookies, headers } from "next/headers"
-import { auth } from "@/lib/auth"
+import { cookies } from "next/headers";
 
-const baseUrl = env.backendBaseUrl;
-const getSession = async () => {
-
-    try {
-
-        const cookieStore = await cookies();
-
-        console.log("Cookie Store :",cookieStore.toString());
-
-        const res= await fetch(`https://medistorebackend-jet.vercel.app/api/auth/get-session`,{
-        // const res= await fetch(`${baseUrl}/api/auth/get-session`,{
-
-
-            headers:{
-                Cookie: cookieStore.toString()
-            },
-            cache:"no-store",
-            credentials:"include"
-        })
-
-        const session= await res.json();
-
-        console.log("Session from session : ", session)
-
-
-        return { data: session, error: null };
-    } catch (error) {
-        // console.log(error);
-        return { data: null, error: "Could not fetch session" };
-    }
-}
-
+const AUTH_URL = env.backendBaseUrl;
 
 export const userService = {
-    getSession
-}
+  getSession: async function () {
+    try {
+      const cookieStore = await cookies();
+
+      const res = await fetch(`${AUTH_URL}/api/auth/me`, {
+        headers: {
+          Cookie: cookieStore.toString(),
+        },
+        cache: "no-store",
+      });
+
+      const session = await res.json();
+
+      if (session === null) {
+        return { data: null, error: { message: "Session is missing." } };
+      }
+
+      return { data: session, error: null };
+    } catch (err) {
+      console.error(err);
+      return { data: null, error: { message: "Something Went Wrong" } };
+    }
+  },
+};

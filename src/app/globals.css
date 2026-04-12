@@ -46,84 +46,303 @@
   --radius-4xl: calc(var(--radius) + 16px);
 }
 
+/* ─────────────────────────────────────────────────────────────────────────────
+   MediStore Brand Palette
+   Primary / Brand    — Deep Navy  #1B3A5C
+   Accent / CTA       — Warm Amber #C2703A
+   Background         — Cream      #F5EDE3
+   Surface / Card     — White      #FFFFFF
+   Links / Info       — Sky Blue   #3A6EA5
+   Success / Stock    — Sage       #2E7D32
+   Error / Danger     — Alert Red  #C62828
+   Body Text          — Espresso   #5C4033
+   Muted / Metadata   — Warm Taupe #8A6650
+───────────────────────────────────────────────────────────────────────────── */
+
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+
+  /* Brand tokens (use via var() or Tailwind arbitrary) */
+  --brand-navy:     #1B3A5C;
+  --brand-amber:    #C2703A;
+  --brand-cream:    #F5EDE3;
+  --brand-sky:      #3A6EA5;
+  --brand-sage:     #2E7D32;
+  --brand-red:      #C62828;
+  --brand-espresso: #5C4033;
+  --brand-taupe:    #8A6650;
+
+  /* System tokens mapped to brand */
+  --background:           #F5EDE3;
+  --foreground:           #5C4033;
+  --card:                 #FFFFFF;
+  --card-foreground:      #5C4033;
+  --popover:              #FFFFFF;
+  --popover-foreground:   #5C4033;
+  --primary:              #1B3A5C;
+  --primary-foreground:   #FFFFFF;
+  --secondary:            #F0E4D7;
+  --secondary-foreground: #5C4033;
+  --muted:                #EEE4D9;
+  --muted-foreground:     #8A6650;
+  --accent:               #C2703A;
+  --accent-foreground:    #FFFFFF;
+  --destructive:          #C62828;
+  --border:               #DDD0C4;
+  --input:                #EAE0D5;
+  --ring:                 #3A6EA5;
+
+  /* Charts */
+  --chart-1: #1B3A5C;
+  --chart-2: #C2703A;
+  --chart-3: #3A6EA5;
+  --chart-4: #2E7D32;
+  --chart-5: #8A6650;
+
+  /* Sidebar — Deep Navy base */
+  --sidebar:                    #1B3A5C;
+  --sidebar-foreground:         #F5EDE3;
+  --sidebar-primary:            #C2703A;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent:             #243F63;
+  --sidebar-accent-foreground:  #F5EDE3;
+  --sidebar-border:             #14304F;
+  --sidebar-ring:               #3A6EA5;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --background:           #0F1E2E;
+  --foreground:           #F5EDE3;
+  --card:                 #162838;
+  --card-foreground:      #F5EDE3;
+  --popover:              #162838;
+  --popover-foreground:   #F5EDE3;
+  --primary:              #3A6EA5;
+  --primary-foreground:   #FFFFFF;
+  --secondary:            #1B3A5C;
+  --secondary-foreground: #F5EDE3;
+  --muted:                #1F3245;
+  --muted-foreground:     #8A6650;
+  --accent:               #C2703A;
+  --accent-foreground:    #FFFFFF;
+  --destructive:          #C62828;
+  --border:               #243F63;
+  --input:                #1F3245;
+  --ring:                 #3A6EA5;
+
+  --chart-1: #3A6EA5;
+  --chart-2: #C2703A;
+  --chart-3: #2E7D32;
+  --chart-4: #8A6650;
+  --chart-5: #1B3A5C;
+
+  --sidebar:                    #0F1E2E;
+  --sidebar-foreground:         #F5EDE3;
+  --sidebar-primary:            #C2703A;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent:             #1B3A5C;
+  --sidebar-accent-foreground:  #F5EDE3;
+  --sidebar-border:             #162838;
+  --sidebar-ring:               #3A6EA5;
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    /* Fill the full viewport so the body bg color is always visible
+       behind the ambient particle canvas (which is fixed, z-index:-1) */
+    min-height: 100%;
+    background-color: #F5EDE3;
+  }
+  html.dark {
+    background-color: #0F1E2E;
+  }
   body {
     @apply bg-background text-foreground;
+    min-height: 100vh;
+    /* Smooth background-color transition when toggling light/dark */
+    transition: background-color 0.4s ease, color 0.3s ease;
   }
 }
 
+/* ─── Icon utility classes ───────────────────────────────────────────────── */
+.icon-neutral  { color: #8A6650; }
+.icon-admin    { color: #1B3A5C; }
+.icon-seller   { color: #2E7D32; }
+.icon-cart     { color: #3A6EA5; }
+.icon-orders   { color: #C2703A; }
+.icon-wallet   { color: #C2703A; }
+.icon-rx       { color: #C62828; }
+.icon-sub      { color: #3A6EA5; }
+.icon-alert    { color: #C62828; }
+.icon-batch    { color: #2E7D32; }
+.icon-search   { color: #1B3A5C; }
 
-/* make gradiant with this 
-#fafdff,  #0c206d,  #00a4a4 */
+/* ─── Reusable page / card helpers ──────────────────────────────────────── */
+.medi-page {
+  min-height: 100vh;
+  padding: 2rem;
+  background: linear-gradient(135deg, #F5EDE3 0%, #EEE4D9 100%);
+}
+
+.medi-card {
+  background: #FFFFFF;
+  border-radius: 0.75rem;
+  border: 1px solid #DDD0C4;
+  box-shadow: 0 2px 12px rgba(27, 58, 92, 0.07);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+.medi-card:hover {
+  box-shadow: 0 8px 28px rgba(27, 58, 92, 0.14);
+  transform: translateY(-2px);
+}
+
+/* Status badges */
+.badge-pending   { background: #FFF3E0; color: #C2703A; border: 1px solid #C2703A; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+.badge-approved  { background: #E8F5E9; color: #2E7D32; border: 1px solid #2E7D32; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+.badge-rejected  { background: #FFEBEE; color: #C62828; border: 1px solid #C62828; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+.badge-active    { background: #E3F0FB; color: #3A6EA5; border: 1px solid #3A6EA5; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+.badge-paused    { background: #F5EDE3; color: #8A6650; border: 1px solid #8A6650; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+.badge-cancelled { background: #FFEBEE; color: #C62828; border: 1px solid #C62828; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+.badge-instock   { background: #E8F5E9; color: #2E7D32; border: 1px solid #2E7D32; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+.badge-lowstock  { background: #FFEBEE; color: #C62828; border: 1px solid #C62828; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+
+/* Order status dynamic badges */
+.badge-placed      { background: #E3F0FB; color: #3A6EA5; border: 1px solid #3A6EA5; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+.badge-processing  { background: #FFF3E0; color: #C2703A; border: 1px solid #C2703A; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+.badge-shipped     { background: #EDE7F6; color: #512DA8; border: 1px solid #512DA8; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+.badge-delivered   { background: #E8F5E9; color: #2E7D32; border: 1px solid #2E7D32; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+.badge-requested   { background: #FFF3E0; color: #C2703A; border: 1px solid #C2703A; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+.badge-completed   { background: #E3F0FB; color: #3A6EA5; border: 1px solid #3A6EA5; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+.badge-verified    { background: #E8F5E9; color: #2E7D32; border: 1px solid #2E7D32; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+.badge-inactive    { background: #F5F5F5; color: #757575; border: 1px solid #BDBDBD; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+
+/* ─── Badge aliases (frontend uses these names) ──────────────────────────────── */
+.badge-approved       { background: #E8F5E9; color: #2E7D32; border: 1px solid #2E7D32; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+.badge-rejected       { background: #FFEBEE; color: #C62828; border: 1px solid #C62828; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+.badge-pending        { background: #FFF3E0; color: #C2703A; border: 1px solid #C2703A; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+.badge-active         { background: #E8F5E9; color: #2E7D32; border: 1px solid #2E7D32; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+.badge-cancelled      { background: #FFEBEE; color: #C62828; border: 1px solid #C62828; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+.badge-paused         { background: #E3F0FB; color: #3A6EA5; border: 1px solid #3A6EA5; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+.badge-instock        { background: #E8F5E9; color: #2E7D32; border: 1px solid #2E7D32; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+.badge-lowstock       { background: #FFF3E0; color: #C2703A; border: 1px solid #C2703A; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+.badge-confirmed      { background: #E3F0FB; color: #3A6EA5; border: 1px solid #3A6EA5; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+.badge-out_for_delivery { background: #FFF3E0; color: #C2703A; border: 1px solid #C2703A; border-radius: 9999px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+
+
+/* ─── Reusable button classes ────────────────────────────────────────────────── */
+.medi-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.625rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  background: #1B3A5C;
+  color: #FFFFFF;
+  border: none;
+}
+.medi-btn-primary:hover  { opacity: 0.88; transform: translateY(-1px); }
+.medi-btn-primary:active { opacity: 1.00; transform: translateY(0); }
+
+.medi-btn-accent {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.625rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  background: #C2703A;
+  color: #FFFFFF;
+  border: none;
+}
+.medi-btn-accent:hover  { opacity: 0.88; transform: translateY(-1px); }
+.medi-btn-accent:active { opacity: 1.00; transform: translateY(0); }
+
+.medi-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.625rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  background: transparent;
+  color: #1B3A5C;
+  border: 1px solid #DDD0C4;
+}
+.medi-btn-ghost:hover { background: #EEE4D9; }
+
+/* ─── Input focus ring ───────────────────────────────────────────────────────── */
+input:focus, textarea:focus, select:focus {
+  outline: 2px solid #3A6EA5;
+  outline-offset: 1px;
+}
+
+/* ─── Smooth scrollbar (webkit) ──────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #F5EDE3; }
+::-webkit-scrollbar-thumb { background: #DDD0C4; border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: #C2703A; }
+
+/* ─── Stat card helper ────────────────────────────────────────────────────────── */
+.medi-stat {
+  background: #FFFFFF;
+  border-radius: 1rem;
+  border: 1px solid #DDD0C4;
+  padding: 1.5rem;
+  box-shadow: 0 2px 12px rgba(27, 58, 92, 0.07);
+  transition: box-shadow 0.2s ease;
+}
+.medi-stat:hover { box-shadow: 0 6px 24px rgba(27, 58, 92, 0.14); }
+
+/* ─── Table helpers ──────────────────────────────────────────────────────────── */
+.medi-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.medi-table th {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #8A6650;
+  background: #F5EDE3;
+  border-bottom: 2px solid #DDD0C4;
+}
+.medi-table td {
+  padding: 0.875rem 1rem;
+  font-size: 0.875rem;
+  color: #5C4033;
+  border-bottom: 1px solid #EEE4D9;
+  vertical-align: middle;
+}
+.medi-table tr:last-child td { border-bottom: none; }
+.medi-table tr:hover td { background: #FBF7F4; }
+
+/* ─── Empty state ────────────────────────────────────────────────────────────── */
+.medi-empty {
+  text-align: center;
+  padding: 5rem 2rem;
+  color: #8A6650;
+}
+.medi-empty-icon {
+  font-size: 3.5rem;
+  opacity: 0.18;
+  margin-bottom: 1rem;
+}
