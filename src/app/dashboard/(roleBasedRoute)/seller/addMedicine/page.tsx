@@ -30,8 +30,8 @@ export default function AddMedicinePage() {
 
   /* ─── medicine fields ───────────────────────────────────────────── */
   const [med, setMed] = useState({
-    name: "", description: "", price: "", stock: "",
-    manufacturer: "", categoryId: "", image: "",
+    name: "", description: "", price: "", discountPrice: "",
+    stock: "", manufacturer: "", categoryId: "", image: "",
   });
 
   /* ─── image upload ─────────────────────────────────────────────── */
@@ -84,6 +84,7 @@ export default function AddMedicinePage() {
         body: JSON.stringify({
           ...med,
           price: Number(med.price),
+          discountPrice: med.discountPrice ? Number(med.discountPrice) : null,
           stock: Number(med.stock),
         }),
       });
@@ -126,7 +127,7 @@ export default function AddMedicinePage() {
 
       setDone(true);
       /* Reset form */
-      setMed({ name: "", description: "", price: "", stock: "", manufacturer: "", categoryId: "", image: "" });
+      setMed({ name: "", description: "", price: "", discountPrice: "", stock: "", manufacturer: "", categoryId: "", image: "" });
       setAlertEnabled(false); setAlertThreshold("10");
       setBatchEnabled(false); setBatch({ batchNumber: "", quantity: "100", expiryDate: "", purchaseDate: new Date().toISOString().slice(0, 10) });
     } catch (err: any) {
@@ -202,6 +203,15 @@ export default function AddMedicinePage() {
               <input type="number" min="0" step="0.01" value={med.price}
                 onChange={e => setMed(p => ({ ...p, price: e.target.value }))}
                 placeholder="12.50" className={INPUT_CLS} style={FIELD_STYLE} required />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold mb-1" style={LABEL_STYLE}>
+                Discount Price ($) <span className="font-normal opacity-70">(optional)</span>
+              </label>
+              <input type="number" min="0" step="0.01" value={med.discountPrice}
+                onChange={e => setMed(p => ({ ...p, discountPrice: e.target.value }))}
+                placeholder="9.99" className={INPUT_CLS} style={FIELD_STYLE} />
+              <p className="text-[10px] mt-0.5" style={{ color: "#8A6650" }}>Must be lower than regular price</p>
             </div>
             <div>
               <label className="block text-xs font-semibold mb-1" style={LABEL_STYLE}>Stock Qty *</label>

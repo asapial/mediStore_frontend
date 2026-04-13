@@ -15,6 +15,7 @@ interface Review {
 }
 interface Medicine {
   id: string; name: string; description: string; image: string; price: number;
+  discountPrice?: number | null;
   stock: number; manufacturer: string; expiryDate?: string; dosage?: string;
   category: Category; seller: { id: string; name: string; email: string };
   reviews?: Review[];
@@ -166,8 +167,18 @@ export default function ProductDetailPage() {
             )}
 
             {/* Price */}
-            <div className="flex items-baseline gap-2 mb-4">
-              <span className="text-4xl font-black text-accent">${medicine.price.toFixed(2)}</span>
+            <div className="flex items-baseline gap-3 mb-4 flex-wrap">
+              {medicine.discountPrice != null && medicine.discountPrice > 0 && medicine.discountPrice < medicine.price ? (
+                <>
+                  <span className="text-4xl font-black text-accent">${medicine.discountPrice.toFixed(2)}</span>
+                  <span className="text-xl font-bold line-through text-muted-foreground">${medicine.price.toFixed(2)}</span>
+                  <span className="text-sm font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-600">
+                    -{Math.round(((medicine.price - medicine.discountPrice) / medicine.price) * 100)}% OFF
+                  </span>
+                </>
+              ) : (
+                <span className="text-4xl font-black text-accent">${medicine.price.toFixed(2)}</span>
+              )}
               <span className={`text-sm font-semibold ${medicine.stock > 0
                 ? "text-emerald-600 dark:text-emerald-400"
                 : "text-destructive"}`}>

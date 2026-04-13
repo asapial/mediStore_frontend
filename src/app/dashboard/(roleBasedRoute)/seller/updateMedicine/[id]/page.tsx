@@ -10,8 +10,9 @@ import {
 
 interface Category { id: string; name: string }
 interface MedicineForm {
-  id: string; name: string; description: string; price: number; stock: number;
-  manufacturer: string; image: string; categoryId: string;
+  id: string; name: string; description: string; price: number;
+  discountPrice: number | null;
+  stock: number; manufacturer: string; image: string; categoryId: string;
   requiresPrescription?: boolean;
 }
 
@@ -38,6 +39,7 @@ export default function UpdateMedicinePage() {
         name:                 d.name ?? "",
         description:          d.description ?? "",
         price:                d.price ?? 0,
+        discountPrice:        d.discountPrice ?? null,
         stock:                d.stock ?? 0,
         manufacturer:         d.manufacturer ?? "",
         image:                d.image ?? "",
@@ -70,7 +72,9 @@ export default function UpdateMedicinePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: form.name, description: form.description,
-          price: Number(form.price), stock: Number(form.stock),
+          price: Number(form.price),
+          discountPrice: form.discountPrice !== null ? Number(form.discountPrice) : null,
+          stock: Number(form.stock),
           manufacturer: form.manufacturer, image: form.image,
           categoryId: form.categoryId,
           requiresPrescription: form.requiresPrescription,
@@ -149,6 +153,21 @@ export default function UpdateMedicinePage() {
               <input type="number" min={0} step={0.01} value={form.price}
                 onChange={e => field("price", e.target.value)}
                 className={CLS} style={FIELD} />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold mb-1" style={LBL}>
+                Discount Price ($) <span className="font-normal opacity-60">(optional)</span>
+              </label>
+              <input type="number" min={0} step={0.01}
+                value={form.discountPrice ?? ""}
+                onChange={e => field("discountPrice", e.target.value === "" ? null : Number(e.target.value))}
+                placeholder="e.g. 9.99"
+                className={CLS} style={FIELD} />
+              {form.discountPrice != null && form.discountPrice > 0 && form.discountPrice < form.price && (
+                <p className="text-[10px] mt-0.5" style={{ color: "#2E7D32" }}>
+                  🏷 {Math.round(((form.price - form.discountPrice) / form.price) * 100)}% off
+                </p>
+              )}
             </div>
             <div>
               <label className="block text-xs font-semibold mb-1" style={LBL}>Stock (units) *</label>

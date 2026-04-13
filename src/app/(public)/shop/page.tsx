@@ -11,7 +11,8 @@ import { toast } from "sonner";
 interface Category { id: string; name: string; }
 interface Medicine {
   id: string; name: string; description: string; image: string;
-  price: number; stock: number; manufacturer: string; category: Category;
+  price: number; discountPrice?: number | null;
+  stock: number; manufacturer: string; category: Category;
   seller: { id: string; name: string; email: string };
   reviews?: { rating: number }[];
   isFeatured?: boolean;
@@ -311,9 +312,16 @@ export default function ShopPage() {
                         </div>
                       )}
                       <div className="flex items-center justify-between mt-3">
-                        <span className="font-black text-base text-accent">
-                          ${med.price.toFixed(2)}
-                        </span>
+                        <div className="flex items-baseline gap-1.5">
+                          {med.discountPrice != null && med.discountPrice > 0 && med.discountPrice < med.price ? (
+                            <>
+                              <span className="font-black text-base text-accent">${med.discountPrice.toFixed(2)}</span>
+                              <span className="text-xs line-through text-muted-foreground">${med.price.toFixed(2)}</span>
+                            </>
+                          ) : (
+                            <span className="font-black text-base text-accent">${med.price.toFixed(2)}</span>
+                          )}
+                        </div>
                         <span className={`text-xs font-medium ${med.stock > 0
                           ? "text-emerald-600 dark:text-emerald-400"
                           : "text-destructive"}`}>
@@ -375,9 +383,16 @@ export default function ShopPage() {
                             {med.description}
                           </p>
                         </div>
-                        <span className="font-black text-lg flex-shrink-0 text-accent">
-                          ${med.price.toFixed(2)}
-                        </span>
+                        <div className="flex items-baseline gap-1.5 flex-shrink-0">
+                          {med.discountPrice != null && med.discountPrice > 0 && med.discountPrice < med.price ? (
+                            <>
+                              <span className="font-black text-lg text-accent">${med.discountPrice.toFixed(2)}</span>
+                              <span className="text-xs line-through text-muted-foreground">${med.price.toFixed(2)}</span>
+                            </>
+                          ) : (
+                            <span className="font-black text-lg text-accent">${med.price.toFixed(2)}</span>
+                          )}
+                        </div>
                       </div>
                       <div className="flex flex-col xs:flex-row flex-wrap items-start gap-2 mt-3">
                         {isLoggedIn ? (

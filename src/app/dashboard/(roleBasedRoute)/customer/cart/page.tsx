@@ -13,8 +13,8 @@ interface CartItem {
   quantity: number; addedAt: string;
   medicine: {
     id: string; name: string; description: string;
-    image: string | null; price: number; stock: number;
-    manufacturer: string; categoryId: string;
+    image: string | null; price: number; discountPrice?: number | null;
+    stock: number; manufacturer: string; categoryId: string;
   };
 }
 
@@ -82,9 +82,14 @@ export default function CartPage() {
     finally { setRemoving(null); }
   };
 
-  const selectedItems = items.filter(i => selected.has(i.id));
-  const subtotal      = selectedItems.reduce((s, i) => s + i.quantity * i.medicine.price, 0);
-  const totalQty      = selectedItems.reduce((s, i) => s + i.quantity, 0);
+  const selectedItems  = items.filter(i => selected.has(i.id));
+  // effective price = discountPrice if set and valid, else price
+  const effPrice = (m: CartItem["medicine"]) =>
+    m.discountPrice != null && m.discountPrice > 0 && m.discountPrice < m.price ? m.discountPrice : m.price;
+  const originalTotal  = selectedItems.reduce((s, i) => s + i.quantity * i.medicine.price, 0);
+  const subtotal       = selectedItems.reduce((s, i) => s + i.quantity * effPrice(i.medicine), 0);
+  const discountSaving = originalTotal - subtotal;
+  const totalQty       = selectedItems.reduce((s, i) => s + i.quantity, 0);
 
   const goCheckout = () => {
     if (selectedItems.length === 0) { toast.error("Select at least one item"); return; }
@@ -171,9 +176,20 @@ export default function CartPage() {
                     <h3 className="font-bold text-sm" style={{ color: "#1B3A5C" }}>{item.medicine.name}</h3>
                     <p className="text-xs mt-0.5" style={{ color: "#8A6650" }}>{item.medicine.manufacturer}</p>
                     <div className="flex items-center gap-4 mt-2">
-                      <span className="font-bold" style={{ color: "#C2703A" }}>
-                        ${item.medicine.price.toFixed(2)}
-                      </span>
+                      {(() => {
+                        const hasDisc = item.medicine.discountPrice != null && item.medicine.discountPrice > 0 && item.medicine.discountPrice < item.medicine.price;
+                        return hasDisc ? (
+                          <>
+                            <span className="font-bold" style={{ color: "#C2703A" }}>${item.medicine.discountPrice!.toFixed(2)}</span>
+                            <span className="text-xs line-through" style={{ color: "#aaa" }}>${item.medicine.price.toFixed(2)}</span>
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: "#FFEBEE", color: "#C62828" }}>
+                              -{Math.round(((item.medicine.price - item.medicine.discountPrice!) / item.medicine.price) * 100)}%
+                            </span>
+                          </>
+                        ) : (
+                          <span className="font-bold" style={{ color: "#C2703A" }}>${item.medicine.price.toFixed(2)}</span>
+                        );
+                      })()}
                       <span className={`badge-${item.medicine.stock === 0 ? "rejected" : item.medicine.stock < 10 ? "lowstock" : "instock"}`}>
                         {item.medicine.stock === 0 ? "Out of Stock" : item.medicine.stock < 10 ? "Low Stock" : "In Stock"}
                       </span>
@@ -203,7 +219,7 @@ export default function CartPage() {
                     </div>
                     {/* Subtotal */}
                     <p className="text-sm font-black" style={{ color: "#1B3A5C" }}>
-                      ${(item.quantity * item.medicine.price).toFixed(2)}
+                      ${(item.quantity * effPrice(item.medicine)).toFixed(2)}
                     </p>
                     {/* Remove */}
                     <button onClick={() => removeItem(item.id)}
@@ -234,10 +250,22 @@ export default function CartPage() {
             {selectedItems.map(item => (
               <div key={item.id} className="flex justify-between text-xs" style={{ color: "#8A6650" }}>
                 <span className="truncate max-w-[60%]">{item.medicine.name} ×{item.quantity}</span>
-                <span>${(item.quantity * item.medicine.price).toFixed(2)}</span>
+                <span>${(item.quantity * effPrice(item.medicine)).toFixed(2)}</span>
               </div>
             ))}
             <div className="border-t pt-3" style={{ borderColor: "#DDD0C4" }}>
+              {discountSaving > 0 && (
+                <>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span style={{ color: "#8A6650" }}>Original Total</span>
+                    <span className="line-through" style={{ color: "#aaa" }}>${originalTotal.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span style={{ color: "#2E7D32" }}>Discount Savings</span>
+                    <span style={{ color: "#2E7D32" }}>–${discountSaving.toFixed(2)}</span>
+                  </div>
+                </>
+              )}
               <div className="flex justify-between">
                 <span className="font-bold" style={{ color: "#1B3A5C" }}>Subtotal</span>
                 <span className="font-black text-lg" style={{ color: "#C2703A" }}>${subtotal.toFixed(2)}</span>

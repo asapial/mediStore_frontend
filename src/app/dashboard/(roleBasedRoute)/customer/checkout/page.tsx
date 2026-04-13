@@ -79,7 +79,7 @@ const BD_GEO: Record<string, Record<string, Record<string, string[]>>> = {
 
 interface CartItem {
   id: string; cartId: string; medicineId: string; quantity: number;
-  medicine: { id: string; name: string; image: string | null; price: number; stock: number; manufacturer: string };
+  medicine: { id: string; name: string; image: string | null; price: number; discountPrice?: number | null; stock: number; manufacturer: string };
 }
 type PaymentMethod = "COD" | "STRIPE";
 
@@ -131,8 +131,13 @@ export default function CheckoutPage() {
   const upazilas   = district ? Object.keys(BD_GEO[division]?.[district] || {}).sort() : [];
   const thanas     = upazila  ? (BD_GEO[division]?.[district]?.[upazila] || []) : [];
 
-  const subtotal  = items.reduce((s, i) => s + i.quantity * i.medicine.price, 0);
-  const finalTotal = Math.max(0, subtotal - discount);
+  // effective price per item (discountPrice if valid, else price)
+  const effPrice = (m: CartItem["medicine"]) =>
+    m.discountPrice != null && m.discountPrice > 0 && m.discountPrice < m.price ? m.discountPrice : m.price;
+  const originalTotal   = items.reduce((s, i) => s + i.quantity * i.medicine.price, 0);
+  const discountSaving  = items.reduce((s, i) => s + i.quantity * (i.medicine.price - effPrice(i.medicine)), 0);
+  const subtotal        = originalTotal - discountSaving;   // after product discounts
+  const finalTotal      = Math.max(0, subtotal - discount); // after coupon
 
   const fullAddress = useGeoAddress && geoCoords
     ? [houseNum, landmark, `GPS(${geoCoords.lat.toFixed(5)},${geoCoords.lng.toFixed(5)})`, "Bangladesh"].filter(Boolean).join(", ")
@@ -172,7 +177,8 @@ export default function CheckoutPage() {
       const res = await fetch("/api/coupons/apply", {
         method: "POST", credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: couponCode.trim(), orderTotal: subtotal }),
+        // Coupon apply uses subtotal (after product discounts)
+      body: JSON.stringify({ code: couponCode.trim(), orderTotal: subtotal }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Invalid coupon");
@@ -505,16 +511,28 @@ export default function CheckoutPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-semibold truncate" style={{ color: "#1B3A5C" }}>{item.medicine.name}</p>
-                    <p className="text-xs" style={{ color: "#8A6650" }}>×{item.quantity} × ${item.medicine.price.toFixed(2)}</p>
+                    <p className="text-xs" style={{ color: "#8A6650" }}>×{item.quantity} × ${effPrice(item.medicine).toFixed(2)}</p>
                   </div>
                   <p className="font-bold text-sm flex-shrink-0" style={{ color: "#C2703A" }}>
-                    ${(item.quantity * item.medicine.price).toFixed(2)}
+                    ${(item.quantity * effPrice(item.medicine)).toFixed(2)}
                   </p>
                 </div>
               ))}
             </div>
 
             <div className="border-t pt-4 space-y-2" style={{ borderColor: "#DDD0C4" }}>
+              {discountSaving > 0 && (
+                <>
+                  <div className="flex justify-between text-sm">
+                    <span style={{ color: "#8A6650" }}>Original Total</span>
+                    <span className="line-through" style={{ color: "#aaa" }}>${originalTotal.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span style={{ color: "#2E7D32" }}>Product Discounts</span>
+                    <span style={{ color: "#2E7D32" }}>–${discountSaving.toFixed(2)}</span>
+                  </div>
+                </>
+              )}
               <div className="flex justify-between text-sm">
                 <span style={{ color: "#8A6650" }}>Subtotal</span>
                 <span style={{ color: "#5C4033" }}>${subtotal.toFixed(2)}</span>

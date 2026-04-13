@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ShoppingCart, Star, Heart, Pill, Lock } from "lucide-react";
+import { ShoppingCart, Star, Pill, Lock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
 interface Medicine {
-  id: string; name: string; description: string; image?: string; price: number;
+  id: string; name: string; description: string; image?: string;
+  price: number; discountPrice?: number | null;
   stock: number; manufacturer: string;
   category: { id: string; name: string };
   seller: { id: string; name: string };
@@ -23,12 +24,15 @@ function avgRating(reviews: { rating: number }[]) {
 function MedCard({ med, isLoggedIn }: { med: Medicine; isLoggedIn: boolean }) {
   const rating = avgRating(med.reviews);
   const outOfStock = med.stock === 0;
+  const hasDiscount = med.discountPrice != null && med.discountPrice > 0 && med.discountPrice < med.price;
+  const displayPrice = hasDiscount ? med.discountPrice! : med.price;
+  const discountPct = hasDiscount ? Math.round(((med.price - med.discountPrice!) / med.price) * 100) : 0;
 
   const addToCart = async (e: React.MouseEvent) => {
-    e.preventDefault(); // don't navigate when clicking inside the link
+    e.preventDefault();
     if (!isLoggedIn) { toast.error("Please log in to add to cart"); return; }
     try {
-      const res = await fetch("/api/cart", {
+      const res = await fetch("/api/cart/add", {           // ← FIXED endpoint
         method: "POST", credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ medicineId: med.id, quantity: 1 }),
@@ -50,8 +54,11 @@ function MedCard({ med, isLoggedIn }: { med: Medicine; isLoggedIn: boolean }) {
         {med.image
           ? <img src={med.image} alt={med.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
           : <Pill className="w-16 h-16 text-muted-foreground/30" />}
-        <div className="absolute top-2 left-2">
+        <div className="absolute top-2 left-2 flex gap-1">
           <Badge className="bg-emerald-500 hover:bg-emerald-500 text-white text-[10px]">Featured</Badge>
+          {hasDiscount && (
+            <Badge className="bg-red-500 hover:bg-red-500 text-white text-[10px]">-{discountPct}%</Badge>
+          )}
         </div>
         {outOfStock && (
           <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
@@ -72,7 +79,12 @@ function MedCard({ med, isLoggedIn }: { med: Medicine; isLoggedIn: boolean }) {
           <span className="text-xs text-muted-foreground ml-1">({med.reviews.length})</span>
         </div>
         <div className="flex items-center justify-between">
-          <span className="font-bold text-emerald-600">${med.price.toFixed(2)}</span>
+          <div className="flex items-baseline gap-1.5">
+            <span className="font-bold text-emerald-600">${displayPrice.toFixed(2)}</span>
+            {hasDiscount && (
+              <span className="text-xs text-muted-foreground line-through">${med.price.toFixed(2)}</span>
+            )}
+          </div>
           {isLoggedIn ? (
             <Button size="sm" onClick={addToCart} disabled={outOfStock}
               className="bg-emerald-500 hover:bg-emerald-600 text-white text-xs h-7 px-3">
@@ -94,12 +106,11 @@ function MedCard({ med, isLoggedIn }: { med: Medicine; isLoggedIn: boolean }) {
 }
 
 export default function FeaturedProducts() {
-  const [medicines,   setMedicines]   = useState<Medicine[]>([]);
-  const [loading,     setLoading]     = useState(true);
-  const [isLoggedIn,  setIsLoggedIn]  = useState(false);
+  const [medicines, setMedicines] = useState<Medicine[]>([]);
+  const [loading,   setLoading]   = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    // Check session
     fetch("/api/auth/me", { credentials: "include" })
       .then(r => r.json())
       .then(d => { if (d?.user) setIsLoggedIn(true); })

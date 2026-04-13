@@ -52,7 +52,7 @@ function SaleCard({ item, index, isLoggedIn }: { item: FlashSaleItem; index: num
     if (outOfStock || adding) return;
     setAdding(true);
     try {
-      const res = await fetch("/api/cart", {
+      const res = await fetch("/api/cart/add", {        // ← FIXED endpoint
         method: "POST", credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ medicineId: item.medicine.id, quantity: 1 }),
