@@ -80,7 +80,7 @@ export default function SignupPage() {
         </div>
 
         {/* ── RIGHT: Signup Form ───────────────────────────────── */}
-        <div className="flex-1 flex items-center justify-center p-6 lg:p-8 overflow-y-auto"
+        <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8 overflow-y-auto"
           style={{ background: "rgba(255,255,255,0.03)", backdropFilter: "blur(20px)" }}>
           <div className="w-full max-w-lg py-8">
 

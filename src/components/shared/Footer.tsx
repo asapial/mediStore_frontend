@@ -16,8 +16,8 @@ import Link from "next/link";
 
 const Footer = () => {
   return (
-    <SectionContainer className="bg-gradient-to-r from-[#f0fafd] via-[#d0f5f8] to-[#b2eef6] dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 text-gray-900 dark:text-gray-100  ">
-      <div className=" px-6 py-12 grid grid-cols-1 md:grid-cols-4 ">
+    <SectionContainer className="bg-gradient-to-r from-[#f0fafd] via-[#d0f5f8] to-[#b2eef6] dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 text-gray-900 dark:text-gray-100">
+      <div className="px-4 sm:px-6 py-10 sm:py-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 sm:gap-6">
         {/* Brand */}
         <div>
           <h2 className="text-2xl font-bold mb-3 flex items-center gap-2">
@@ -108,7 +108,7 @@ const Footer = () => {
 
       {/* Footer Bottom */}
       <div className="text-center text-sm py-4 border-t border-gray-300 dark:border-gray-600 mt-8">
-        © {new Date().getFullYear()} MediStore. All rights reserved.
+        © {new Date().getFullYear()} LifeLine. All rights reserved.
       </div>
     </SectionContainer>
   );

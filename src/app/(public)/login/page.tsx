@@ -71,12 +71,12 @@ export default function LoginPage() {
         </div>
 
         {/* ── RIGHT: Login Form ─────────────────────────────────────── */}
-        <div className="flex-1 flex items-center justify-center p-6 lg:p-12" style={{ background: "rgba(255,255,255,0.03)", backdropFilter: "blur(20px)" }}>
+        <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-12" style={{ background: "rgba(255,255,255,0.03)", backdropFilter: "blur(20px)" }}>
           <div className="w-full max-w-md">
 
             {/* Glass card wrapping the form */}
             <div className="rounded-3xl p-1" style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05))" }}>
-              <div className="rounded-[22px] p-8" style={{ background: "rgba(255,255,255,0.95)" }}>
+              <div className="rounded-[22px] p-5 sm:p-8" style={{ background: "rgba(255,255,255,0.95)" }}>
                 <LoginForm />
               </div>
             </div>

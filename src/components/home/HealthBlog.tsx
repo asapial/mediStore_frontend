@@ -24,20 +24,20 @@ export default function HealthBlog() {
   if (!loading && blogs.length === 0) return null;
 
   return (
-    <section className="py-12 bg-background">
+    <section className="py-10 sm:py-12 bg-background">
       <div className="max-w-7xl mx-auto px-4">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-6 sm:mb-8 flex-wrap gap-3">
           <div>
-            <h2 className="text-2xl font-black text-foreground">Health Blog</h2>
+            <h2 className="text-xl sm:text-2xl font-black text-foreground">Health Blog</h2>
             <p className="text-sm text-muted-foreground mt-1">Expert tips for a healthier life</p>
           </div>
-          <a href="/blog" className="text-sm font-semibold text-emerald-600 hover:underline flex items-center gap-1">
+          <a href="/blog" className="text-sm font-semibold text-emerald-600 hover:underline flex items-center gap-1 shrink-0">
             All Articles <ArrowRight className="w-4 h-4" />
           </a>
         </div>
 
         {loading ? (
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-5 sm:gap-6">
             {Array.from({ length: 3 }).map((_, i) => (
               <div key={i} className="rounded-2xl border border-border overflow-hidden">
                 <div className="h-48 bg-muted animate-pulse" />
@@ -49,7 +49,7 @@ export default function HealthBlog() {
             ))}
           </div>
         ) : (
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-5 sm:gap-6">
             {blogs.map(blog => (
               <a key={blog.id} href={`/blog/${blog.slug}`}
                 className="group rounded-2xl border border-border overflow-hidden hover:shadow-lg transition-all hover:-translate-y-1 bg-background">

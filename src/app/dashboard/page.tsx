@@ -670,7 +670,7 @@ export default function DashboardPage() {
 
       {/* ── Top bar ──────────────────────────────────────────────────────────── */}
       <header className="sticky top-0 z-50 bg-card/80 backdrop-blur border-b border-border">
-        <div className="flex items-center justify-between h-16 px-6 max-w-[1400px] mx-auto">
+        <div className="flex items-center justify-between h-14 sm:h-16 px-4 sm:px-6 max-w-[1400px] mx-auto">
 
           {/* Brand */}
           <a href="/" className="flex items-center gap-2 text-lg font-bold text-primary hover:opacity-80 transition-opacity">
@@ -728,12 +728,12 @@ export default function DashboardPage() {
       </header>
 
       {/* ── Content ──────────────────────────────────────────────────────────── */}
-      <main className="max-w-[1400px] mx-auto px-6 py-6">
+      <main className="max-w-[1400px] mx-auto px-4 sm:px-6 py-4 sm:py-6">
 
         {/* Page heading */}
-        <div className="flex items-start justify-between mb-6">
+        <div className="flex items-start justify-between mb-5 sm:mb-6 flex-wrap gap-3">
           <div>
-            <h1 className="text-2xl font-bold text-primary tracking-tight">{meta.heading}</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-primary tracking-tight">{meta.heading}</h1>
             <p className="text-sm text-muted-foreground mt-0.5">{meta.sub}</p>
           </div>
           <button

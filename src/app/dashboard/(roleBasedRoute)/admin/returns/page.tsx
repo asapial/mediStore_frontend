@@ -143,13 +143,6 @@ export default function AdminReturnsPage() {
                               <FaTimesCircle className="inline mr-1" /> Reject
                             </button>
                           </div>
-                          {ret.status === "APPROVED" && (
-                            <button onClick={() => updateStatus(ret.id, "COMPLETED")}
-                              className="w-full py-1.5 rounded-lg text-sm font-semibold"
-                              style={{ background: "#3A6EA5", color: "#FFF" }}>
-                              Mark Completed
-                            </button>
-                          )}
                           <button onClick={() => setReviewing(null)} className="text-xs w-full text-center" style={{ color: "#8A6650" }}>Cancel</button>
                         </div>
                       ) : (

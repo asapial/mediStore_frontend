@@ -184,25 +184,25 @@ export default function FlashSale() {
 
       <div className="max-w-7xl mx-auto px-4 relative">
         {/* Section header */}
-        <div className="flex items-center justify-between mb-8">
-          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center justify-between mb-6 sm:mb-8 gap-3">
+          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-3 sm:gap-4">
             <motion.div animate={{ rotate: [0, -15, 15, 0] }} transition={{ repeat: Infinity, duration: 2 }}
-              className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center">
-              <Flame className="w-6 h-6 text-orange-300" />
+              className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-white/20 flex items-center justify-center">
+              <Flame className="w-5 h-5 sm:w-6 sm:h-6 text-orange-300" />
             </motion.div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-3xl font-black text-white">Flash Sale</h2>
+                <h2 className="text-2xl sm:text-3xl font-black text-white">Flash Sale</h2>
                 <motion.span animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 1 }}
                   className="bg-amber-400 text-black text-[10px] font-black px-2 py-0.5 rounded-full">
                   LIVE
                 </motion.span>
               </div>
-              <p className="text-white/60 text-sm">⚡ Limited-time deals — grab before they're gone!</p>
+              <p className="text-white/60 text-xs sm:text-sm">⚡ Limited-time deals — grab before they’re gone!</p>
             </div>
           </motion.div>
           <motion.a href="/shop" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}
-            className="hidden sm:flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white border border-white/30 hover:bg-white/10 transition-colors">
+            className="flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl text-sm font-bold text-white border border-white/30 hover:bg-white/10 transition-colors">
             View All <Zap className="w-3.5 h-3.5" />
           </motion.a>
         </div>

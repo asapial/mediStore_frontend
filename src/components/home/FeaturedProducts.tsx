@@ -84,16 +84,16 @@ export default function FeaturedProducts() {
   if (!loading && medicines.length === 0) return null;
 
   return (
-    <section className="py-12 bg-muted/20 dark:bg-muted/5">
+    <section className="py-10 sm:py-12 bg-muted/20 dark:bg-muted/5">
       <div className="max-w-7xl mx-auto px-4">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-6 sm:mb-8 flex-wrap gap-3">
           <div>
-            <h2 className="text-2xl font-black text-foreground">Featured Products</h2>
+            <h2 className="text-xl sm:text-2xl font-black text-foreground">Featured Products</h2>
             <p className="text-sm text-muted-foreground mt-1">Hand-picked by our pharmacists</p>
           </div>
-          <a href="/shop" className="text-sm font-semibold text-emerald-600 hover:underline">View all →</a>
+          <a href="/shop" className="text-sm font-semibold text-emerald-600 hover:underline shrink-0">View all →</a>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
           {loading
             ? Array.from({ length: 10 }).map((_,i) => (
                 <div key={i} className="rounded-2xl border border-border overflow-hidden">

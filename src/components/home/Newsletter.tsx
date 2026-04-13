@@ -39,13 +39,13 @@ export default function Newsletter() {
   };
 
   return (
-    <section className="py-16 bg-emerald-600 dark:bg-emerald-800">
+    <section className="py-12 sm:py-16 bg-emerald-600 dark:bg-emerald-800">
       <div className="max-w-2xl mx-auto px-4 text-center">
-        <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-5">
-          <Mail className="w-7 h-7 text-white" />
+        <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-4 sm:mb-5">
+          <Mail className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
         </div>
-        <h2 className="text-3xl font-black text-white mb-2">Stay Healthy, Stay Updated</h2>
-        <p className="text-white/80 text-sm mb-8 leading-relaxed">
+        <h2 className="text-2xl sm:text-3xl font-black text-white mb-2">Stay Healthy, Stay Updated</h2>
+        <p className="text-white/80 text-sm mb-6 sm:mb-8 leading-relaxed">
           Subscribe for exclusive health tips, flash sale alerts, and special discounts delivered to your inbox.
         </p>
 
@@ -61,7 +61,7 @@ export default function Newsletter() {
               placeholder="Your name (optional)"
               value={name}
               onChange={e => setName(e.target.value)}
-              className="bg-white/20 border-white/30 text-white placeholder:text-white/60 focus-visible:ring-white/50 sm:w-44 flex-shrink-0"
+              className="bg-white/20 border-white/30 text-white placeholder:text-white/60 focus-visible:ring-white/50 sm:w-40 lg:w-44 shrink-0"
             />
             <Input
               type="email"
@@ -72,8 +72,8 @@ export default function Newsletter() {
               className="flex-1 bg-white/20 border-white/30 text-white placeholder:text-white/60 focus-visible:ring-white/50"
             />
             <Button type="submit" disabled={submitting}
-              className="bg-white hover:bg-white/90 text-emerald-700 font-bold px-6 flex-shrink-0">
-              {submitting ? "…" : <><Send className="w-4 h-4 mr-1" /> Subscribe</>}
+              className="bg-white hover:bg-white/90 text-emerald-700 font-bold px-5 sm:px-6 flex-shrink-0">
+              {submitting ? "…" : <><Send className="w-4 h-4 mr-1" />Subscribe</>}
             </Button>
           </form>
         )}

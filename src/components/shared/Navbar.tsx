@@ -20,8 +20,8 @@ interface UserInfo { id: string; name: string; email: string; role: string; imag
 const navLinks = [
   { label: "Home",         href: "/",        hasDropdown: false },
   { label: "Shop",         href: "/shop",    hasDropdown: false },
-  { label: "Health Topics",href: "/health",  hasDropdown: false },
-  { label: "About Us",     href: "/about",   hasDropdown: false },
+  // { label: "Health Topics",href: "/health",  hasDropdown: false },
+  // { label: "About Us",     href: "/about",   hasDropdown: false },
   { label: "Blog",         href: "/blog",    hasDropdown: false },
   { label: "Contact",      href: "/contact", hasDropdown: false },
 ];

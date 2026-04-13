@@ -102,7 +102,7 @@ export default function SellerMedicinesPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4 mb-7">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-7">
         {[
           { label: "Total Medicines", val: medicines.length,  color: "#1B3A5C" },
           { label: "Low Stock",       val: lowStock,           color: "#C2703A" },

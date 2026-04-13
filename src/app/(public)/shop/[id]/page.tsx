@@ -149,7 +149,7 @@ export default function ProductDetailPage() {
               bg-secondary text-muted-foreground">
               {medicine.category.name}
             </span>
-            <h1 className="text-3xl font-black leading-tight mb-2 text-primary">{medicine.name}</h1>
+            <h1 className="text-2xl sm:text-3xl font-black leading-tight mb-2 text-primary">{medicine.name}</h1>
             <p className="text-sm mb-1 text-muted-foreground">by {medicine.manufacturer}</p>
 
             {avgRating > 0 && (
@@ -172,7 +172,7 @@ export default function ProductDetailPage() {
 
             {/* Quantity + Add to Cart */}
             {!outOfStock && (
-              <div className="flex items-center gap-3 mb-5">
+              <div className="flex flex-wrap items-center gap-3 mb-5">
                 <div className="flex items-center border border-border rounded-xl overflow-hidden">
                   <button onClick={() => setQty(q => Math.max(1, q - 1))}
                     className="w-10 h-10 flex items-center justify-center hover:bg-muted transition-colors">
@@ -187,7 +187,7 @@ export default function ProductDetailPage() {
                 <button
                   onClick={handleAddToCart}
                   disabled={adding}
-                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold
+                  className={`flex-1 min-w-[160px] flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold
                     text-white transition-all disabled:opacity-70 hover:opacity-90
                     ${inCart ? "bg-emerald-600" : "bg-primary"}`}>
                   {inCart ? <CheckCircle className="w-5 h-5" /> : <ShoppingCart className="w-5 h-5" />}
@@ -202,7 +202,7 @@ export default function ProductDetailPage() {
             )}
 
             {/* Info chips */}
-            <div className="grid grid-cols-3 gap-3 mb-5">
+            <div className="grid grid-cols-1 xs:grid-cols-3 gap-2 sm:gap-3 mb-5">
               {[
                 { icon: <Truck className="w-4 h-4" />, label: "Free Delivery", sub: "On orders $50+" },
                 { icon: <Shield className="w-4 h-4" />, label: "Authentic",     sub: "Verified seller" },
@@ -236,10 +236,10 @@ export default function ProductDetailPage() {
 
         {/* ── Tabs ── */}
         <div className="bg-card rounded-3xl overflow-hidden border border-border">
-          <div className="flex border-b border-border">
+          <div className="flex border-b border-border overflow-x-auto">
             {(["description", "details", "reviews"] as const).map(t => (
               <button key={t} onClick={() => setTab(t)}
-                className={`px-6 py-4 text-sm font-bold capitalize transition-colors ${
+                className={`px-4 sm:px-6 py-4 text-sm font-bold capitalize transition-colors whitespace-nowrap ${
                   tab === t
                     ? "text-primary border-b-2 border-primary -mb-px"
                     : "text-muted-foreground hover:text-foreground"

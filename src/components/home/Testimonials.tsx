@@ -66,11 +66,11 @@ export default function Testimonials() {
   };
 
   return (
-    <section className="py-12 bg-muted/20 dark:bg-muted/5">
+    <section className="py-10 sm:py-12 bg-muted/20 dark:bg-muted/5">
       <div className="max-w-7xl mx-auto px-4">
-        <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
+        <div className="flex items-center justify-between mb-6 sm:mb-8 flex-wrap gap-3">
           <div>
-            <h2 className="text-2xl font-black text-foreground">What Customers Say</h2>
+            <h2 className="text-xl sm:text-2xl font-black text-foreground">What Customers Say</h2>
             <p className="text-sm text-muted-foreground mt-1">Real reviews from our community</p>
           </div>
           {user && !submitted && (
@@ -112,7 +112,7 @@ export default function Testimonials() {
         )}
 
         {loading ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
             {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="rounded-2xl border border-border p-5 space-y-3 bg-background">
                 <div className="flex gap-2"><div className="w-10 h-10 rounded-full bg-muted animate-pulse"></div><div className="flex-1 space-y-1"><div className="h-3 bg-muted rounded animate-pulse w-1/2"></div><div className="h-2.5 bg-muted rounded animate-pulse w-1/3"></div></div></div>
@@ -124,7 +124,7 @@ export default function Testimonials() {
         ) : testimonials.length === 0 ? (
           <p className="text-center text-muted-foreground py-10">No reviews yet. Be the first!</p>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
             {testimonials.map(t => (
               <div key={t.id} className="bg-background border border-border rounded-2xl p-5 hover:shadow-md transition-all">
                 <div className="flex items-center gap-3 mb-3">

@@ -149,7 +149,9 @@ export default function ManageCategoriesPage() {
                 .slice(0, 5)
                 .map(c => (
                   <div key={c.id} className="flex items-center justify-between text-sm py-1.5 border-b" style={{ borderColor: "#EEE4D9" }}>
-                    <span truncate style={{ color: "#5C4033" }}>{c.name}</span>
+            <span className="truncate" style={{ color: "#5C4033" }}>
+  {c.name}
+</span>
                     <span className="font-bold" style={{ color: "#1B3A5C" }}>{c._count?.medicines ?? 0}</span>
                   </div>
                 ))}

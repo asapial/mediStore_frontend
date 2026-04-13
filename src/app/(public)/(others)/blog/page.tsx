@@ -81,7 +81,7 @@ export default function BlogPage() {
       <div className="bg-gradient-to-br from-emerald-600 to-teal-700 py-16 px-4 text-center text-white">
         <div className="max-w-3xl mx-auto">
           <p className="text-emerald-200 text-sm font-semibold uppercase tracking-widest mb-3">Health & Wellness</p>
-          <h1 className="text-4xl md:text-5xl font-black mb-4 leading-tight">Health Blog</h1>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black mb-4 leading-tight">Health Blog</h1>
           <p className="text-emerald-100 text-base mb-8">Expert health tips, medical news, and wellness guides from our community</p>
           <div className="flex items-center max-w-lg mx-auto bg-white/20 border border-white/30 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-white/60">
             <Search className="w-4 h-4 text-white/70 ml-4 flex-shrink-0" />
@@ -170,7 +170,7 @@ export default function BlogPage() {
                 </div>
               )}
 
-              <div className="flex items-center gap-3 pt-2">
+              <div className="flex flex-wrap items-center gap-3 pt-2">
                 <button type="submit" disabled={saving}
                   className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm disabled:opacity-60 transition-colors">
                   <Send className="w-4 h-4" />
@@ -204,7 +204,7 @@ export default function BlogPage() {
         {/* My Articles tab */}
         {activeTab === "mine" && user && (
           <div className="mb-8">
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div className="grid sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
               {myBlogs.map(b => (
                 <div key={b.id} className="rounded-2xl border border-border overflow-hidden bg-background opacity-90">
                   <div className="h-36 bg-muted/50 flex items-center justify-center overflow-hidden">
@@ -228,7 +228,7 @@ export default function BlogPage() {
         {/* All articles */}
         {activeTab === "all" && (
           loading ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
               {Array.from({ length: 6 }).map((_, i) => (
                 <div key={i} className="rounded-2xl border border-border overflow-hidden">
                   <div className="h-48 bg-muted animate-pulse" />
@@ -246,7 +246,7 @@ export default function BlogPage() {
               {user && <button onClick={() => setShowForm(true)} className="mt-4 text-emerald-600 hover:underline text-sm font-medium">Be the first to write one →</button>}
             </div>
           ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
               {filtered.map(b => (
                 <a key={b.id} href={`/blog/${b.slug}`}
                   className="group rounded-2xl border border-border overflow-hidden hover:shadow-lg transition-all hover:-translate-y-0.5 bg-background">

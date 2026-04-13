@@ -101,12 +101,12 @@ export default function ShopPage() {
     <div className="min-h-screen bg-background">
 
       {/* ── Hero Banner ── */}
-      <div className="bg-primary py-12 px-4 text-center text-primary-foreground">
+      <div className="bg-primary py-10 sm:py-12 px-4 text-center text-primary-foreground">
         <p className="text-xs font-semibold uppercase tracking-widest text-blue-200 mb-2">
           Online Pharmacy
         </p>
-        <h1 className="text-4xl font-black mb-3">Shop All Medicines</h1>
-        <p className="text-white/70 text-sm mb-8">
+        <h1 className="text-3xl sm:text-4xl font-black mb-3">Shop All Medicines</h1>
+        <p className="text-white/70 text-sm mb-6 sm:mb-8">
           Trusted products · Verified sellers · Fast delivery
         </p>
         {/* Search */}
@@ -132,7 +132,7 @@ export default function ShopPage() {
           <p className="text-sm font-semibold text-muted-foreground">
             {loading ? "Loading…" : `${medicines.length} products found`}
           </p>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             {/* Filter toggle */}
             <button
               onClick={() => setShowFilters(!showFilters)}
@@ -364,7 +364,7 @@ export default function ShopPage() {
                           ${med.price.toFixed(2)}
                         </span>
                       </div>
-                      <div className="flex items-center gap-2 mt-3">
+                      <div className="flex flex-col xs:flex-row flex-wrap items-start gap-2 mt-3">
                         <button
                           onClick={() => addToCart(med.id, med.name)}
                           disabled={outOfStock}
@@ -380,7 +380,7 @@ export default function ShopPage() {
                         </button>
                         <a href={`/shop/${med.id}`}
                           className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-sm
-                            font-bold border border-border text-primary hover:bg-muted transition-colors ml-auto">
+                            font-bold border border-border text-primary hover:bg-muted transition-colors sm:ml-auto">
                           View Details
                         </a>
                       </div>

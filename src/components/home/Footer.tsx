@@ -9,15 +9,15 @@ const footerLinks = {
 export default function Footer() {
   return (
     <footer className="bg-card border-t border-border">
-      <div className="max-w-7xl mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
+      <div className="max-w-7xl mx-auto px-4 py-10 sm:py-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
           {/* Brand */}
           <div className="lg:col-span-2">
             <div className="flex items-center gap-2 mb-4">
               <div className="w-9 h-9 rounded-lg bg-emerald-500 flex items-center justify-center">
                 <span className="text-white font-black text-lg">P</span>
               </div>
-              <span className="font-black text-xl text-foreground">Pro<span className="text-emerald-500">Pharm</span></span>
+              <span className="font-black text-xl text-foreground">Life<span className="text-emerald-500">Line</span></span>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed mb-5 max-w-xs">
               Your trusted online pharmacy. We deliver genuine medicines, vitamins, and health products right to your door — fast, safe, and affordable.
@@ -27,7 +27,7 @@ export default function Footer() {
                 <Phone className="w-4 h-4 text-emerald-500" /> +1 800 123 4567
               </a>
               <a href="mailto:help@Pharmora.com" className="flex items-center gap-2 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
-                <Mail className="w-4 h-4 text-emerald-500" /> help@Pharmora.com
+                <Mail className="w-4 h-4 text-emerald-500" /> help@lifeline.com
               </a>
               <span className="flex items-start gap-2">
                 <MapPin className="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0" /> 123 Health Street, Suite 100, New York, NY 10001
@@ -67,10 +67,11 @@ export default function Footer() {
 
       {/* Bottom bar */}
       <div className="border-t border-border py-4 px-4">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
-          <p>© 2026 Pharmora. All rights reserved.</p>
-          <div className="flex items-center gap-4">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground text-center">
+          <p>© 2026 LifeLine. All rights reserved.</p>
+          <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4">
             <span>🔒 SSL Secured</span>
+            <span className="hidden sm:inline">·</span>
             <span>💳 Visa · Mastercard · PayPal · Apple Pay</span>
           </div>
         </div>

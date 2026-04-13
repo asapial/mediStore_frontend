@@ -39,19 +39,19 @@ export default function CategoryStrip() {
   }, []);
 
   return (
-    <section className="py-10 border-b border-border bg-background">
+    <section className="py-8 sm:py-10 border-b border-border bg-background">
       <div className="max-w-7xl mx-auto px-4">
-        <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-9 gap-3">
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-9 gap-3 sm:gap-4">
           {categories.map(({ id, name, icon }, i) => {
             const IconComp = (icon && ICON_MAP[icon]) || DEFAULT_ICONS[i % DEFAULT_ICONS.length];
             const styles   = COLOR_MAP[name] || { color: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-950/50" };
             return (
               <a key={id} href={`/shop?category=${encodeURIComponent(name)}`}
-                className="flex flex-col items-center gap-2.5 group cursor-pointer">
-                <div className={`w-14 h-14 rounded-2xl ${styles.bg} flex items-center justify-center transition-all duration-200 group-hover:scale-110 group-hover:shadow-md border border-transparent group-hover:border-border`}>
-                  <IconComp className={`w-6 h-6 ${styles.color}`} />
+                className="flex flex-col items-center gap-2 group cursor-pointer">
+                <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl ${styles.bg} flex items-center justify-center transition-all duration-200 group-hover:scale-110 group-hover:shadow-md border border-transparent group-hover:border-border`}>
+                  <IconComp className={`w-5 h-5 sm:w-6 sm:h-6 ${styles.color}`} />
                 </div>
-                <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors text-center leading-tight">
+                <span className="text-[10px] sm:text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors text-center leading-tight line-clamp-2">
                   {name}
                 </span>
               </a>
@@ -59,9 +59,9 @@ export default function CategoryStrip() {
           })}
           {/* Loading skeletons */}
           {categories.length === 0 && Array.from({ length: 9 }).map((_, i) => (
-            <div key={i} className="flex flex-col items-center gap-2.5">
-              <div className="w-14 h-14 rounded-2xl bg-muted animate-pulse" />
-              <div className="h-3 w-12 rounded bg-muted animate-pulse" />
+            <div key={i} className="flex flex-col items-center gap-2">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-muted animate-pulse" />
+              <div className="h-3 w-10 sm:w-12 rounded bg-muted animate-pulse" />
             </div>
           ))}
         </div>

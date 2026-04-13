@@ -466,7 +466,7 @@ function SlideImagePanel({
 
                     {/* ── Glass card ── */}
                     <motion.div
-                        className="relative w-64 h-72 md:w-[360px] md:h-[440px] rounded-[36px] overflow-hidden"
+                        className="relative w-56 h-64 sm:w-64 sm:h-72 md:w-[360px] md:h-[440px] rounded-[36px] overflow-hidden"
                         whileHover={{ scale: 1.028 }}
                         transition={{ type: "spring", stiffness: 220, damping: 24 }}
                     >
@@ -519,12 +519,12 @@ function SlideImagePanel({
                         />
                     </motion.div>
 
-                    {/* ── Floating info chips (outside card, beside it) ── */}
+                    {/* ── Floating info chips (outside card, beside it) — hidden on small screens to prevent viewport overflow ── */}
                     <AnimatePresence>
                         {slide.floatingChips.map((chip, i) => (
                             <div
                                 key={chip.label}
-                                className={`absolute z-30 ${chip.side === "left"
+                                className={`hidden sm:block absolute z-30 ${chip.side === "left"
                                         ? "-left-4 top-10 -translate-x-full"
                                         : "-right-4 bottom-12 translate-x-full"
                                     }`}
@@ -555,7 +555,7 @@ const containerVariants = {
 };
 const wordVariants = {
     hidden: { y: 64, opacity: 0, rotateX: -40 },
-    visible: { y: 0, opacity: 1, rotateX: 0, transition: { type: "spring", stiffness: 200, damping: 22 } },
+    visible: { y: 0, opacity: 1, rotateX: 0, transition: { type: "spring", stiffness: 200, damping: 22 } as const },
     exit: { y: -36, opacity: 0, rotateX: 30, transition: { duration: 0.22, ease: easeOut } },
 };
 const fadeUp = {
@@ -565,7 +565,7 @@ const fadeUp = {
 };
 const imageVariants = {
     hidden: { opacity: 0, x: 64, scale: 0.9 },
-    visible: { opacity: 1, x: 0, scale: 1, transition: { type: "spring", stiffness: 140, damping: 20, delay: 0.08 } },
+    visible: { opacity: 1, x: 0, scale: 1, transition: { type: "spring", stiffness: 140, damping: 20, delay: 0.08 } as const },
     exit: { opacity: 0, x: -44, scale: 0.92, transition: { duration: 0.26 } },
 };
 
@@ -623,7 +623,7 @@ export default function HeroBanner() {
     return (
         <section
             ref={containerRef}
-            className={`relative overflow-hidden bg-gradient-to-br ${slide.bgLight} ${slide.bgDark} transition-colors duration-700 min-h-[600px] md:min-h-[660px]`}
+            className={`relative overflow-hidden bg-gradient-to-br ${slide.bgLight} ${slide.bgDark} transition-colors duration-700 min-h-[520px] sm:min-h-[600px] md:min-h-[660px]`}
             onMouseMove={handleMouseMove}
         >
             <GridLines />
@@ -658,8 +658,8 @@ export default function HeroBanner() {
             </div>
 
             {/* Main grid */}
-            <div className="max-w-7xl mx-auto px-6 py-16 md:py-20 relative z-10">
-                <div className="grid md:grid-cols-[1fr_500px] gap-12 lg:gap-16 items-center">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-14 md:py-20 relative z-10">
+                <div className="grid md:grid-cols-[1fr_460px] lg:grid-cols-[1fr_500px] gap-8 sm:gap-10 md:gap-12 lg:gap-16 items-center">
 
                     {/* ── LEFT: Text content ── */}
                     <div className="flex flex-col gap-5">
@@ -695,8 +695,8 @@ export default function HeroBanner() {
                                                     style={{ display: "inline-block" }}
                                                     className={
                                                         li === 1
-                                                            ? `text-5xl md:text-6xl xl:text-7xl font-black leading-none bg-gradient-to-r ${slide.accentClass} bg-clip-text text-transparent`
-                                                            : "text-5xl md:text-6xl xl:text-7xl font-black leading-none text-foreground"
+                                                            ? `text-4xl sm:text-5xl md:text-6xl xl:text-7xl font-black leading-none bg-gradient-to-r ${slide.accentClass} bg-clip-text text-transparent`
+                                                            : "text-4xl sm:text-5xl md:text-6xl xl:text-7xl font-black leading-none text-foreground"
                                                     }
                                                 >
                                                     {word}
@@ -754,7 +754,7 @@ export default function HeroBanner() {
                         {/* Trust stats */}
                         <AnimatePresence mode="wait">
                             <motion.div key={`stats-${current}`} variants={fadeUp} initial="hidden" animate="visible" exit="exit"
-                                className="flex items-center gap-6 pt-3">
+                                className="flex items-center gap-4 sm:gap-6 pt-3 flex-wrap">
                                 {[
                                     { val: "50K+", label: "Products" },
                                     { val: "4.8★", label: "Rating" },
@@ -779,7 +779,7 @@ export default function HeroBanner() {
                         </AnimatePresence>
                     </div>
 
-                    {/* ── RIGHT: PNG Image Panel ── */}
+                    {/* ── RIGHT: PNG Image Panel — centered on mobile, right-aligned on md+ ── */}
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={`img-${current}`}
@@ -787,7 +787,7 @@ export default function HeroBanner() {
                             initial="hidden"
                             animate="visible"
                             exit="exit"
-                            className="relative flex items-center justify-center"
+                            className="relative flex items-center justify-center order-first md:order-last"
                         >
                             <SlideImagePanel
                                 slide={slide}

@@ -36,7 +36,7 @@ export default function ContactPage() {
   return (
     <div className="min-h-screen" style={{ background: "linear-gradient(135deg,#F5EDE3 0%,#EEE4D9 100%)" }}>
       {/* Hero */}
-      <div style={{ background: "linear-gradient(135deg,#1B3A5C,#0F2740)" }} className="py-20 px-4 text-center text-white relative overflow-hidden">
+      <div style={{ background: "linear-gradient(135deg,#1B3A5C,#0F2740)" }} className="py-14 sm:py-20 px-4 text-center text-white relative overflow-hidden">
         {/* Background decoration */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {[...Array(6)].map((_, i) => (
@@ -45,17 +45,17 @@ export default function ContactPage() {
           ))}
         </div>
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="relative">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-5 text-xs font-semibold" style={{ background: "rgba(194,112,58,0.3)", color: "#F5C49D" }}>
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-4 sm:mb-5 text-xs font-semibold" style={{ background: "rgba(194,112,58,0.3)", color: "#F5C49D" }}>
             <HeadphonesIcon className="w-3.5 h-3.5" /> 24/7 Support Available
           </div>
-          <h1 className="text-5xl font-black mb-4 leading-tight">We'd Love to<br /><span style={{ color: "#C2703A" }}>Hear From You</span></h1>
-          <p className="text-white/70 max-w-lg mx-auto text-base">Our dedicated pharmacy support team is ready to help with orders, prescriptions, and any questions.</p>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black mb-4 leading-tight">We’d Love to<br /><span style={{ color: "#C2703A" }}>Hear From You</span></h1>
+          <p className="text-white/70 max-w-lg mx-auto text-sm sm:text-base">Our dedicated pharmacy support team is ready to help with orders, prescriptions, and any questions.</p>
         </motion.div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 py-14">
+      <div className="max-w-6xl mx-auto px-4 py-10 sm:py-14">
         {/* Info cards row */}
-        <div className="grid sm:grid-cols-3 gap-5 mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5 mb-10 sm:mb-12">
           {[
             { icon: <Mail className="w-6 h-6" />, title: "Email Us", value: "support@lifeline.com", sub: "We reply within 24 hours" },
             { icon: <Phone className="w-6 h-6" />, title: "Call Us", value: "+880 1234 567 890", sub: "Mon–Sat, 9AM–7PM" },
@@ -73,7 +73,7 @@ export default function ContactPage() {
           ))}
         </div>
 
-        <div className="grid lg:grid-cols-5 gap-8">
+        <div className="grid lg:grid-cols-5 gap-6 sm:gap-8">
           {/* Left: Contact info */}
           <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="lg:col-span-2 space-y-6">
             <div className="bg-white rounded-3xl p-7 shadow-sm" style={{ border: "1px solid #DDD0C4" }}>
@@ -112,7 +112,7 @@ export default function ContactPage() {
 
           {/* Right: Form */}
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="lg:col-span-3">
-            <div className="bg-white rounded-3xl p-8 shadow-sm" style={{ border: "1px solid #DDD0C4" }}>
+            <div className="bg-white rounded-3xl p-5 sm:p-8 shadow-sm" style={{ border: "1px solid #DDD0C4" }}>
               {submitted ? (
                 <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-12">
                   <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-5" style={{ background: "#E8F5E9" }}>
