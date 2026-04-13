@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { toast } from "sonner";
 import {
   ShoppingCart, Heart, Star, ChevronLeft, Package, User,
-  Truck, Shield, Plus, Minus, CheckCircle,
+  Truck, Shield, Plus, Minus, CheckCircle, Lock,
 } from "lucide-react";
 
 interface Category { id: string; name: string; }
@@ -36,7 +36,12 @@ export default function ProductDetailPage() {
   const [adding,   setAdding]   = useState(false);
   const [inCart,   setInCart]   = useState(false);
   const [tab, setTab] = useState<"description" | "details" | "reviews">("description");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  useEffect(() => {
+    fetch("/api/auth/me", { credentials: "include" })
+      .then(r => r.json()).then(d => { if (d?.user) setIsLoggedIn(true); }).catch(() => {});
+  }, []);
   useEffect(() => {
     if (!id) return;
     setLoading(true);
@@ -173,31 +178,52 @@ export default function ProductDetailPage() {
             {/* Quantity + Add to Cart */}
             {!outOfStock && (
               <div className="flex flex-wrap items-center gap-3 mb-5">
-                <div className="flex items-center border border-border rounded-xl overflow-hidden">
-                  <button onClick={() => setQty(q => Math.max(1, q - 1))}
-                    className="w-10 h-10 flex items-center justify-center hover:bg-muted transition-colors">
-                    <Minus className="w-4 h-4 text-foreground" />
-                  </button>
-                  <span className="w-12 text-center font-bold text-primary">{qty}</span>
-                  <button onClick={() => setQty(q => Math.min(medicine.stock, q + 1))}
-                    className="w-10 h-10 flex items-center justify-center hover:bg-muted transition-colors">
-                    <Plus className="w-4 h-4 text-foreground" />
-                  </button>
-                </div>
-                <button
-                  onClick={handleAddToCart}
-                  disabled={adding}
-                  className={`flex-1 min-w-[160px] flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold
-                    text-white transition-all disabled:opacity-70 hover:opacity-90
-                    ${inCart ? "bg-emerald-600" : "bg-primary"}`}>
-                  {inCart ? <CheckCircle className="w-5 h-5" /> : <ShoppingCart className="w-5 h-5" />}
-                  {adding ? "Adding…" : inCart ? "Added to Cart ✓" : "Add to Cart"}
-                </button>
-                <button onClick={handleWishlist}
-                  className="w-12 h-12 rounded-xl flex items-center justify-center border border-border
-                    hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
-                  <Heart className="w-5 h-5 text-red-400" />
-                </button>
+                {isLoggedIn ? (
+                  <>
+                    <div className="flex items-center border border-border rounded-xl overflow-hidden">
+                      <button onClick={() => setQty(q => Math.max(1, q - 1))}
+                        className="w-10 h-10 flex items-center justify-center hover:bg-muted transition-colors">
+                        <Minus className="w-4 h-4 text-foreground" />
+                      </button>
+                      <span className="w-12 text-center font-bold text-primary">{qty}</span>
+                      <button onClick={() => setQty(q => Math.min(medicine.stock, q + 1))}
+                        className="w-10 h-10 flex items-center justify-center hover:bg-muted transition-colors">
+                        <Plus className="w-4 h-4 text-foreground" />
+                      </button>
+                    </div>
+                    <button
+                      onClick={handleAddToCart}
+                      disabled={adding}
+                      className={`flex-1 min-w-[160px] flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold
+                        text-white transition-all disabled:opacity-70 hover:opacity-90
+                        ${inCart ? "bg-emerald-600" : "bg-primary"}`}>
+                      {inCart ? <CheckCircle className="w-5 h-5" /> : <ShoppingCart className="w-5 h-5" />}
+                      {adding ? "Adding…" : inCart ? "Added to Cart ✓" : "Add to Cart"}
+                    </button>
+                    <button onClick={handleWishlist}
+                      className="w-12 h-12 rounded-xl flex items-center justify-center border border-border
+                        hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                      <Heart className="w-5 h-5 text-red-400" />
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => toast.error("Please log in to add to cart")}
+                      className="flex-1 min-w-[160px] flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold
+                        bg-muted text-muted-foreground cursor-not-allowed"
+                      title="Login required">
+                      <Lock className="w-5 h-5" /> Login to Add to Cart
+                    </button>
+                    <button
+                      onClick={() => toast.error("Please log in to save to wishlist")}
+                      className="w-12 h-12 rounded-xl flex items-center justify-center border border-border
+                        text-muted-foreground cursor-not-allowed"
+                      title="Login required">
+                      <Lock className="w-5 h-5" />
+                    </button>
+                  </>
+                )}
               </div>
             )}
 

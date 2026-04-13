@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingCart, Timer, Flame, Zap, Star } from "lucide-react";
+import { ShoppingCart, Timer, Flame, Zap, Lock } from "lucide-react";
 import { toast } from "sonner";
 
 interface FlashSaleItem {
@@ -38,7 +38,7 @@ function CountdownSegment({ val, label }: { val: number; label: string }) {
   );
 }
 
-function SaleCard({ item, index }: { item: FlashSaleItem; index: number }) {
+function SaleCard({ item, index, isLoggedIn }: { item: FlashSaleItem; index: number; isLoggedIn: boolean }) {
   const t = useCountdown(item.endAt);
   const [adding, setAdding] = useState(false);
   const [added,  setAdded]  = useState(false);
@@ -139,19 +139,29 @@ function SaleCard({ item, index }: { item: FlashSaleItem; index: number }) {
         )}
 
         {/* Add to cart button */}
-        <motion.button
-          onClick={addToCart}
-          disabled={outOfStock || adding}
-          whileTap={!outOfStock ? { scale: 0.95 } : {}}
-          className="w-full mt-3 py-2 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-          style={added
-            ? { background: "#2E7D32", color: "#FFF" }
-            : outOfStock
-            ? { background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.4)" }
-            : { background: "rgba(255,255,255,0.95)", color: "#b91c1c" }}>
-          <ShoppingCart className="w-3.5 h-3.5" />
-          {adding ? "Adding…" : added ? "✓ Added!" : outOfStock ? "Sold Out" : "Add to Cart"}
-        </motion.button>
+        {isLoggedIn ? (
+          <motion.button
+            onClick={addToCart}
+            disabled={outOfStock || adding}
+            whileTap={!outOfStock ? { scale: 0.95 } : {}}
+            className="w-full mt-3 py-2 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            style={added
+              ? { background: "#2E7D32", color: "#FFF" }
+              : outOfStock
+              ? { background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.4)" }
+              : { background: "rgba(255,255,255,0.95)", color: "#b91c1c" }}>
+            <ShoppingCart className="w-3.5 h-3.5" />
+            {adding ? "Adding…" : added ? "✓ Added!" : outOfStock ? "Sold Out" : "Add to Cart"}
+          </motion.button>
+        ) : (
+          <button
+            onClick={() => toast.error("Please log in to add to cart")}
+            className="w-full mt-3 py-2 rounded-xl text-xs font-black flex items-center justify-center gap-1.5"
+            style={{ background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.5)" }}
+            title="Login required">
+            <Lock className="w-3.5 h-3.5" /> Login to Buy
+          </button>
+        )}
       </div>
     </motion.div>
   );
@@ -160,8 +170,11 @@ function SaleCard({ item, index }: { item: FlashSaleItem; index: number }) {
 export default function FlashSale() {
   const [sales,    setSales]   = useState<FlashSaleItem[]>([]);
   const [loading,  setLoading] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
+    fetch("/api/auth/me", { credentials: "include" })
+      .then(r => r.json()).then(d => { if (d?.user) setIsLoggedIn(true); }).catch(() => {});
     fetch("/api/flash-sales/active")
       .then(r => r.json())
       .then(d => setSales(d.data || []))
@@ -216,7 +229,7 @@ export default function FlashSale() {
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             <AnimatePresence>
-              {sales.map((s, i) => <SaleCard key={s.id} item={s} index={i} />)}
+              {sales.map((s, i) => <SaleCard key={s.id} item={s} index={i} isLoggedIn={isLoggedIn} />)}
             </AnimatePresence>
           </div>
         )}

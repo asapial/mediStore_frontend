@@ -1,18 +1,95 @@
 "use client";
-import { useState, useEffect } from "react";
-import { Search, Clock, User, ArrowRight, PenSquare, X, Send, CheckCircle, Tag, Image, FileText, AlignLeft } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import {
+  Search, Clock, User, ArrowRight, PenSquare, X, Send, CheckCircle,
+  Tag, Image as ImageIcon, FileText, AlignLeft, Upload, Loader2, Edit3, Lock,
+} from "lucide-react";
 import { toast } from "sonner";
 
+/* ─────────────────────────────────────── Types ──────────────────────────────── */
 interface Blog {
   id: string; title: string; summary: string; slug: string; image?: string;
-  tags: string[]; publishedAt?: string; author: { id: string; name: string; image?: string };
+  tags: string[]; isPublished?: boolean; isFeatured?: boolean;
+  publishedAt?: string; content?: string;
+  author: { id: string; name: string; image?: string };
 }
-interface SessionUser { id: string; name: string; email: string; }
+interface SessionUser { id: string; name: string; email: string; role: string; }
 
+/* ─────────────────────────────── Style helpers ──────────────────────────────── */
 const FIELD_STYLE = { borderColor: "#DDD0C4", background: "#FFF", color: "#5C4033" };
-const LABEL_STYLE = "block text-xs font-semibold mb-1 text-gray-600";
-const INPUT_CLS = "w-full border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400";
+const LABEL_CLS   = "block text-xs font-semibold mb-1 text-gray-600";
+const INPUT_CLS   = "w-full border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400";
+const IMGBB_KEY   = "e91ee091af74018e8539c64488ba645e";
 
+/* ─────────────────────────────── imgbb upload ───────────────────────────────── */
+async function uploadToImgbb(file: File): Promise<string> {
+  const fd = new FormData();
+  fd.append("image", file);
+  const res  = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, { method: "POST", body: fd });
+  const data = await res.json();
+  if (!data.success) throw new Error("Image upload failed");
+  return data.data.url as string;
+}
+
+/* ─────────────────── Reusable image upload field ───────────────────────────── */
+function ImageUploadField({
+  value, onChange, label = "Cover Image (optional)",
+}: {
+  value: string; onChange: (url: string) => void; label?: string;
+}) {
+  const ref = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const url = await uploadToImgbb(file);
+      onChange(url);
+      toast.success("Image uploaded!");
+    } catch {
+      toast.error("Image upload failed. Try a URL instead.");
+    } finally { setUploading(false); e.target.value = ""; }
+  };
+
+  return (
+    <div>
+      <label className={LABEL_CLS}><ImageIcon className="inline w-3.5 h-3.5 mr-1" />{label}</label>
+      <div className="flex gap-2">
+        <input
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          placeholder="https://example.com/image.jpg  or upload ↑"
+          className={INPUT_CLS} style={FIELD_STYLE}
+        />
+        <button
+          type="button"
+          onClick={() => ref.current?.click()}
+          disabled={uploading}
+          className="flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl border border-emerald-300 bg-emerald-50 text-emerald-700 text-xs font-bold hover:bg-emerald-100 transition disabled:opacity-60"
+          title="Upload image to imgbb"
+        >
+          {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+          {uploading ? "…" : "Upload"}
+        </button>
+        <input ref={ref} type="file" accept="image/*" className="hidden" onChange={handleFile} />
+      </div>
+      {value && (
+        <div className="mt-2 rounded-xl overflow-hidden h-36 bg-muted relative">
+          <img src={value} alt="preview" className="w-full h-full object-cover"
+            onError={e => (e.currentTarget.style.display = "none")} />
+          <button type="button" onClick={() => onChange("")}
+            className="absolute top-1.5 right-1.5 bg-black/50 text-white rounded-full p-0.5 hover:bg-black/70 transition">
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ═══════════════════════════════ MAIN PAGE ════════════════════════════════════ */
 export default function BlogPage() {
   const [blogs,     setBlogs]     = useState<Blog[]>([]);
   const [myBlogs,   setMyBlogs]   = useState<Blog[]>([]);
@@ -22,12 +99,18 @@ export default function BlogPage() {
   const [showForm,  setShowForm]  = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [saving,    setSaving]    = useState(false);
-  const [activeTab, setActiveTab] = useState<"all"|"mine">("all");
+  const [activeTab, setActiveTab] = useState<"all" | "mine">("all");
 
-  const [form, setForm] = useState({
-    title: "", summary: "", content: "", image: "", tags: "",
-  });
+  /* ─── edit state ─── */
+  const [editBlog, setEditBlog]   = useState<Blog | null>(null);
+  const [editSaving, setEditSaving] = useState(false);
 
+  /* ─── write form ─── */
+  const [form, setForm] = useState({ title: "", summary: "", content: "", image: "", tags: "" });
+  /* ─── edit form ─── */
+  const [editForm, setEditForm] = useState({ title: "", summary: "", content: "", image: "", tags: "" });
+
+  /* ─── loaders ─── */
   const loadBlogs = () =>
     fetch("/api/blogs?limit=50")
       .then(r => r.json()).then(d => setBlogs(d.data || []))
@@ -45,6 +128,19 @@ export default function BlogPage() {
       .catch(() => {});
   }, []);
 
+  /* ─── open edit modal ─── */
+  const openEdit = (b: Blog) => {
+    setEditBlog(b);
+    setEditForm({
+      title:   b.title,
+      summary: b.summary,
+      content: b.content || "",
+      image:   b.image   || "",
+      tags:    b.tags.join(", "),
+    });
+  };
+
+  /* ─── submit new article ─── */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.title.trim() || !form.summary.trim() || !form.content.trim()) {
@@ -68,6 +164,36 @@ export default function BlogPage() {
     finally { setSaving(false); }
   };
 
+  /* ─── save edit ─── */
+  const handleEditSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editBlog) return;
+    if (!editForm.title.trim() || !editForm.summary.trim() || !editForm.content.trim()) {
+      toast.error("Title, summary and content are required"); return;
+    }
+    setEditSaving(true);
+    try {
+      const tags = editForm.tags.split(",").map(t => t.trim()).filter(Boolean);
+      const res = await fetch(`/api/blogs/${editBlog.id}`, {
+        method: "PUT", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title:   editForm.title.trim(),
+          summary: editForm.summary.trim(),
+          content: editForm.content.trim(),
+          image:   editForm.image || null,
+          tags,
+        }),
+      });
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.message);
+      toast.success(d.message || "Article updated — pending admin review");
+      setEditBlog(null);
+      loadMyBlogs();
+    } catch (e: any) { toast.error(e.message); }
+    finally { setEditSaving(false); }
+  };
+
   const filtered = blogs.filter(b =>
     b.title.toLowerCase().includes(search.toLowerCase()) ||
     b.summary.toLowerCase().includes(search.toLowerCase()) ||
@@ -77,10 +203,10 @@ export default function BlogPage() {
   return (
     <div className="min-h-screen bg-background">
 
-      {/* Hero */}
+      {/* ── Hero ─────────────────────────────────────────────────────────────── */}
       <div className="bg-gradient-to-br from-emerald-600 to-teal-700 py-16 px-4 text-center text-white">
         <div className="max-w-3xl mx-auto">
-          <p className="text-emerald-200 text-sm font-semibold uppercase tracking-widest mb-3">Health & Wellness</p>
+          <p className="text-emerald-200 text-sm font-semibold uppercase tracking-widest mb-3">Health &amp; Wellness</p>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-black mb-4 leading-tight">Health Blog</h1>
           <p className="text-emerald-100 text-base mb-8">Expert health tips, medical news, and wellness guides from our community</p>
           <div className="flex items-center max-w-lg mx-auto bg-white/20 border border-white/30 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-white/60">
@@ -89,14 +215,13 @@ export default function BlogPage() {
               placeholder="Search articles, topics, tags…"
               className="flex-1 px-3 py-3 text-sm focus:outline-none bg-transparent text-white placeholder:text-white/60" />
           </div>
-          {user && (
+          {user ? (
             <button onClick={() => { setShowForm(!showForm); setSubmitted(false); }}
               className="mt-6 inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-white text-emerald-700 font-bold text-sm hover:bg-emerald-50 transition-colors">
               <PenSquare className="w-4 h-4" />
               {showForm ? "Cancel" : "Write an Article"}
             </button>
-          )}
-          {!user && (
+          ) : (
             <p className="mt-6 text-emerald-200 text-sm">
               <a href="/login" className="underline font-semibold text-white">Sign in</a> to write and publish your own health articles
             </p>
@@ -118,10 +243,9 @@ export default function BlogPage() {
           </div>
         )}
 
-        {/* Write Article Form */}
+        {/* ── Write Article Form ─────────────────────────────────────────────── */}
         {showForm && user && (
           <div className="mb-10 border border-border rounded-2xl overflow-hidden shadow-sm">
-            {/* Form header */}
             <div className="bg-emerald-600 px-6 py-4 flex items-center justify-between">
               <div className="flex items-center gap-2 text-white font-bold">
                 <PenSquare className="w-5 h-5" /> Write a Health Article
@@ -132,43 +256,34 @@ export default function BlogPage() {
             <form onSubmit={handleSubmit} className="bg-background p-6 space-y-5">
               <div className="grid sm:grid-cols-2 gap-4">
                 <div className="sm:col-span-2">
-                  <label className={LABEL_STYLE}><FileText className="inline w-3.5 h-3.5 mr-1" />Article Title *</label>
+                  <label className={LABEL_CLS}><FileText className="inline w-3.5 h-3.5 mr-1" />Article Title *</label>
                   <input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))}
                     placeholder="e.g. 10 Tips for a Healthier Immune System"
                     className={INPUT_CLS} style={FIELD_STYLE} required />
                 </div>
                 <div className="sm:col-span-2">
-                  <label className={LABEL_STYLE}><AlignLeft className="inline w-3.5 h-3.5 mr-1" />Summary *</label>
+                  <label className={LABEL_CLS}><AlignLeft className="inline w-3.5 h-3.5 mr-1" />Summary *</label>
                   <textarea value={form.summary} onChange={e => setForm(p => ({ ...p, summary: e.target.value }))}
                     placeholder="A brief summary of the article (2-3 sentences)…"
                     rows={2} className={`${INPUT_CLS} resize-none`} style={FIELD_STYLE} required />
                 </div>
                 <div className="sm:col-span-2">
-                  <label className={LABEL_STYLE}><Send className="inline w-3.5 h-3.5 mr-1" />Full Content *</label>
+                  <label className={LABEL_CLS}><Send className="inline w-3.5 h-3.5 mr-1" />Full Content *</label>
                   <textarea value={form.content} onChange={e => setForm(p => ({ ...p, content: e.target.value }))}
                     placeholder="Write your full article here…"
                     rows={10} className={`${INPUT_CLS} resize-none`} style={FIELD_STYLE} required />
                 </div>
-                <div>
-                  <label className={LABEL_STYLE}><Image className="inline w-3.5 h-3.5 mr-1" />Cover Image URL (optional)</label>
-                  <input value={form.image} onChange={e => setForm(p => ({ ...p, image: e.target.value }))}
-                    placeholder="https://example.com/image.jpg"
-                    className={INPUT_CLS} style={FIELD_STYLE} />
+                {/* imgbb image upload */}
+                <div className="sm:col-span-2">
+                  <ImageUploadField value={form.image} onChange={url => setForm(p => ({ ...p, image: url }))} />
                 </div>
                 <div>
-                  <label className={LABEL_STYLE}><Tag className="inline w-3.5 h-3.5 mr-1" />Tags (comma-separated)</label>
+                  <label className={LABEL_CLS}><Tag className="inline w-3.5 h-3.5 mr-1" />Tags (comma-separated)</label>
                   <input value={form.tags} onChange={e => setForm(p => ({ ...p, tags: e.target.value }))}
                     placeholder="e.g. vitamins, immunity, nutrition"
                     className={INPUT_CLS} style={FIELD_STYLE} />
                 </div>
               </div>
-
-              {/* Image preview */}
-              {form.image && (
-                <div className="rounded-xl overflow-hidden h-40 bg-muted">
-                  <img src={form.image} alt="preview" className="w-full h-full object-cover" onError={e => (e.currentTarget.style.display = "none")} />
-                </div>
-              )}
 
               <div className="flex flex-wrap items-center gap-3 pt-2">
                 <button type="submit" disabled={saving}
@@ -186,7 +301,72 @@ export default function BlogPage() {
           </div>
         )}
 
-        {/* Tabs (My Articles tab only shown if logged in and has drafts) */}
+        {/* ── Edit Article Modal ─────────────────────────────────────────────── */}
+        {editBlog && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+            <div className="w-full max-w-2xl bg-background rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+              {/* Modal header */}
+              <div className="bg-blue-600 px-6 py-4 flex items-center justify-between flex-shrink-0">
+                <div className="flex items-center gap-2 text-white font-bold">
+                  <Edit3 className="w-5 h-5" /> Edit Article
+                </div>
+                <button onClick={() => setEditBlog(null)} className="text-white/70 hover:text-white"><X className="w-5 h-5" /></button>
+              </div>
+
+              {/* Admin notice */}
+              <div className="bg-amber-50 border-b border-amber-200 px-6 py-2.5 flex items-start gap-2 text-xs text-amber-800 flex-shrink-0">
+                <Lock className="w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-amber-600" />
+                <span>After saving, this article will be set back to <strong>Pending Review</strong>. An admin must re-publish and re-feature it.</span>
+              </div>
+
+              <form onSubmit={handleEditSave} className="overflow-y-auto p-6 space-y-5 flex-1">
+                <div className="space-y-4">
+                  <div>
+                    <label className={LABEL_CLS}><FileText className="inline w-3.5 h-3.5 mr-1" />Article Title *</label>
+                    <input value={editForm.title} onChange={e => setEditForm(p => ({ ...p, title: e.target.value }))}
+                      className={INPUT_CLS} style={FIELD_STYLE} required />
+                  </div>
+                  <div>
+                    <label className={LABEL_CLS}><AlignLeft className="inline w-3.5 h-3.5 mr-1" />Summary *</label>
+                    <textarea value={editForm.summary} onChange={e => setEditForm(p => ({ ...p, summary: e.target.value }))}
+                      rows={3} className={`${INPUT_CLS} resize-none`} style={FIELD_STYLE} required />
+                  </div>
+                  <div>
+                    <label className={LABEL_CLS}><Send className="inline w-3.5 h-3.5 mr-1" />Full Content *</label>
+                    <textarea value={editForm.content} onChange={e => setEditForm(p => ({ ...p, content: e.target.value }))}
+                      rows={12} className={`${INPUT_CLS} resize-none`} style={FIELD_STYLE} required />
+                  </div>
+                  {/* imgbb upload in edit form */}
+                  <ImageUploadField
+                    value={editForm.image}
+                    onChange={url => setEditForm(p => ({ ...p, image: url }))}
+                    label="Cover Image (optional — upload or paste URL)"
+                  />
+                  <div>
+                    <label className={LABEL_CLS}><Tag className="inline w-3.5 h-3.5 mr-1" />Tags (comma-separated)</label>
+                    <input value={editForm.tags} onChange={e => setEditForm(p => ({ ...p, tags: e.target.value }))}
+                      placeholder="e.g. vitamins, immunity"
+                      className={INPUT_CLS} style={FIELD_STYLE} />
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-3 pt-2">
+                  <button type="submit" disabled={editSaving}
+                    className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm disabled:opacity-60 transition-colors">
+                    {editSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Edit3 className="w-4 h-4" />}
+                    {editSaving ? "Saving…" : "Save Changes"}
+                  </button>
+                  <button type="button" onClick={() => setEditBlog(null)}
+                    className="px-5 py-2.5 rounded-xl border border-border text-sm font-semibold hover:bg-muted transition-colors">
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* ── Tabs ──────────────────────────────────────────────────────────── */}
         {user && myBlogs.length > 0 && (
           <div className="flex gap-2 mb-6">
             {(["all", "mine"] as const).map(tab => (
@@ -201,23 +381,42 @@ export default function BlogPage() {
           </div>
         )}
 
-        {/* My Articles tab */}
+        {/* ── My Articles tab ───────────────────────────────────────────────── */}
         {activeTab === "mine" && user && (
           <div className="mb-8">
             <div className="grid sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
               {myBlogs.map(b => (
-                <div key={b.id} className="rounded-2xl border border-border overflow-hidden bg-background opacity-90">
-                  <div className="h-36 bg-muted/50 flex items-center justify-center overflow-hidden">
-                    {b.image ? <img src={b.image} alt={b.title} className="w-full h-full object-cover" /> : <span className="text-5xl">✍️</span>}
+                <div key={b.id} className="rounded-2xl border border-border overflow-hidden bg-background group hover:shadow-md transition-all">
+                  <div className="h-36 bg-muted/50 flex items-center justify-center overflow-hidden relative">
+                    {b.image
+                      ? <img src={b.image} alt={b.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                      : <span className="text-5xl">✍️</span>}
+                    {/* Edit button overlay */}
+                    <button
+                      onClick={() => openEdit(b)}
+                      className="absolute top-2 right-2 bg-blue-600 text-white p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 text-xs font-bold"
+                      title="Edit article"
+                    >
+                      <Edit3 className="w-3.5 h-3.5" /> Edit
+                    </button>
                   </div>
                   <div className="p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${(b as any).isPublished ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"}`}>
-                        {(b as any).isPublished ? "✅ Published" : "⏳ Pending Review"}
+                    <div className="flex items-center gap-2 mb-2 flex-wrap">
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${b.isPublished ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"}`}>
+                        {b.isPublished ? "✅ Published" : "⏳ Pending Review"}
                       </span>
+                      {b.isFeatured && (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-50 text-orange-700">⭐ Featured</span>
+                      )}
                     </div>
                     <h3 className="font-bold text-sm leading-snug line-clamp-2">{b.title}</h3>
                     <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{b.summary}</p>
+                    <button
+                      onClick={() => openEdit(b)}
+                      className="mt-3 flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-800 transition-colors"
+                    >
+                      <Edit3 className="w-3 h-3" /> Edit this article
+                    </button>
                   </div>
                 </div>
               ))}
@@ -225,7 +424,7 @@ export default function BlogPage() {
           </div>
         )}
 
-        {/* All articles */}
+        {/* ── All articles ──────────────────────────────────────────────────── */}
         {activeTab === "all" && (
           loading ? (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">

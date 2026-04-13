@@ -4,7 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search, SlidersHorizontal, ShoppingCart, Heart, Star, X,
-  Filter, Grid3X3, List,
+  Filter, Grid3X3, List, Lock,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -64,8 +64,11 @@ export default function ShopPage() {
   const [inStock,  setInStock]  = useState(false);
   const [featured, setFeatured] = useState(false);
   const [sortBy,   setSortBy]   = useState("newest");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
+    fetch("/api/auth/me", { credentials: "include" })
+      .then(r => r.json()).then(d => { if (d?.user) setIsLoggedIn(true); }).catch(() => {});
     fetch("/api/admin/categories")
       .then(r => r.json()).then(d => setCategories(d.data || []));
   }, []);
@@ -317,17 +320,29 @@ export default function ShopPage() {
                           {med.stock > 0 ? `${med.stock} left` : "Sold out"}
                         </span>
                       </div>
-                      <button
-                        onClick={() => addToCart(med.id, med.name)}
-                        disabled={outOfStock}
-                        className={`w-full mt-3 py-2 rounded-xl text-sm font-bold flex items-center
-                          justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed
-                          hover:opacity-90 ${outOfStock
-                            ? "bg-muted text-muted-foreground"
-                            : "bg-primary text-primary-foreground"}`}>
-                        <ShoppingCart className="w-4 h-4" />
-                        {outOfStock ? "Out of Stock" : "Add to Cart"}
-                      </button>
+                      {/* Grid card cart button */}
+                      {isLoggedIn ? (
+                        <button
+                          onClick={() => addToCart(med.id, med.name)}
+                          disabled={outOfStock}
+                          className={`w-full mt-3 py-2 rounded-xl text-sm font-bold flex items-center
+                            justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed
+                            hover:opacity-90 ${outOfStock
+                              ? "bg-muted text-muted-foreground"
+                              : "bg-primary text-primary-foreground"}`}>
+                          <ShoppingCart className="w-4 h-4" />
+                          {outOfStock ? "Out of Stock" : "Add to Cart"}
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => toast.error("Please log in to add to cart")}
+                          disabled={outOfStock}
+                          className="w-full mt-3 py-2 rounded-xl text-sm font-bold flex items-center
+                            justify-center gap-2 bg-muted text-muted-foreground cursor-not-allowed"
+                          title="Login required">
+                          <Lock className="w-4 h-4" /> Login to Add
+                        </button>
+                      )}
                     </div>
                   </motion.div>
                 ) : (
@@ -365,19 +380,39 @@ export default function ShopPage() {
                         </span>
                       </div>
                       <div className="flex flex-col xs:flex-row flex-wrap items-start gap-2 mt-3">
-                        <button
-                          onClick={() => addToCart(med.id, med.name)}
-                          disabled={outOfStock}
-                          className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-sm
-                            font-bold bg-primary text-primary-foreground disabled:opacity-50">
-                          <ShoppingCart className="w-3.5 h-3.5" /> Add to Cart
-                        </button>
-                        <button
-                          onClick={() => addToWishlist(med.id, med.name)}
-                          className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-sm
-                            font-bold border border-border text-muted-foreground hover:bg-muted transition-colors">
-                          <Heart className="w-3.5 h-3.5" /> Wishlist
-                        </button>
+                        {isLoggedIn ? (
+                          <button
+                            onClick={() => addToCart(med.id, med.name)}
+                            disabled={outOfStock}
+                            className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-sm
+                              font-bold bg-primary text-primary-foreground disabled:opacity-50">
+                            <ShoppingCart className="w-3.5 h-3.5" /> Add to Cart
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => toast.error("Please log in to add to cart")}
+                            className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-sm
+                              font-bold bg-muted text-muted-foreground cursor-not-allowed"
+                            title="Login required">
+                            <Lock className="w-3.5 h-3.5" /> Login to Add
+                          </button>
+                        )}
+                        {isLoggedIn ? (
+                          <button
+                            onClick={() => addToWishlist(med.id, med.name)}
+                            className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-sm
+                              font-bold border border-border text-muted-foreground hover:bg-muted transition-colors">
+                            <Heart className="w-3.5 h-3.5" /> Wishlist
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => toast.error("Please log in to save to wishlist")}
+                            className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-sm
+                              font-bold border border-border text-muted-foreground cursor-not-allowed"
+                            title="Login required">
+                            <Lock className="w-3.5 h-3.5" /> Wishlist
+                          </button>
+                        )}
                         <a href={`/shop/${med.id}`}
                           className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-sm
                             font-bold border border-border text-primary hover:bg-muted transition-colors sm:ml-auto">

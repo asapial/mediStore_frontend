@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ShoppingCart, Star, Heart, Pill } from "lucide-react";
+import Link from "next/link";
+import { ShoppingCart, Star, Heart, Pill, Lock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -19,9 +20,13 @@ function avgRating(reviews: { rating: number }[]) {
   return reviews.reduce((s, r) => s + r.rating, 0) / reviews.length;
 }
 
-function MedCard({ med }: { med: Medicine }) {
+function MedCard({ med, isLoggedIn }: { med: Medicine; isLoggedIn: boolean }) {
   const rating = avgRating(med.reviews);
-  const addToCart = async () => {
+  const outOfStock = med.stock === 0;
+
+  const addToCart = async (e: React.MouseEvent) => {
+    e.preventDefault(); // don't navigate when clicking inside the link
+    if (!isLoggedIn) { toast.error("Please log in to add to cart"); return; }
     try {
       const res = await fetch("/api/cart", {
         method: "POST", credentials: "include",
@@ -33,8 +38,14 @@ function MedCard({ med }: { med: Medicine }) {
       toast.success("Added to cart!");
     } catch (e: any) { toast.error(e.message); }
   };
+
   return (
-    <div className="bg-background border border-border rounded-2xl overflow-hidden group hover:shadow-lg transition-all hover:-translate-y-1">
+    <Link
+      href={`/shop/${med.id}`}
+      className="bg-background border border-border rounded-2xl overflow-hidden group hover:shadow-lg
+        transition-all hover:-translate-y-1 block"
+    >
+      {/* Image */}
       <div className="relative h-44 bg-muted/30 flex items-center justify-center overflow-hidden">
         {med.image
           ? <img src={med.image} alt={med.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
@@ -42,12 +53,14 @@ function MedCard({ med }: { med: Medicine }) {
         <div className="absolute top-2 left-2">
           <Badge className="bg-emerald-500 hover:bg-emerald-500 text-white text-[10px]">Featured</Badge>
         </div>
-        {med.stock === 0 && (
+        {outOfStock && (
           <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
             <span className="text-white font-bold text-sm">Out of Stock</span>
           </div>
         )}
       </div>
+
+      {/* Content */}
       <div className="p-4">
         <p className="text-xs text-muted-foreground mb-1">{med.category.name} · {med.seller.name}</p>
         <h3 className="font-semibold text-sm leading-snug line-clamp-2 mb-1">{med.name}</h3>
@@ -60,21 +73,38 @@ function MedCard({ med }: { med: Medicine }) {
         </div>
         <div className="flex items-center justify-between">
           <span className="font-bold text-emerald-600">${med.price.toFixed(2)}</span>
-          <Button size="sm" onClick={addToCart} disabled={med.stock === 0}
-            className="bg-emerald-500 hover:bg-emerald-600 text-white text-xs h-7 px-3">
-            <ShoppingCart className="w-3 h-3 mr-1" /> Add
-          </Button>
+          {isLoggedIn ? (
+            <Button size="sm" onClick={addToCart} disabled={outOfStock}
+              className="bg-emerald-500 hover:bg-emerald-600 text-white text-xs h-7 px-3">
+              <ShoppingCart className="w-3 h-3 mr-1" /> Add
+            </Button>
+          ) : (
+            <button
+              onClick={e => { e.preventDefault(); toast.error("Please log in to add to cart"); }}
+              className="flex items-center gap-1 px-3 h-7 rounded-md text-xs font-medium border border-border text-muted-foreground cursor-not-allowed"
+              title="Login required"
+            >
+              <Lock className="w-3 h-3" /> Add
+            </button>
+          )}
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
 
 export default function FeaturedProducts() {
-  const [medicines, setMedicines] = useState<Medicine[]>([]);
-  const [loading,   setLoading]   = useState(true);
+  const [medicines,   setMedicines]   = useState<Medicine[]>([]);
+  const [loading,     setLoading]     = useState(true);
+  const [isLoggedIn,  setIsLoggedIn]  = useState(false);
 
   useEffect(() => {
+    // Check session
+    fetch("/api/auth/me", { credentials: "include" })
+      .then(r => r.json())
+      .then(d => { if (d?.user) setIsLoggedIn(true); })
+      .catch(() => {});
+
     fetch("/api/medicines/featured")
       .then(r => r.json())
       .then(d => setMedicines(d.data || []))
@@ -105,7 +135,7 @@ export default function FeaturedProducts() {
                   </div>
                 </div>
               ))
-            : medicines.map(m => <MedCard key={m.id} med={m} />)}
+            : medicines.map(m => <MedCard key={m.id} med={m} isLoggedIn={isLoggedIn} />)}
         </div>
       </div>
     </section>

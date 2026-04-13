@@ -4,15 +4,20 @@ import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaLayerGroup, FaPlus, FaTrash, FaEdit, FaSave, FaTimes, FaSearch, FaStar } from "react-icons/fa";
 
-interface Category { id: string; name: string; isFeatured?: boolean; _count?: { medicines: number } }
+interface Category {
+  id: string; name: string; icon?: string; isFeatured?: boolean;
+  _count?: { medicines: number };
+}
 
 export default function ManageCategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading,    setLoading]    = useState(true);
   const [newCat,     setNewCat]     = useState("");
+  const [newIcon,    setNewIcon]    = useState("");          // ← new: optional emoji
   const [creating,   setCreating]   = useState(false);
   const [editId,     setEditId]     = useState<string | null>(null);
   const [editName,   setEditName]   = useState("");
+  const [editIcon,   setEditIcon]   = useState("");          // ← new: edit icon
   const [deleting,   setDeleting]   = useState<string | null>(null);
   const [search,     setSearch]     = useState("");
 
@@ -35,11 +40,11 @@ export default function ManageCategoriesPage() {
       const res = await fetch("/api/admin/categories", {
         method: "POST", credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: newCat.trim() }),
+        body: JSON.stringify({ name: newCat.trim(), ...(newIcon.trim() ? { icon: newIcon.trim() } : {}) }),
       });
       if (!res.ok) throw new Error((await res.json()).message);
       toast.success("Category created");
-      setNewCat(""); fetchCats();
+      setNewCat(""); setNewIcon(""); fetchCats();
     } catch (e: any) { toast.error(e.message || "Failed"); }
     finally { setCreating(false); }
   };
@@ -50,7 +55,7 @@ export default function ManageCategoriesPage() {
       const res = await fetch(`/api/admin/categories/${id}`, {
         method: "PUT", credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: editName.trim() }),
+        body: JSON.stringify({ name: editName.trim(), ...(editIcon.trim() ? { icon: editIcon.trim() } : {}) }),
       });
       if (!res.ok) throw new Error((await res.json()).message);
       toast.success("Category updated"); setEditId(null); fetchCats();
@@ -99,7 +104,7 @@ export default function ManageCategoriesPage() {
       </div>
 
       {/* Stats bar */}
-      <div className="grid grid-cols-3 gap-4 mb-7">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-7">
         <div className="medi-card p-4 text-center">
           <p className="text-3xl font-black" style={{ color: "#1B3A5C" }}>{categories.length}</p>
           <p className="text-xs font-semibold uppercase mt-1" style={{ color: "#8A6650" }}>Total</p>
@@ -125,22 +130,43 @@ export default function ManageCategoriesPage() {
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
-        {/* Create form */}
+        {/* ── Create form ─────────────────────────────────────────────────────── */}
         <div className="medi-card p-6 h-fit">
           <h2 className="font-bold mb-4 flex items-center gap-2" style={{ color: "#1B3A5C" }}>
             <FaPlus style={{ color: "#C2703A" }} /> Add Category
           </h2>
+
+          {/* Name */}
+          <label className="text-xs font-semibold mb-1 block" style={{ color: "#8A6650" }}>
+            Category Name *
+          </label>
           <input value={newCat} onChange={e => setNewCat(e.target.value)}
             onKeyDown={e => e.key === "Enter" && create()}
-            placeholder="Category name (press Enter)"
+            placeholder="e.g. Vitamins & Supplements"
             className="w-full border rounded-lg px-3 py-2.5 text-sm mb-3"
             style={{ borderColor: "#DDD0C4", background: "#FFF", color: "#5C4033" }} />
+
+          {/* Icon (emoji) — optional */}
+          <label className="text-xs font-semibold mb-1 block" style={{ color: "#8A6650" }}>
+            Icon Emoji <span className="font-normal">(optional — paste any emoji)</span>
+          </label>
+          <div className="relative mb-3">
+            <input value={newIcon} onChange={e => setNewIcon(e.target.value)}
+              placeholder="e.g. 💊 🌿 🏥"
+              maxLength={4}
+              className="w-full border rounded-lg px-3 py-2.5 text-sm pr-10"
+              style={{ borderColor: "#DDD0C4", background: "#FFF", color: "#5C4033" }} />
+            {newIcon && (
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-2xl leading-none">{newIcon}</span>
+            )}
+          </div>
+
           <button onClick={create} disabled={creating || !newCat.trim()}
             className="medi-btn-accent w-full disabled:opacity-60">
             {creating ? "Creating…" : "Add Category"}
           </button>
 
-          {/* Quick stats list */}
+          {/* Top by medicines */}
           {categories.length > 0 && (
             <div className="mt-6 border-t pt-4" style={{ borderColor: "#DDD0C4" }}>
               <p className="text-xs font-semibold uppercase mb-3" style={{ color: "#8A6650" }}>Top by Medicines</p>
@@ -149,9 +175,10 @@ export default function ManageCategoriesPage() {
                 .slice(0, 5)
                 .map(c => (
                   <div key={c.id} className="flex items-center justify-between text-sm py-1.5 border-b" style={{ borderColor: "#EEE4D9" }}>
-            <span className="truncate" style={{ color: "#5C4033" }}>
-  {c.name}
-</span>
+                    <span className="truncate flex items-center gap-1.5" style={{ color: "#5C4033" }}>
+                      {c.icon && <span>{c.icon}</span>}
+                      {c.name}
+                    </span>
                     <span className="font-bold" style={{ color: "#1B3A5C" }}>{c._count?.medicines ?? 0}</span>
                   </div>
                 ))}
@@ -159,7 +186,7 @@ export default function ManageCategoriesPage() {
           )}
         </div>
 
-        {/* Categories list */}
+        {/* ── Categories list ──────────────────────────────────────────────────── */}
         <div className="lg:col-span-2">
           {/* Search */}
           <div className="relative mb-4">
@@ -183,23 +210,38 @@ export default function ManageCategoriesPage() {
                 {filtered.map((cat, i) => (
                   <motion.div key={cat.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.03 }} className="medi-card p-4 flex items-center gap-4">
-                    {/* Color dot */}
-                    <div className="w-9 h-9 rounded-xl flex-shrink-0 flex items-center justify-center font-bold text-white text-sm"
+
+                    {/* Icon avatar */}
+                    <div className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center font-bold text-white text-lg"
                       style={{ background: `hsl(${(i * 47) % 360}, 55%, 45%)` }}>
-                      {cat.name.charAt(0).toUpperCase()}
+                      {cat.icon ? cat.icon : cat.name.charAt(0).toUpperCase()}
                     </div>
 
-                    {/* Name */}
-                    <div className="flex-1">
+                    {/* Name / edit field */}
+                    <div className="flex-1 min-w-0">
                       {editId === cat.id ? (
-                        <input autoFocus value={editName} onChange={e => setEditName(e.target.value)}
-                          onKeyDown={e => { if (e.key === "Enter") update(cat.id); if (e.key === "Escape") setEditId(null); }}
-                          className="w-full border rounded-lg px-3 py-1.5 text-sm"
-                          style={{ borderColor: "#C2703A", background: "#FFF", color: "#5C4033" }} />
+                        <div className="space-y-2">
+                          <input autoFocus value={editName} onChange={e => setEditName(e.target.value)}
+                            onKeyDown={e => { if (e.key === "Enter") update(cat.id); if (e.key === "Escape") setEditId(null); }}
+                            placeholder="Category name"
+                            className="w-full border rounded-lg px-3 py-1.5 text-sm"
+                            style={{ borderColor: "#C2703A", background: "#FFF", color: "#5C4033" }} />
+                          <div className="relative">
+                            <input value={editIcon} onChange={e => setEditIcon(e.target.value)}
+                              placeholder="Icon emoji (optional)"
+                              maxLength={4}
+                              className="w-full border rounded-lg px-3 py-1.5 text-sm pr-8"
+                              style={{ borderColor: "#DDD0C4", background: "#FFF", color: "#5C4033" }} />
+                            {editIcon && (
+                              <span className="absolute right-2 top-1/2 -translate-y-1/2 text-lg leading-none">{editIcon}</span>
+                            )}
+                          </div>
+                        </div>
                       ) : (
                         <div>
                           <p className="font-semibold text-sm" style={{ color: "#1B3A5C" }}>{cat.name}</p>
                           <p className="text-xs" style={{ color: "#8A6650" }}>
+                            {cat.icon && <span className="mr-1">{cat.icon}</span>}
                             {cat._count?.medicines ?? 0} medicine{(cat._count?.medicines ?? 0) !== 1 ? "s" : ""}
                           </p>
                         </div>
@@ -209,8 +251,10 @@ export default function ManageCategoriesPage() {
                     {/* Actions */}
                     <div className="flex items-center gap-2 flex-shrink-0">
                       {/* Featured toggle */}
-                      <button onClick={() => toggleFeatured(cat)} title={cat.isFeatured ? "Remove from category strip" : "Show in category strip"}
-                        className="p-2 rounded-lg transition-colors" style={{ background: cat.isFeatured ? "#FFF8E1" : "#F5EDE3", color: cat.isFeatured ? "#F59E0B" : "#8A6650" }}>
+                      <button onClick={() => toggleFeatured(cat)}
+                        title={cat.isFeatured ? "Remove from category strip" : "Show in category strip"}
+                        className="p-2 rounded-lg transition-colors"
+                        style={{ background: cat.isFeatured ? "#FFF8E1" : "#F5EDE3", color: cat.isFeatured ? "#F59E0B" : "#8A6650" }}>
                         <FaStar className={cat.isFeatured ? "text-amber-400" : "text-muted-foreground/40"} />
                       </button>
                       {editId === cat.id ? (
@@ -222,7 +266,7 @@ export default function ManageCategoriesPage() {
                         </>
                       ) : (
                         <>
-                          <button onClick={() => { setEditId(cat.id); setEditName(cat.name); }}
+                          <button onClick={() => { setEditId(cat.id); setEditName(cat.name); setEditIcon(cat.icon ?? ""); }}
                             className="p-2 rounded-lg" style={{ background: "#E3F0FB", color: "#3A6EA5" }}><FaEdit /></button>
                           <button onClick={() => del(cat.id, cat.name)}
                             disabled={deleting === cat.id}
