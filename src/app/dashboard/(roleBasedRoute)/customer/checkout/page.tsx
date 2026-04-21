@@ -79,6 +79,7 @@ const BD_GEO: Record<string, Record<string, Record<string, string[]>>> = {
 
 interface CartItem {
   id: string; cartId: string; medicineId: string; quantity: number;
+  priceOverride?: number | null;        // flash-sale locked price
   medicine: { id: string; name: string; image: string | null; price: number; discountPrice?: number | null; stock: number; manufacturer: string };
 }
 type PaymentMethod = "COD" | "STRIPE";
@@ -131,12 +132,16 @@ export default function CheckoutPage() {
   const upazilas   = district ? Object.keys(BD_GEO[division]?.[district] || {}).sort() : [];
   const thanas     = upazila  ? (BD_GEO[division]?.[district]?.[upazila] || []) : [];
 
-  // effective price per item (discountPrice if valid, else price)
-  const effPrice = (m: CartItem["medicine"]) =>
-    m.discountPrice != null && m.discountPrice > 0 && m.discountPrice < m.price ? m.discountPrice : m.price;
+  // Price priority: priceOverride (flash sale) > discountPrice (product discount) > price
+  const effPrice = (item: CartItem) => {
+    if (item.priceOverride != null && item.priceOverride > 0) return item.priceOverride;
+    const m = item.medicine;
+    if (m.discountPrice != null && m.discountPrice > 0 && m.discountPrice < m.price) return m.discountPrice;
+    return m.price;
+  };
   const originalTotal   = items.reduce((s, i) => s + i.quantity * i.medicine.price, 0);
-  const discountSaving  = items.reduce((s, i) => s + i.quantity * (i.medicine.price - effPrice(i.medicine)), 0);
-  const subtotal        = originalTotal - discountSaving;   // after product discounts
+  const discountSaving  = items.reduce((s, i) => s + i.quantity * (i.medicine.price - effPrice(i)), 0);
+  const subtotal        = originalTotal - discountSaving;   // after product + flash sale discounts
   const finalTotal      = Math.max(0, subtotal - discount); // after coupon
 
   const fullAddress = useGeoAddress && geoCoords
@@ -502,22 +507,29 @@ export default function CheckoutPage() {
             <h2 className="font-bold text-lg mb-4" style={{ color: "#1B3A5C" }}>Order Summary</h2>
 
             <div className="space-y-3 mb-4 max-h-60 overflow-y-auto pr-1">
-              {items.map(item => (
-                <div key={item.id} className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg flex-shrink-0 overflow-hidden" style={{ background: "#EEE4D9" }}>
-                    {item.medicine.image
-                      ? <img src={item.medicine.image} alt={item.medicine.name} className="w-full h-full object-cover" />
-                      : <div className="w-full h-full flex items-center justify-center">💊</div>}
+              {items.map(item => {
+                const ep = effPrice(item);
+                const isFlashSale = item.priceOverride != null && item.priceOverride > 0;
+                return (
+                  <div key={item.id} className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg flex-shrink-0 overflow-hidden" style={{ background: "#EEE4D9" }}>
+                      {item.medicine.image
+                        ? <img src={item.medicine.image} alt={item.medicine.name} className="w-full h-full object-cover" />
+                        : <div className="w-full h-full flex items-center justify-center">💊</div>}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold truncate" style={{ color: "#1B3A5C" }}>
+                        {item.medicine.name}
+                        {isFlashSale && <span className="ml-1 text-[9px] font-bold px-1 py-0.5 rounded" style={{ background: "#FFF3E0", color: "#C2703A" }}>⚡Flash</span>}
+                      </p>
+                      <p className="text-xs" style={{ color: "#8A6650" }}>×{item.quantity} × ${ep.toFixed(2)}</p>
+                    </div>
+                    <p className="font-bold text-sm flex-shrink-0" style={{ color: "#C2703A" }}>
+                      ${(item.quantity * ep).toFixed(2)}
+                    </p>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-semibold truncate" style={{ color: "#1B3A5C" }}>{item.medicine.name}</p>
-                    <p className="text-xs" style={{ color: "#8A6650" }}>×{item.quantity} × ${effPrice(item.medicine).toFixed(2)}</p>
-                  </div>
-                  <p className="font-bold text-sm flex-shrink-0" style={{ color: "#C2703A" }}>
-                    ${(item.quantity * effPrice(item.medicine)).toFixed(2)}
-                  </p>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             <div className="border-t pt-4 space-y-2" style={{ borderColor: "#DDD0C4" }}>

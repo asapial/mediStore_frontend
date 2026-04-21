@@ -11,6 +11,7 @@ import {
 interface CartItem {
   id: string; cartId: string; medicineId: string;
   quantity: number; addedAt: string;
+  priceOverride?: number | null;        // flash-sale locked price
   medicine: {
     id: string; name: string; description: string;
     image: string | null; price: number; discountPrice?: number | null;
@@ -83,11 +84,15 @@ export default function CartPage() {
   };
 
   const selectedItems  = items.filter(i => selected.has(i.id));
-  // effective price = discountPrice if set and valid, else price
-  const effPrice = (m: CartItem["medicine"]) =>
-    m.discountPrice != null && m.discountPrice > 0 && m.discountPrice < m.price ? m.discountPrice : m.price;
+  // Price priority: priceOverride (flash sale) > discountPrice (product discount) > price
+  const effPrice = (item: CartItem) => {
+    if (item.priceOverride != null && item.priceOverride > 0) return item.priceOverride;
+    const m = item.medicine;
+    if (m.discountPrice != null && m.discountPrice > 0 && m.discountPrice < m.price) return m.discountPrice;
+    return m.price;
+  };
   const originalTotal  = selectedItems.reduce((s, i) => s + i.quantity * i.medicine.price, 0);
-  const subtotal       = selectedItems.reduce((s, i) => s + i.quantity * effPrice(i.medicine), 0);
+  const subtotal       = selectedItems.reduce((s, i) => s + i.quantity * effPrice(i), 0);
   const discountSaving = originalTotal - subtotal;
   const totalQty       = selectedItems.reduce((s, i) => s + i.quantity, 0);
 
@@ -177,17 +182,20 @@ export default function CartPage() {
                     <p className="text-xs mt-0.5" style={{ color: "#8A6650" }}>{item.medicine.manufacturer}</p>
                     <div className="flex items-center gap-4 mt-2">
                       {(() => {
-                        const hasDisc = item.medicine.discountPrice != null && item.medicine.discountPrice > 0 && item.medicine.discountPrice < item.medicine.price;
-                        return hasDisc ? (
+                        const ep = effPrice(item);
+                        const hasDiscount = ep < item.medicine.price;
+                        const isFlashSale = item.priceOverride != null && item.priceOverride > 0;
+                        return hasDiscount ? (
                           <>
-                            <span className="font-bold" style={{ color: "#C2703A" }}>${item.medicine.discountPrice!.toFixed(2)}</span>
+                            <span className="font-bold" style={{ color: "#C2703A" }}>${ep.toFixed(2)}</span>
                             <span className="text-xs line-through" style={{ color: "#aaa" }}>${item.medicine.price.toFixed(2)}</span>
-                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: "#FFEBEE", color: "#C62828" }}>
-                              -{Math.round(((item.medicine.price - item.medicine.discountPrice!) / item.medicine.price) * 100)}%
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+                              style={{ background: isFlashSale ? "#FFF3E0" : "#FFEBEE", color: isFlashSale ? "#C2703A" : "#C62828" }}>
+                              {isFlashSale ? "⚡ Flash" : `-${Math.round(((item.medicine.price - ep) / item.medicine.price) * 100)}%`}
                             </span>
                           </>
                         ) : (
-                          <span className="font-bold" style={{ color: "#C2703A" }}>${item.medicine.price.toFixed(2)}</span>
+                          <span className="font-bold" style={{ color: "#C2703A" }}>${ep.toFixed(2)}</span>
                         );
                       })()}
                       <span className={`badge-${item.medicine.stock === 0 ? "rejected" : item.medicine.stock < 10 ? "lowstock" : "instock"}`}>
@@ -219,7 +227,7 @@ export default function CartPage() {
                     </div>
                     {/* Subtotal */}
                     <p className="text-sm font-black" style={{ color: "#1B3A5C" }}>
-                      ${(item.quantity * effPrice(item.medicine)).toFixed(2)}
+                      ${(item.quantity * effPrice(item)).toFixed(2)}
                     </p>
                     {/* Remove */}
                     <button onClick={() => removeItem(item.id)}
@@ -250,7 +258,7 @@ export default function CartPage() {
             {selectedItems.map(item => (
               <div key={item.id} className="flex justify-between text-xs" style={{ color: "#8A6650" }}>
                 <span className="truncate max-w-[60%]">{item.medicine.name} ×{item.quantity}</span>
-                <span>${(item.quantity * effPrice(item.medicine)).toFixed(2)}</span>
+                <span>${(item.quantity * effPrice(item)).toFixed(2)}</span>
               </div>
             ))}
             <div className="border-t pt-3" style={{ borderColor: "#DDD0C4" }}>

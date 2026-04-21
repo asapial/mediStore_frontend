@@ -52,15 +52,19 @@ function SaleCard({ item, index, isLoggedIn }: { item: FlashSaleItem; index: num
     if (outOfStock || adding) return;
     setAdding(true);
     try {
-      const res = await fetch("/api/cart/add", {        // ← FIXED endpoint
+      const res = await fetch("/api/cart/add", {
         method: "POST", credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ medicineId: item.medicine.id, quantity: 1 }),
+        body: JSON.stringify({
+          medicineId: item.medicine.id,
+          quantity: 1,
+          priceOverride: item.discountPrice,   // ← lock in the flash-sale price
+        }),
       });
       const d = await res.json();
       if (!res.ok) throw new Error(d.message || "Failed");
       setAdded(true);
-      toast.success(`${item.medicine.name} added to cart!`);
+      toast.success(`${item.medicine.name} added to cart at $${item.discountPrice.toFixed(2)}!`);
       setTimeout(() => setAdded(false), 3000);
     } catch (e: any) {
       toast.error(e.message || "Please log in to add to cart");
