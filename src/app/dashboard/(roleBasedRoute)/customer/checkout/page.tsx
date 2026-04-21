@@ -79,7 +79,8 @@ const BD_GEO: Record<string, Record<string, Record<string, string[]>>> = {
 
 interface CartItem {
   id: string; cartId: string; medicineId: string; quantity: number;
-  priceOverride?: number | null;        // flash-sale locked price
+  priceOverride?: number | null;   // flash-sale locked price per unit
+  flashQuantity?: number;          // how many units are at flash price
   medicine: { id: string; name: string; image: string | null; price: number; discountPrice?: number | null; stock: number; manufacturer: string };
 }
 type PaymentMethod = "COD" | "STRIPE";
@@ -132,17 +133,21 @@ export default function CheckoutPage() {
   const upazilas   = district ? Object.keys(BD_GEO[division]?.[district] || {}).sort() : [];
   const thanas     = upazila  ? (BD_GEO[division]?.[district]?.[upazila] || []) : [];
 
-  // Price priority: priceOverride (flash sale) > discountPrice (product discount) > price
-  const effPrice = (item: CartItem) => {
-    if (item.priceOverride != null && item.priceOverride > 0) return item.priceOverride;
-    const m = item.medicine;
-    if (m.discountPrice != null && m.discountPrice > 0 && m.discountPrice < m.price) return m.discountPrice;
-    return m.price;
+  // Split-aware subtotal: flashQty × flashPrice + regularQty × regularPrice
+  const itemSubtotal = (item: CartItem): number => {
+    const flashQty    = item.flashQuantity ?? 0;
+    const regularQty  = item.quantity - flashQty;
+    const flashPrice  = item.priceOverride ?? item.medicine.price;
+    const m           = item.medicine;
+    const regPrice    = m.discountPrice != null && m.discountPrice > 0 && m.discountPrice < m.price
+      ? m.discountPrice : m.price;
+    return flashQty * flashPrice + regularQty * regPrice;
   };
+
   const originalTotal   = items.reduce((s, i) => s + i.quantity * i.medicine.price, 0);
-  const discountSaving  = items.reduce((s, i) => s + i.quantity * (i.medicine.price - effPrice(i)), 0);
-  const subtotal        = originalTotal - discountSaving;   // after product + flash sale discounts
-  const finalTotal      = Math.max(0, subtotal - discount); // after coupon
+  const discountSaving  = items.reduce((s, i) => s + i.quantity * i.medicine.price - itemSubtotal(i), 0);
+  const subtotal        = originalTotal - discountSaving;
+  const finalTotal      = Math.max(0, subtotal - discount);
 
   const fullAddress = useGeoAddress && geoCoords
     ? [houseNum, landmark, `GPS(${geoCoords.lat.toFixed(5)},${geoCoords.lng.toFixed(5)})`, "Bangladesh"].filter(Boolean).join(", ")
@@ -225,10 +230,15 @@ export default function CheckoutPage() {
         const piData = await piRes.json();
         if (!piRes.ok) throw new Error(piData.message || "Stripe session failed");
 
-        // Store pending order data for after payment
+        // Store pending order data for after payment (Stripe)
         sessionStorage.setItem("pendingOrder", JSON.stringify({
           address: fullAddress,
-          items: items.map(i => ({ medicineId: i.medicineId, quantity: i.quantity })),
+          items: items.map(i => ({
+            medicineId:    i.medicineId,
+            quantity:      i.quantity,
+            priceOverride: i.priceOverride ?? null,
+            flashQuantity: i.flashQuantity ?? 0,
+          })),
           couponCode: couponApplied ? couponCode : undefined,
         }));
         sessionStorage.setItem("stripeClientSecret", piData.data.clientSecret);
@@ -242,7 +252,12 @@ export default function CheckoutPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           address: fullAddress,
-          items: items.map(i => ({ medicineId: i.medicineId, quantity: i.quantity })),
+          items: items.map(i => ({
+            medicineId:    i.medicineId,
+            quantity:      i.quantity,
+            priceOverride: i.priceOverride ?? null,
+            flashQuantity: i.flashQuantity ?? 0,
+          })),
           ...(couponApplied ? { couponCode } : {}),
         }),
       });
@@ -508,8 +523,10 @@ export default function CheckoutPage() {
 
             <div className="space-y-3 mb-4 max-h-60 overflow-y-auto pr-1">
               {items.map(item => {
-                const ep = effPrice(item);
-                const isFlashSale = item.priceOverride != null && item.priceOverride > 0;
+                const flashQty   = item.flashQuantity ?? 0;
+                const isFlash    = flashQty > 0;
+                const isSplit    = isFlash && flashQty < item.quantity;
+                const lineTotal  = itemSubtotal(item);
                 return (
                   <div key={item.id} className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-lg flex-shrink-0 overflow-hidden" style={{ background: "#EEE4D9" }}>
@@ -520,12 +537,20 @@ export default function CheckoutPage() {
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-semibold truncate" style={{ color: "#1B3A5C" }}>
                         {item.medicine.name}
-                        {isFlashSale && <span className="ml-1 text-[9px] font-bold px-1 py-0.5 rounded" style={{ background: "#FFF3E0", color: "#C2703A" }}>⚡Flash</span>}
+                        {isFlash && <span className="ml-1 text-[9px] font-bold px-1 py-0.5 rounded" style={{ background: "#FFF3E0", color: "#C2703A" }}>⚡Flash</span>}
                       </p>
-                      <p className="text-xs" style={{ color: "#8A6650" }}>×{item.quantity} × ${ep.toFixed(2)}</p>
+                      {isSplit ? (
+                        <p className="text-xs" style={{ color: "#8A6650" }}>
+                          {flashQty}×${item.priceOverride!.toFixed(2)}⚡ + {item.quantity - flashQty}×${item.medicine.price.toFixed(2)}
+                        </p>
+                      ) : (
+                        <p className="text-xs" style={{ color: "#8A6650" }}>
+                          ×{item.quantity} × ${isFlash ? item.priceOverride!.toFixed(2) : item.medicine.price.toFixed(2)}
+                        </p>
+                      )}
                     </div>
                     <p className="font-bold text-sm flex-shrink-0" style={{ color: "#C2703A" }}>
-                      ${(item.quantity * ep).toFixed(2)}
+                      ${lineTotal.toFixed(2)}
                     </p>
                   </div>
                 );

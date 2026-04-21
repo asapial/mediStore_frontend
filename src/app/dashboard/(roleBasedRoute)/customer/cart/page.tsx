@@ -11,7 +11,8 @@ import {
 interface CartItem {
   id: string; cartId: string; medicineId: string;
   quantity: number; addedAt: string;
-  priceOverride?: number | null;        // flash-sale locked price
+  priceOverride?: number | null;  // flash-sale locked price per unit
+  flashQuantity?: number;         // how many units are at flash price
   medicine: {
     id: string; name: string; description: string;
     image: string | null; price: number; discountPrice?: number | null;
@@ -62,9 +63,12 @@ export default function CartPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ itemId, quantity: qty }),
       });
-      if (!res.ok) throw new Error();
-      setItems(p => p.map(i => i.id === itemId ? { ...i, quantity: qty } : i));
-    } catch { toast.error("Failed to update quantity"); }
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to update");
+      // ← Use the full server response so flashQuantity is correctly recalculated
+      const updatedItem: CartItem = data.data;
+      setItems(p => p.map(i => i.id === itemId ? { ...i, ...updatedItem } : i));
+    } catch (err: any) { toast.error(err.message || "Failed to update quantity"); }
   };
 
   const removeItem = async (itemId: string) => {
@@ -83,16 +87,37 @@ export default function CartPage() {
     finally { setRemoving(null); }
   };
 
-  const selectedItems  = items.filter(i => selected.has(i.id));
-  // Price priority: priceOverride (flash sale) > discountPrice (product discount) > price
-  const effPrice = (item: CartItem) => {
-    if (item.priceOverride != null && item.priceOverride > 0) return item.priceOverride;
+  const selectedItems = items.filter(i => selected.has(i.id));
+
+  /**
+   * Split-aware subtotal for a single cart item:
+   *   flashQty  units × priceOverride  (flash-sale price)
+   *   regularQty units × medicine.price (regular price)
+   * Falls back to discountPrice or regular price when no flash sale.
+   */
+  const itemSubtotal = (item: CartItem): number => {
+    const flashQty   = item.flashQuantity ?? 0;
+    const regularQty = item.quantity - flashQty;
+    const flashPrice = item.priceOverride ?? item.medicine.price;
+    // For the regular portion, use discountPrice if set, otherwise medicine.price
+    const m = item.medicine;
+    const regPrice =
+      m.discountPrice != null && m.discountPrice > 0 && m.discountPrice < m.price
+        ? m.discountPrice
+        : m.price;
+    return flashQty * flashPrice + regularQty * regPrice;
+  };
+
+  // Effective per-unit display price (for the price badge — use flash if any flash qty)
+  const effPrice = (item: CartItem): number => {
+    if ((item.flashQuantity ?? 0) > 0 && item.priceOverride != null) return item.priceOverride;
     const m = item.medicine;
     if (m.discountPrice != null && m.discountPrice > 0 && m.discountPrice < m.price) return m.discountPrice;
     return m.price;
   };
+
   const originalTotal  = selectedItems.reduce((s, i) => s + i.quantity * i.medicine.price, 0);
-  const subtotal       = selectedItems.reduce((s, i) => s + i.quantity * effPrice(i), 0);
+  const subtotal       = selectedItems.reduce((s, i) => s + itemSubtotal(i), 0);
   const discountSaving = originalTotal - subtotal;
   const totalQty       = selectedItems.reduce((s, i) => s + i.quantity, 0);
 
@@ -180,22 +205,42 @@ export default function CartPage() {
                   <div className="flex-1 min-w-0" onClick={e => e.stopPropagation()}>
                     <h3 className="font-bold text-sm" style={{ color: "#1B3A5C" }}>{item.medicine.name}</h3>
                     <p className="text-xs mt-0.5" style={{ color: "#8A6650" }}>{item.medicine.manufacturer}</p>
-                    <div className="flex items-center gap-4 mt-2">
+                    <div className="flex flex-wrap items-center gap-2 mt-2">
                       {(() => {
-                        const ep = effPrice(item);
-                        const hasDiscount = ep < item.medicine.price;
-                        const isFlashSale = item.priceOverride != null && item.priceOverride > 0;
-                        return hasDiscount ? (
+                        const flashQty   = item.flashQuantity ?? 0;
+                        const regularQty = item.quantity - flashQty;
+                        const flashPrice = item.priceOverride ?? item.medicine.price;
+                        const isSplit    = flashQty > 0 && regularQty > 0;
+                        const isFlash    = flashQty > 0;
+                        return (
                           <>
-                            <span className="font-bold" style={{ color: "#C2703A" }}>${ep.toFixed(2)}</span>
-                            <span className="text-xs line-through" style={{ color: "#aaa" }}>${item.medicine.price.toFixed(2)}</span>
-                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
-                              style={{ background: isFlashSale ? "#FFF3E0" : "#FFEBEE", color: isFlashSale ? "#C2703A" : "#C62828" }}>
-                              {isFlashSale ? "⚡ Flash" : `-${Math.round(((item.medicine.price - ep) / item.medicine.price) * 100)}%`}
-                            </span>
+                            {isFlash ? (
+                              <span className="font-bold" style={{ color: "#C2703A" }}>
+                                ⚡ ${flashPrice.toFixed(2)}
+                              </span>
+                            ) : (
+                              <span className="font-bold" style={{ color: "#C2703A" }}>
+                                ${effPrice(item).toFixed(2)}
+                              </span>
+                            )}
+                            {isFlash && (
+                              <span className="text-xs line-through" style={{ color: "#aaa" }}>
+                                ${item.medicine.price.toFixed(2)}
+                              </span>
+                            )}
+                            {isSplit && (
+                              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+                                style={{ background: "#E3F2FD", color: "#1565C0" }}>
+                                {flashQty}⚡ + {regularQty} regular
+                              </span>
+                            )}
+                            {isFlash && !isSplit && (
+                              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+                                style={{ background: "#FFF3E0", color: "#C2703A" }}>
+                                ⚡ Flash Deal
+                              </span>
+                            )}
                           </>
-                        ) : (
-                          <span className="font-bold" style={{ color: "#C2703A" }}>${ep.toFixed(2)}</span>
                         );
                       })()}
                       <span className={`badge-${item.medicine.stock === 0 ? "rejected" : item.medicine.stock < 10 ? "lowstock" : "instock"}`}>
@@ -225,9 +270,9 @@ export default function CartPage() {
                         <FaPlus style={{ fontSize: 10 }} />
                       </button>
                     </div>
-                    {/* Subtotal */}
+                    {/* Subtotal (split-aware) */}
                     <p className="text-sm font-black" style={{ color: "#1B3A5C" }}>
-                      ${(item.quantity * effPrice(item)).toFixed(2)}
+                      ${itemSubtotal(item).toFixed(2)}
                     </p>
                     {/* Remove */}
                     <button onClick={() => removeItem(item.id)}
@@ -257,8 +302,13 @@ export default function CartPage() {
             </div>
             {selectedItems.map(item => (
               <div key={item.id} className="flex justify-between text-xs" style={{ color: "#8A6650" }}>
-                <span className="truncate max-w-[60%]">{item.medicine.name} ×{item.quantity}</span>
-                <span>${(item.quantity * effPrice(item)).toFixed(2)}</span>
+                <span className="truncate max-w-[60%]">
+                  {item.medicine.name} ×{item.quantity}
+                  {(item.flashQuantity ?? 0) > 0 && (
+                    <span style={{ color: "#C2703A" }}> ⚡{item.flashQuantity}</span>
+                  )}
+                </span>
+                <span>${itemSubtotal(item).toFixed(2)}</span>
               </div>
             ))}
             <div className="border-t pt-3" style={{ borderColor: "#DDD0C4" }}>
