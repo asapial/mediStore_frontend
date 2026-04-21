@@ -1,14 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import {
   FaPills, FaTag, FaImage, FaBell, FaBoxes,
-  FaUpload, FaCheckCircle, FaStore,
+  FaUpload, FaCheckCircle, FaStore, FaLock, FaExclamationTriangle, FaTimesCircle,
 } from "react-icons/fa";
 
 type Category = { id: string; name: string };
+type LicenseStatus = "PENDING" | "VERIFIED" | "REJECTED" | null;
 
 const FIELD_STYLE = {
   borderColor: "#DDD0C4", background: "#FFF", color: "#5C4033",
@@ -18,6 +20,20 @@ const INPUT_CLS = "w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-no
 const SECTION_HDR = "flex items-center gap-2 font-bold text-base mb-4";
 
 export default function AddMedicinePage() {
+  const router = useRouter();
+
+  /* ─── license guard ──────────────────────────────────────────────── */
+  const [licenseStatus,  setLicenseStatus]  = useState<LicenseStatus>(null);
+  const [licenseLoading, setLicenseLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/seller-license/my", { credentials: "include" })
+      .then(r => r.json())
+      .then(d => setLicenseStatus(d.data?.status ?? null))
+      .catch(() => setLicenseStatus(null))
+      .finally(() => setLicenseLoading(false));
+  }, []);
+
   /* ─── categories ────────────────────────────────────────────────── */
   const [categories, setCategories] = useState<Category[]>([]);
 
@@ -138,6 +154,53 @@ export default function AddMedicinePage() {
   };
 
   /* ─── UI ────────────────────────────────────────────────────────── */
+
+  // ── License gate ────────────────────────────────────────────────────────
+  if (licenseLoading) return (
+    <div className="medi-page flex items-center justify-center min-h-[40vh]">
+      <p style={{ color: "#8A6650" }}>Checking license status…</p>
+    </div>
+  );
+
+  if (licenseStatus !== "VERIFIED") {
+    const isPending  = licenseStatus === "PENDING";
+    const isRejected = licenseStatus === "REJECTED";
+    const isNone     = licenseStatus === null;
+
+    const bgColor    = isPending ? "#FFF8E1" : isRejected ? "#FFEBEE" : "#F3E5F5";
+    const bdColor    = isPending ? "#F9A825" : isRejected ? "#C62828" : "#7B1FA2";
+    const textColor  = isPending ? "#F57F17" : isRejected ? "#C62828" : "#6A1B9A";
+    const Icon       = isPending ? FaExclamationTriangle : isRejected ? FaTimesCircle : FaLock;
+    const title      = isPending  ? "License Under Review"
+                     : isRejected ? "License Rejected"
+                     : "License Required";
+    const msg        = isPending
+      ? "Your license has been submitted and is awaiting admin approval. You will be able to add medicines once it is approved."
+      : isRejected
+      ? "Your seller license was rejected by the admin. Please re-submit a valid license to start listing medicines."
+      : "You must upload and have your seller license approved by an admin before you can list medicines.";
+
+    return (
+      <div className="medi-page flex items-center justify-center min-h-[50vh]">
+        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+          className="medi-card p-10 max-w-md w-full text-center">
+          <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+            style={{ background: bgColor, border: `2px solid ${bdColor}` }}>
+            <Icon style={{ color: bdColor, fontSize: 28 }} />
+          </div>
+          <h2 className="text-xl font-bold mb-2" style={{ color: "#1B3A5C" }}>{title}</h2>
+          <p className="text-sm mb-6" style={{ color: "#8A6650" }}>{msg}</p>
+          <button
+            onClick={() => router.push("/dashboard/seller/license")}
+            className="medi-btn-primary w-full">
+            {isRejected || isNone ? "Go to License Page" : "View License Status"}
+          </button>
+        </motion.div>
+      </div>
+    );
+  }
+
+  // ── Verified seller — show the full form ────────────────────────────────
   return (
     <div className="medi-page">
       {/* Page header */}

@@ -22,36 +22,43 @@ const STATUS_BG: Record<LicenseStatus, string> = {
   REJECTED: "linear-gradient(135deg,#C62828 0%,#8B1A1A 100%)",
 };
 
-// ── Cloudinary unsigned upload ──────────────────────────────────────────────
-const CLOUD_NAME    = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ?? "demo";
-const UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET ?? "unsigned_preset";
-
-async function uploadToCloudinary(
+// ── Upload via backend (signed, secure) ────────────────────────────────────
+async function uploadViaBackend(
   file: File,
   onProgress?: (pct: number) => void
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     const fd = new FormData();
     fd.append("file", file);
-    fd.append("upload_preset", UPLOAD_PRESET);
-    // For PDFs, force raw resource type
-    if (file.type === "application/pdf") fd.append("resource_type", "raw");
 
     const xhr = new XMLHttpRequest();
-    const resourceType = file.type === "application/pdf" ? "raw" : "image";
-    xhr.open("POST", `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/${resourceType}/upload`);
+    xhr.open("POST", "/api/seller-license/upload");
+    xhr.withCredentials = true;  // send auth cookie
 
     xhr.upload.onprogress = e => {
-      if (e.lengthComputable && onProgress) onProgress(Math.round((e.loaded / e.total) * 100));
+      if (e.lengthComputable && onProgress)
+        onProgress(Math.round((e.loaded / e.total) * 100));
     };
+
     xhr.onload = () => {
-      try {
-        const data = JSON.parse(xhr.responseText);
-        if (xhr.status === 200 && data.secure_url) resolve(data.secure_url);
-        else reject(new Error(data.error?.message || "Upload failed"));
-      } catch { reject(new Error("Upload response parse error")); }
+      // Try to parse JSON; if it fails, surface the raw response for debugging
+      let data: any = null;
+      try { data = JSON.parse(xhr.responseText); } catch { /* not JSON */ }
+
+      if (data && xhr.status === 200 && data.data?.url) {
+        resolve(data.data.url);
+      } else {
+        // Show real error: parsed message OR raw response (truncated to 200 chars)
+        const msg =
+          data?.message ||
+          (xhr.responseText
+            ? `Server error (${xhr.status}): ${xhr.responseText.slice(0, 200)}`
+            : `HTTP ${xhr.status} — empty response`);
+        reject(new Error(msg));
+      }
     };
-    xhr.onerror = () => reject(new Error("Network error during upload"));
+
+    xhr.onerror = () => reject(new Error("Network error — could not reach the server"));
     xhr.send(fd);
   });
 }
@@ -104,10 +111,10 @@ export default function SellerLicensePage() {
     setUploadProgress(0);
     setUploadedFile(null);
     try {
-      const url = await uploadToCloudinary(file, pct => setUploadProgress(pct));
+      const url = await uploadViaBackend(file, pct => setUploadProgress(pct));
       setDocUrl(url);
       setUploadedFile({ name: file.name, type: file.type });
-      toast.success("Document uploaded to Cloudinary ✓");
+      toast.success("Document uploaded successfully ✓");
     } catch (err: any) {
       toast.error(err.message || "Upload failed");
     } finally {
