@@ -142,7 +142,9 @@ export default function SellerLicensePage() {
   };
 
   const isImage = (url: string) => /\.(jpg|jpeg|png|webp|gif)(\?|$)/i.test(url);
-  const isPdf   = (url: string) => /\.pdf(\?|$)/i.test(url) || url.includes("raw/upload");
+  // PDFs are uploaded with resource_type:"image" so Cloudinary serves them at
+  // .../image/upload/.../filename.pdf — detecting by .pdf extension is sufficient.
+  const isPdf   = (url: string) => /\.pdf(\?|$)/i.test(url);
 
   return (
     <div className="medi-page">
@@ -180,11 +182,17 @@ export default function SellerLicensePage() {
                   <strong>Admin Note: </strong>{license.adminNote}
                 </div>
               )}
-              {/* Document preview link */}
-              <a href={license.documentUrl} target="_blank" rel="noopener noreferrer"
+              {/* Document proxy link — opens through our backend so Cloudinary
+                  CDN restrictions don't block delivery in the browser */}
+              <a
+                href="/api/seller-license/document"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="mt-4 inline-flex items-center gap-2 text-xs px-4 py-2 rounded-lg font-semibold"
-                style={{ background: "rgba(255,255,255,0.2)" }}>
-                {isPdf(license.documentUrl) ? <FaFilePdf /> : <FaImage />} View Document
+                style={{ background: "rgba(255,255,255,0.2)" }}
+              >
+                {(uploadedFile?.type === "application/pdf" || isPdf(license.documentUrl))
+                  ? <FaFilePdf /> : <FaImage />} View Document
               </a>
             </motion.div>
           )}
@@ -287,7 +295,7 @@ export default function SellerLicensePage() {
                     <FaFilePdf style={{ color: "#C62828", fontSize: 28 }} />
                     <div>
                       <p className="text-sm font-semibold" style={{ color: "#5C4033" }}>Document ready</p>
-                      <a href={docUrl} target="_blank" rel="noopener noreferrer"
+                      <a href={`/api/seller-license/document?url=${encodeURIComponent(docUrl)}`} target="_blank" rel="noopener noreferrer"
                         className="text-xs underline" style={{ color: "#3A6EA5" }}>Open in new tab ↗</a>
                     </div>
                   </div>
