@@ -1,164 +1,264 @@
 "use client";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { motion } from "framer-motion";
-import { FaTruck, FaCheckCircle, FaBoxOpen, FaMapMarkerAlt, FaClipboardList } from "react-icons/fa";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  FaTruck, FaCheckCircle, FaBox, FaStore, FaMapMarkerAlt,
+  FaChevronDown, FaChevronUp, FaSpinner, FaClipboardList,
+} from "react-icons/fa";
 
-type TrackingStatus = "PLACED" | "CONFIRMED" | "SHIPPED" | "OUT_FOR_DELIVERY" | "DELIVERED" | "CANCELLED";
-interface TrackingEvent { id: string; status: TrackingStatus; note?: string; createdAt: string; }
+type OrderStatus = "PLACED" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED";
 
-const STEPS: TrackingStatus[] = ["PLACED", "CONFIRMED", "SHIPPED", "OUT_FOR_DELIVERY", "DELIVERED"];
-const stepIcons: Record<TrackingStatus, React.ReactNode> = {
-  PLACED:           <FaClipboardList />,
-  CONFIRMED:        <FaCheckCircle />,
-  SHIPPED:          <FaTruck />,
-  OUT_FOR_DELIVERY: <FaMapMarkerAlt />,
-  DELIVERED:        <FaBoxOpen />,
-  CANCELLED:        <FaClipboardList />,
+interface Medicine { id: string; name: string; image?: string; price: number; }
+interface OrderItem { id: string; quantity: number; price: number; medicine: Medicine; }
+interface SubOrder {
+  id: string; sellerId: string; status: OrderStatus; total: number;
+  seller: { name: string; email: string };
+  items: Array<{ id: string; quantity: number; price: number; medicine: Medicine }>;
+}
+interface Order {
+  id: string; status: OrderStatus; address: string; createdAt: string;
+  items: OrderItem[];
+  subOrders: SubOrder[];
+}
+
+const STATUS_COLORS: Record<OrderStatus, string> = {
+  PLACED: "#3A6EA5", PROCESSING: "#C2703A", SHIPPED: "#512DA8",
+  DELIVERED: "#2E7D32", CANCELLED: "#C62828",
 };
-const stepColors: Record<TrackingStatus, string> = {
-  PLACED: "#3A6EA5", CONFIRMED: "#1B3A5C", SHIPPED: "#C2703A",
-  OUT_FOR_DELIVERY: "#C2703A", DELIVERED: "#2E7D32", CANCELLED: "#C62828",
-};
 
-export default function OrderTrackingPage() {
-  const [orders,   setOrders]   = useState<any[]>([]);
-  const [events,   setEvents]   = useState<TrackingEvent[]>([]);
-  const [selected, setSelected] = useState<string | null>(null);
+const STEPS: { key: OrderStatus; label: string; icon: React.ReactNode }[] = [
+  { key: "PLACED",     label: "Order Placed",    icon: <FaClipboardList /> },
+  { key: "PROCESSING", label: "Consolidating",   icon: <FaBox />           },
+  { key: "SHIPPED",    label: "On the Way",      icon: <FaTruck />         },
+  { key: "DELIVERED",  label: "Delivered",        icon: <FaCheckCircle />  },
+];
+
+function TrackingBar({ status }: { status: OrderStatus }) {
+  const stepIndex = STEPS.findIndex(s => s.key === status);
+  return (
+    <div className="flex items-center gap-0 my-5 overflow-x-auto pb-2">
+      {STEPS.map((step, i) => {
+        const done    = i <= stepIndex;
+        const current = i === stepIndex;
+        return (
+          <div key={step.key} className="flex items-center flex-1 min-w-[80px]">
+            <div className="flex flex-col items-center flex-1">
+              <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
+                done ? "text-white shadow-lg" : "text-gray-400"
+              }`} style={{
+                background: done ? STATUS_COLORS[step.key] : "#EEE4D9",
+                transform:  current ? "scale(1.2)" : "scale(1)",
+              }}>
+                {step.icon}
+              </div>
+              <p className="text-[9px] font-bold mt-1 text-center whitespace-nowrap"
+                style={{ color: done ? STATUS_COLORS[step.key] : "#AAA" }}>
+                {step.label}
+              </p>
+            </div>
+            {i < STEPS.length - 1 && (
+              <div className="h-0.5 flex-1 mx-1 rounded transition-all"
+                style={{ background: i < stepIndex ? STATUS_COLORS[STEPS[i + 1].key] : "#DDD0C4" }} />
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+export default function CustomerTrackingPage() {
+  const [orders,   setOrders]   = useState<Order[]>([]);
   const [loading,  setLoading]  = useState(true);
-  const [trackLoading, setTrackLoading] = useState(false);
+  const [expanded, setExpanded] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/api/orders/my", { credentials: "include" })
+    fetch("/api/orders/", { credentials: "include" })
       .then(r => r.json())
       .then(d => setOrders(d.data || []))
       .catch(() => toast.error("Failed to load orders"))
       .finally(() => setLoading(false));
   }, []);
 
-  const loadTracking = async (orderId: string) => {
-    setSelected(orderId);
-    setTrackLoading(true);
-    try {
-      const res  = await fetch(`/api/notifications/tracking/${orderId}`, { credentials: "include" });
-      const data = await res.json();
-      setEvents(data.data || []);
-    } catch { toast.error("Failed to load tracking"); }
-    finally { setTrackLoading(false); }
-  };
+  const activeOrders = orders.filter(o =>
+    ["PLACED", "PROCESSING", "SHIPPED"].includes(o.status)
+  );
+  const doneOrders = orders.filter(o =>
+    ["DELIVERED", "CANCELLED"].includes(o.status)
+  );
 
-  const currentStep = events.length
-    ? STEPS.indexOf(events[events.length - 1].status as any)
-    : -1;
+  if (loading) return (
+    <div className="medi-page flex justify-center py-20">
+      <FaSpinner className="text-3xl animate-spin" style={{ color: "#1B3A5C" }} />
+    </div>
+  );
 
   return (
     <div className="medi-page">
       <div className="mb-8 flex items-center gap-3">
-        <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: "#C2703A" }}>
+        <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: "#1B3A5C" }}>
           <FaTruck className="text-white text-lg" />
         </div>
         <div>
           <h1 className="text-2xl font-bold" style={{ color: "#1B3A5C" }}>Order Tracking</h1>
-          <p className="text-sm" style={{ color: "#8A6650" }}>Real-time updates on your deliveries</p>
+          <p className="text-sm" style={{ color: "#8A6650" }}>
+            Track your orders from placement to delivery
+          </p>
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* Order list */}
-        <div className="lg:col-span-1 space-y-3">
-          <h2 className="font-bold" style={{ color: "#1B3A5C" }}>Select Order</h2>
-          {loading ? (
-            <p style={{ color: "#8A6650" }}>Loading orders…</p>
-          ) : orders.length === 0 ? (
-            <p style={{ color: "#8A6650" }}>No orders found.</p>
-          ) : orders.map(order => (
-            <button key={order.id} onClick={() => loadTracking(order.id)}
-              className="w-full text-left rounded-xl px-4 py-3 transition-all"
-              style={{
-                background: selected === order.id ? "rgba(27,58,92,0.08)" : "#FFF",
-                border: selected === order.id ? "2px solid #1B3A5C" : "1px solid #DDD0C4",
-              }}>
-              <p className="text-sm font-bold" style={{ color: "#1B3A5C" }}>Order #{order.id.slice(-8).toUpperCase()}</p>
-              <p className="text-xs mt-0.5" style={{ color: "#8A6650" }}>
-                {new Date(order.createdAt).toLocaleDateString()} · {order.items?.length ?? 0} items
-              </p>
-              <span className={`badge-${order.status.toLowerCase()}`} style={{ marginTop: 6, display: "inline-block" }}>
-                {order.status}
-              </span>
-            </button>
-          ))}
+      {orders.length === 0 ? (
+        <div className="text-center py-20 medi-card">
+          <FaTruck className="mx-auto text-5xl mb-3 opacity-20" style={{ color: "#1B3A5C" }} />
+          <p style={{ color: "#8A6650" }}>No orders to track yet.</p>
         </div>
-
-        {/* Tracking panel */}
-        <div className="lg:col-span-2 medi-card p-6">
-          {!selected ? (
-            <div className="text-center py-16">
-              <FaTruck className="mx-auto text-5xl mb-3 opacity-20" style={{ color: "#1B3A5C" }} />
-              <p style={{ color: "#8A6650" }}>Select an order to view tracking</p>
-            </div>
-          ) : trackLoading ? (
-            <p className="text-center py-16" style={{ color: "#8A6650" }}>Loading tracking…</p>
-          ) : (
-            <>
-              {/* Step indicator */}
-              <div className="flex items-center mb-8 overflow-x-auto pb-2">
-                {STEPS.map((step, idx) => {
-                  const done    = idx <= currentStep;
-                  const current = idx === currentStep;
-                  return (
-                    <div key={step} className="flex items-center flex-1 min-w-0">
-                      <div className="flex flex-col items-center gap-1 flex-shrink-0">
-                        <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm transition-all"
-                          style={{
-                            background: done ? stepColors[step] : "#EEE4D9",
-                            color: done ? "#FFF" : "#8A6650",
-                            boxShadow: current ? `0 0 0 4px ${stepColors[step]}33` : "none",
-                          }}>
-                          {stepIcons[step]}
-                        </div>
-                        <span className="text-[10px] text-center whitespace-nowrap"
-                          style={{ color: done ? stepColors[step] : "#8A6650", fontWeight: done ? 700 : 400 }}>
-                          {step.replace(/_/g, " ")}
-                        </span>
-                      </div>
-                      {idx < STEPS.length - 1 && (
-                        <div className="flex-1 h-0.5 mx-1" style={{ background: idx < currentStep ? "#2E7D32" : "#DDD0C4" }} />
-                      )}
-                    </div>
-                  );
-                })}
+      ) : (
+        <>
+          {/* Active orders */}
+          {activeOrders.length > 0 && (
+            <div className="mb-8">
+              <h2 className="text-sm font-bold uppercase tracking-wider mb-4" style={{ color: "#C2703A" }}>
+                🟠 Active Orders ({activeOrders.length})
+              </h2>
+              <div className="space-y-4">
+                {activeOrders.map((order, i) => (
+                  <OrderCard key={order.id} order={order} index={i}
+                    expanded={expanded} setExpanded={setExpanded} />
+                ))}
               </div>
-
-              {/* Events */}
-              {events.length === 0 ? (
-                <p className="text-center py-8" style={{ color: "#8A6650" }}>No tracking events yet for this order.</p>
-              ) : (
-                <div className="space-y-4">
-                  {[...events].reverse().map((ev, i) => (
-                    <motion.div key={ev.id} initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.06 }}
-                      className="flex gap-4 items-start">
-                      <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
-                        style={{ background: stepColors[ev.status] + "22", color: stepColors[ev.status] }}>
-                        {stepIcons[ev.status]}
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-bold text-sm" style={{ color: "#1B3A5C" }}>
-                          {ev.status.replace(/_/g, " ")}
-                        </p>
-                        {ev.note && <p className="text-sm" style={{ color: "#5C4033" }}>{ev.note}</p>}
-                        <p className="text-xs mt-0.5" style={{ color: "#8A6650" }}>
-                          {new Date(ev.createdAt).toLocaleString()}
-                        </p>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              )}
-            </>
+            </div>
           )}
+
+          {/* Completed / cancelled */}
+          {doneOrders.length > 0 && (
+            <div>
+              <h2 className="text-sm font-bold uppercase tracking-wider mb-4" style={{ color: "#8A6650" }}>
+                Past Orders ({doneOrders.length})
+              </h2>
+              <div className="space-y-4">
+                {doneOrders.map((order, i) => (
+                  <OrderCard key={order.id} order={order} index={i}
+                    expanded={expanded} setExpanded={setExpanded} />
+                ))}
+              </div>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+function OrderCard({
+  order, index, expanded, setExpanded,
+}: {
+  order: Order; index: number;
+  expanded: string | null; setExpanded: (id: string | null) => void;
+}) {
+  const isExpanded = expanded === order.id;
+  const total = order.items.reduce((s, i) => s + i.price * i.quantity, 0);
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.05 }} className="medi-card overflow-hidden">
+
+      {/* Header */}
+      <div className="flex flex-wrap items-center justify-between gap-2 px-5 py-4"
+        style={{ background: `linear-gradient(90deg,${STATUS_COLORS[order.status]}12 0%,#FFF 100%)`, borderBottom: "1px solid #DDD0C4" }}>
+        <div>
+          <span className="font-black text-sm" style={{ color: "#1B3A5C" }}>
+            Order #{order.id.slice(-8).toUpperCase()}
+          </span>
+          <span className="text-xs ml-3" style={{ color: "#8A6650" }}>
+            {new Date(order.createdAt).toLocaleDateString()}
+          </span>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="px-3 py-1 rounded-full text-xs font-bold"
+            style={{ background: STATUS_COLORS[order.status] + "18", color: STATUS_COLORS[order.status] }}>
+            {order.status}
+          </span>
+          <span className="font-black text-sm" style={{ color: "#C2703A" }}>৳{total.toFixed(2)}</span>
         </div>
       </div>
-    </div>
+
+      {/* Tracking bar */}
+      {order.status !== "CANCELLED" && (
+        <div className="px-5">
+          <TrackingBar status={order.status} />
+        </div>
+      )}
+
+      {/* Address */}
+      <div className="px-5 py-2 flex items-center gap-2"
+        style={{ borderBottom: "1px solid #EEE4D9", background: "#FAFAFA" }}>
+        <FaMapMarkerAlt style={{ color: "#C2703A", fontSize: 12, flexShrink: 0 }} />
+        <p className="text-sm" style={{ color: "#5C4033" }}>{order.address}</p>
+      </div>
+
+      {/* Sub-orders from each seller */}
+      {order.subOrders && order.subOrders.length > 0 && (
+        <div className="px-5 py-3" style={{ borderBottom: "1px solid #EEE4D9" }}>
+          <p className="text-xs font-bold uppercase mb-2" style={{ color: "#8A6650" }}>
+            <FaStore style={{ display: "inline", marginRight: 4 }} />
+            Seller Breakdown
+          </p>
+          <div className="space-y-2">
+            {order.subOrders.map(sub => (
+              <div key={sub.id} className="flex items-center justify-between rounded-xl px-3 py-2"
+                style={{ background: "#F5EDE3" }}>
+                <div>
+                  <p className="text-xs font-bold" style={{ color: "#1B3A5C" }}>{sub.seller.name}</p>
+                  <p className="text-[11px]" style={{ color: "#8A6650" }}>
+                    {sub.items.length} item{sub.items.length > 1 ? "s" : ""}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold"
+                    style={{ background: STATUS_COLORS[sub.status] + "18", color: STATUS_COLORS[sub.status] }}>
+                    {sub.status}
+                  </span>
+                  <p className="text-xs font-bold mt-0.5" style={{ color: "#C2703A" }}>৳{sub.total.toFixed(2)}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Toggle items */}
+      <div className="px-5 py-3">
+        <button onClick={() => setExpanded(isExpanded ? null : order.id)}
+          className="flex items-center gap-1 text-xs font-semibold mb-2"
+          style={{ color: "#3A6EA5" }}>
+          {isExpanded ? <><FaChevronUp />Hide items</> : <><FaChevronDown />View all items ({order.items.length})</>}
+        </button>
+
+        <AnimatePresence>
+          {isExpanded && (
+            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }} className="overflow-hidden space-y-2">
+              {order.items.map(item => (
+                <div key={item.id} className="flex items-center gap-3 rounded-xl p-3"
+                  style={{ background: "#F5EDE3" }}>
+                  <div className="w-10 h-10 rounded-lg flex-shrink-0 overflow-hidden" style={{ background: "#EEE4D9" }}>
+                    {item.medicine.image
+                      ? <img src={item.medicine.image} alt="" className="w-full h-full object-cover" />
+                      : <div className="w-full h-full flex items-center justify-center">💊</div>}
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-semibold text-sm" style={{ color: "#1B3A5C" }}>{item.medicine.name}</p>
+                    <p className="text-xs" style={{ color: "#8A6650" }}>
+                      {item.quantity} × ৳{item.price.toFixed(2)} = <strong style={{ color: "#C2703A" }}>৳{(item.quantity * item.price).toFixed(2)}</strong>
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </motion.div>
   );
 }

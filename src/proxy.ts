@@ -8,23 +8,24 @@ import { userService } from "./services/user.service";
 
 export async function proxy(request: NextRequest) {
   let isAuthenticated = false;
-  let role: "ADMIN" | "SELLER" | "CUSTOMER" | null = null;
+  let role: "ADMIN" | "SELLER" | "CUSTOMER" | "WAREHOUSE" | null = null;
 
   // ── Resolve session ────────────────────────────────────────────────────────
   const { data } = await userService.getSessionForMiddleware(request);
 
   if (data?.user?.role) {
     isAuthenticated = true;
-    role = data.user.role as "ADMIN" | "SELLER" | "CUSTOMER";
+    role = data.user.role as "ADMIN" | "SELLER" | "CUSTOMER" | "WAREHOUSE";
   }
 
   const pathname = request.nextUrl.pathname;
 
   // Role → default landing page after login
   const ROLE_HOME: Record<string, string> = {
-    ADMIN:    "/dashboard/admin",
-    SELLER:   "/dashboard/seller",
-    CUSTOMER: "/dashboard/customer/orders",
+    ADMIN:     "/dashboard/admin",
+    SELLER:    "/dashboard/seller",
+    CUSTOMER:  "/dashboard/customer/orders",
+    WAREHOUSE: "/dashboard/warehouse/overview",
   };
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -123,6 +124,25 @@ export async function proxy(request: NextRequest) {
   // ─────────────────────────────────────────────────────────────────────────
   if (pathname.startsWith("/dashboard/customer")) {
     if (role !== "CUSTOMER") {
+      return NextResponse.redirect(
+        new URL(role ? ROLE_HOME[role] : "/", request.url)
+      );
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // WAREHOUSE ROUTES  — /dashboard/warehouse/*
+  //
+  //  Pages: /dashboard/warehouse/overview  /dashboard/warehouse/analytics
+  //         /dashboard/warehouse/transfers /dashboard/warehouse/bins
+  //         /dashboard/warehouse/expiry    /dashboard/warehouse/grn
+  //         /dashboard/warehouse/fulfillment /dashboard/warehouse/suppliers
+  //         /dashboard/warehouse/temperature /dashboard/warehouse/notifications
+  //
+  //  Only WAREHOUSE may access these.
+  // ─────────────────────────────────────────────────────────────────────────
+  if (pathname.startsWith("/dashboard/warehouse")) {
+    if (role !== "WAREHOUSE") {
       return NextResponse.redirect(
         new URL(role ? ROLE_HOME[role] : "/", request.url)
       );

@@ -19,11 +19,14 @@ import {
   FaHeart, FaTag, FaTruck, FaUndo, FaIdCard, FaStore, FaSitemap, FaBolt,
   FaNewspaper, FaCommentDots, FaEnvelope, FaImage, FaStar, FaSignOutAlt,
   FaUser, FaCog, FaHome, FaChevronDown, FaInbox, FaShieldAlt,
-  FaChartBar, FaChartLine,
+  FaChartBar, FaChartLine, FaWarehouse, FaExchangeAlt, FaFileInvoice,
+  FaThermometerHalf, FaCubes, FaShippingFast, FaExclamationTriangle,
+  FaMoneyBillWave, FaHeadset, FaHistory, FaDatabase, FaMapMarkerAlt,
+  FaFileUpload, FaBoxOpen, FaCheckDouble,
 } from "react-icons/fa";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
-type Role = "CUSTOMER" | "SELLER" | "ADMIN";
+type Role = "CUSTOMER" | "SELLER" | "ADMIN" | "WAREHOUSE";
 
 interface NavItem {
   title: string;
@@ -54,36 +57,50 @@ const navData: NavItem[] = [
   { title: "Prescriptions",       url: "/dashboard/admin/prescription",     role: "ADMIN", icon: FaFileMedical,   group: "Content"      },
   { title: "Returns & Refunds",   url: "/dashboard/admin/returns",          role: "ADMIN", icon: FaUndo,          group: "Content"      },
 
-  { title: "Coupon Management",   url: "/dashboard/admin/coupons",          role: "ADMIN", icon: FaTag,           group: "Commerce"     },
-  { title: "License Verification",url: "/dashboard/admin/license",          role: "ADMIN", icon: FaShieldAlt,     group: "Commerce"     },
-  { title: "Flash Sales",         url: "/dashboard/admin/flash-sale",       role: "ADMIN", icon: FaBolt,          group: "Commerce"     },
+  { title: "Coupon Management",   url: "/dashboard/admin/coupons",           role: "ADMIN", icon: FaTag,            group: "Commerce"     },
+  { title: "License Verification",url: "/dashboard/admin/license",           role: "ADMIN", icon: FaShieldAlt,      group: "Commerce"     },
+  { title: "Flash Sales",         url: "/dashboard/admin/flash-sale",        role: "ADMIN", icon: FaBolt,           group: "Commerce"     },
+  { title: "Payout Requests",     url: "/dashboard/admin/payouts",           role: "ADMIN", icon: FaMoneyBillWave,  group: "Commerce"     },
 
-  { title: "Promo Banners",       url: "/dashboard/admin/banners",          role: "ADMIN", icon: FaImage,         group: "CMS"          },
-  { title: "Platform Features",   url: "/dashboard/admin/platform-features",role: "ADMIN", icon: FaStar,          group: "CMS"          },
-  { title: "Featured Products",   url: "/dashboard/admin/featured-products",role: "ADMIN", icon: FaStore,         group: "CMS"          },
-  { title: "Health Blogs",        url: "/dashboard/admin/blogs",            role: "ADMIN", icon: FaNewspaper,     group: "CMS"          },
-  { title: "Testimonials",        url: "/dashboard/admin/testimonials",     role: "ADMIN", icon: FaCommentDots,   group: "CMS"          },
-  { title: "Newsletter",          url: "/dashboard/admin/newsletter",       role: "ADMIN", icon: FaEnvelope,      group: "CMS"          },
-  { title: "Contact Messages",    url: "/dashboard/admin/messages",         role: "ADMIN", icon: FaInbox,         group: "CMS"          },
+  { title: "Promo Banners",       url: "/dashboard/admin/banners",           role: "ADMIN", icon: FaImage,          group: "CMS"          },
+  { title: "Platform Features",   url: "/dashboard/admin/platform-features", role: "ADMIN", icon: FaStar,           group: "CMS"          },
+  { title: "Featured Products",   url: "/dashboard/admin/featured-products", role: "ADMIN", icon: FaStore,          group: "CMS"          },
+  { title: "Health Blogs",        url: "/dashboard/admin/blogs",             role: "ADMIN", icon: FaNewspaper,      group: "CMS"          },
+  { title: "Testimonials",        url: "/dashboard/admin/testimonials",      role: "ADMIN", icon: FaCommentDots,    group: "CMS"          },
+  { title: "Newsletter",          url: "/dashboard/admin/newsletter",        role: "ADMIN", icon: FaEnvelope,       group: "CMS"          },
+  { title: "Contact Messages",    url: "/dashboard/admin/messages",          role: "ADMIN", icon: FaInbox,          group: "CMS"          },
+
+  { title: "Help Desk",           url: "/dashboard/admin/support",           role: "ADMIN", icon: FaHeadset,        group: "Operations"   },
+  { title: "Fraud Flags",         url: "/dashboard/admin/fraud-flags",       role: "ADMIN", icon: FaShieldAlt,      group: "Operations"   },
+  { title: "Platform Settings",   url: "/dashboard/admin/platform-settings", role: "ADMIN", icon: FaCog,            group: "Operations"   },
+  { title: "Audit Logs",          url: "/dashboard/admin/audit-logs",        role: "ADMIN", icon: FaHistory,        group: "Operations"   },
 
   // ──────────────────────────────────────────────────────────────────────────
   // SELLER
   // ──────────────────────────────────────────────────────────────────────────
-  { title: "Dashboard",           url: "/dashboard",                        role: "SELLER", icon: FaChartLine,     group: "Overview"    },
-  { title: "Add Medicine",        url: "/dashboard/seller/addMedicine",     role: "SELLER", icon: FaPlus,          group: "Inventory"   },
-  { title: "My Medicines",        url: "/dashboard/seller/medicines",       role: "SELLER", icon: FaPills,         group: "Inventory"   },
-  { title: "Stock Alerts",        url: "/dashboard/seller/stock-alerts",    role: "SELLER", icon: FaBell,          group: "Inventory"   },
-  { title: "Batch Tracking",      url: "/dashboard/seller/batches",         role: "SELLER", icon: FaBoxes,         group: "Inventory"   },
+  { title: "Dashboard",           url: "/dashboard",                            role: "SELLER", icon: FaChartLine,    group: "Overview"    },
+  { title: "Analytics",           url: "/dashboard/seller/analytics",           role: "SELLER", icon: FaChartBar,     group: "Overview"    },
 
-  { title: "Orders",              url: "/dashboard/seller/orders",          role: "SELLER", icon: FaClipboardList, group: "Sales"       },
-  { title: "Sub-Orders",          url: "/dashboard/seller/sub-orders",      role: "SELLER", icon: FaSitemap,       group: "Sales"       },
-  { title: "Returns",             url: "/dashboard/seller/returns",         role: "SELLER", icon: FaUndo,          group: "Sales"       },
-  { title: "Flash Sale",          url: "/dashboard/seller/flash-sale",      role: "SELLER", icon: FaBolt,          group: "Sales"       },
-  { title: "Coupons",             url: "/dashboard/seller/coupons",         role: "SELLER", icon: FaTag,           group: "Sales"       },
-  { title: "Subscriptions",       url: "/dashboard/seller/subscription",    role: "SELLER", icon: FaSync,          group: "Sales"       },
+  { title: "Add Medicine",        url: "/dashboard/seller/addMedicine",         role: "SELLER", icon: FaPlus,         group: "Inventory"   },
+  { title: "My Medicines",        url: "/dashboard/seller/medicines",           role: "SELLER", icon: FaPills,        group: "Inventory"   },
+  { title: "Inventory Manager",   url: "/dashboard/seller/inventory",           role: "SELLER", icon: FaDatabase,     group: "Inventory"   },
+  { title: "Stock Alerts",        url: "/dashboard/seller/stock-alerts",        role: "SELLER", icon: FaBell,         group: "Inventory"   },
+  { title: "Batch Tracking",      url: "/dashboard/seller/batches",             role: "SELLER", icon: FaBoxes,        group: "Inventory"   },
+  { title: "Bulk CSV Import",     url: "/dashboard/seller/catalog/import",      role: "SELLER", icon: FaFileUpload,   group: "Inventory"   },
 
-  { title: "License",             url: "/dashboard/seller/license",         role: "SELLER", icon: FaIdCard,        group: "Account"     },
-  { title: "Notifications",       url: "/dashboard/seller/notifications",   role: "SELLER", icon: FaBell,          group: "Account"     },
+  { title: "Orders",              url: "/dashboard/seller/orders",              role: "SELLER", icon: FaClipboardList,group: "Sales"       },
+  { title: "Sub-Orders",          url: "/dashboard/seller/sub-orders",          role: "SELLER", icon: FaSitemap,      group: "Sales"       },
+  { title: "Returns",             url: "/dashboard/seller/returns",             role: "SELLER", icon: FaUndo,         group: "Sales"       },
+  { title: "Flash Sale",          url: "/dashboard/seller/flash-sale",          role: "SELLER", icon: FaBolt,         group: "Sales"       },
+  { title: "Coupons",             url: "/dashboard/seller/coupons",             role: "SELLER", icon: FaTag,          group: "Sales"       },
+  { title: "Subscriptions",       url: "/dashboard/seller/subscription",        role: "SELLER", icon: FaSync,         group: "Sales"       },
+
+  { title: "My Wallet",           url: "/dashboard/seller/wallet",              role: "SELLER", icon: FaWallet,       group: "Finance"     },
+  { title: "Withdraw Funds",      url: "/dashboard/seller/wallet/withdraw",     role: "SELLER", icon: FaMoneyBillWave,group: "Finance"     },
+
+  { title: "My Profile",          url: "/dashboard/seller/profile",             role: "SELLER", icon: FaUser,         group: "Account"     },
+  { title: "License",             url: "/dashboard/seller/license",             role: "SELLER", icon: FaIdCard,       group: "Account"     },
+  { title: "Notifications",       url: "/dashboard/seller/notifications",       role: "SELLER", icon: FaBell,         group: "Account"     },
 
   // ──────────────────────────────────────────────────────────────────────────
   // CUSTOMER
@@ -103,29 +120,68 @@ const navData: NavItem[] = [
 
   { title: "My Wallet",           url: "/dashboard/customer/wallet",        role: "CUSTOMER", icon: FaWallet,        group: "Finance"   },
   { title: "Notifications",       url: "/dashboard/customer/notifications", role: "CUSTOMER", icon: FaBell,          group: "Finance"   },
+
+  { title: "Help & Support",      url: "/dashboard/customer/support",       role: "CUSTOMER", icon: FaHeadset,       group: "Support"   },
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // WAREHOUSE
+  // ──────────────────────────────────────────────────────────────────────────
+  { title: "Overview",            url: "/dashboard/warehouse/overview",     role: "WAREHOUSE", icon: FaWarehouse,       group: "Warehouse"  },
+  { title: "Analytics",           url: "/dashboard/warehouse/analytics",    role: "WAREHOUSE", icon: FaChartLine,       group: "Warehouse"  },
+
+  { title: "Stock Transfers",     url: "/dashboard/warehouse/transfers",    role: "WAREHOUSE", icon: FaExchangeAlt,     group: "Inventory"  },
+  { title: "Storage Bins",        url: "/dashboard/warehouse/bins",         role: "WAREHOUSE", icon: FaCubes,           group: "Inventory"  },
+  { title: "Expiry Monitor",      url: "/dashboard/warehouse/expiry",       role: "WAREHOUSE", icon: FaExclamationTriangle, group: "Inventory" },
+
+  { title: "GRN Management",      url: "/dashboard/warehouse/grn",          role: "WAREHOUSE", icon: FaFileInvoice,     group: "Receiving"  },
+  { title: "Suppliers",           url: "/dashboard/warehouse/suppliers",    role: "WAREHOUSE", icon: FaShippingFast,    group: "Receiving"  },
+
+  { title: "Order Management",  url: "/dashboard/warehouse/orders",      role: "WAREHOUSE", icon: FaCheckDouble,     group: "Fulfillment" },
+  { title: "Fulfillment Queue",   url: "/dashboard/warehouse/fulfillment",  role: "WAREHOUSE", icon: FaBoxes,           group: "Fulfillment" },
+  { title: "Inbound Parcels",     url: "/dashboard/warehouse/inbound",      role: "WAREHOUSE", icon: FaInbox,           group: "Fulfillment" },
+  { title: "Pick & Pack",         url: "/dashboard/warehouse/packing",      role: "WAREHOUSE", icon: FaBoxOpen,         group: "Fulfillment" },
+  { title: "Dispatch / Delivery", url: "/dashboard/warehouse/dispatch",     role: "WAREHOUSE", icon: FaShippingFast,    group: "Fulfillment" },
+
+  { title: "All Stock",           url: "/dashboard/warehouse/stock",        role: "WAREHOUSE", icon: FaDatabase,        group: "Inventory"  },
+  { title: "Locations",           url: "/dashboard/warehouse/locations",    role: "WAREHOUSE", icon: FaMapMarkerAlt,    group: "Inventory"  },
+
+  { title: "Stock & Expiry Alerts",url: "/dashboard/warehouse/alerts",     role: "WAREHOUSE", icon: FaBell,            group: "Monitoring" },
+  { title: "Temperature Logs",    url: "/dashboard/warehouse/temperature",  role: "WAREHOUSE", icon: FaThermometerHalf, group: "Monitoring" },
+  { title: "Notifications",       url: "/dashboard/warehouse/notifications",role: "WAREHOUSE", icon: FaBell,            group: "Monitoring" },
+
+  // ADMIN — Warehouse pages
+  { title: "Warehouses",          url: "/dashboard/admin/warehouses",       role: "ADMIN", icon: FaWarehouse,       group: "Warehouse"  },
+  { title: "Stock Transfers",     url: "/dashboard/admin/transfers",        role: "ADMIN", icon: FaExchangeAlt,     group: "Warehouse"  },
+  { title: "Expiry Alerts",       url: "/dashboard/admin/expiry-alerts",    role: "ADMIN", icon: FaExclamationTriangle, group: "Warehouse" },
 ];
 
-// ── Group config ──────────────────────────────────────────────────────────────
 const GROUP_META: Record<string, { icon: React.ElementType; color: string }> = {
-  Overview:  { icon: FaTachometerAlt, color: "#3A6EA5" },
-  Inventory: { icon: FaBoxes,         color: "#4A7C59" },
-  Sales:     { icon: FaChartBar,      color: "#C2703A" },
-  Account:   { icon: FaUser,          color: "#8A6650" },
-  Content:   { icon: FaLayerGroup,    color: "#5C7AEA" },
-  Commerce:  { icon: FaStore,         color: "#E05C5C" },
-  CMS:       { icon: FaImage,         color: "#9B59B6" },
-  Shopping:  { icon: FaShoppingCart,  color: "#4A7C59" },
-  Health:    { icon: FaFileMedical,   color: "#E91E8C" },
-  Orders:    { icon: FaTruck,         color: "#C2703A" },
-  Finance:   { icon: FaWallet,        color: "#3A6EA5" },
-  General:   { icon: FaHome,          color: "#8A6650" },
+  Overview:    { icon: FaTachometerAlt,      color: "#3A6EA5" },
+  Inventory:   { icon: FaBoxes,              color: "#4A7C59" },
+  Sales:       { icon: FaChartBar,           color: "#C2703A" },
+  Account:     { icon: FaUser,               color: "#8A6650" },
+  Content:     { icon: FaLayerGroup,         color: "#5C7AEA" },
+  Commerce:    { icon: FaStore,              color: "#E05C5C" },
+  CMS:         { icon: FaImage,              color: "#9B59B6" },
+  Operations:  { icon: FaCog,                color: "#64748B" },
+  Shopping:    { icon: FaShoppingCart,       color: "#4A7C59" },
+  Health:      { icon: FaFileMedical,        color: "#E91E8C" },
+  Orders:      { icon: FaTruck,              color: "#C2703A" },
+  Finance:     { icon: FaWallet,             color: "#3A6EA5" },
+  Support:     { icon: FaHeadset,            color: "#C2703A" },
+  General:     { icon: FaHome,               color: "#8A6650" },
+  Warehouse:   { icon: FaWarehouse,          color: "#0EA5E9" },
+  Receiving:   { icon: FaShippingFast,       color: "#7C3AED" },
+  Fulfillment: { icon: FaBoxOpen,            color: "#D97706" },
+  Monitoring:  { icon: FaThermometerHalf,    color: "#10B981" },
 };
 
 // ── Role badge style ──────────────────────────────────────────────────────────
 const ROLE_STYLE: Record<string, { bg: string; text: string; label: string }> = {
-  ADMIN:    { bg: "rgba(90,120,200,0.3)",  text: "#90CAF9", label: "Admin"    },
-  SELLER:   { bg: "rgba(74,124,89,0.35)",  text: "#A5D6A7", label: "Seller"   },
-  CUSTOMER: { bg: "rgba(194,112,58,0.3)",  text: "#FFCC80", label: "Customer" },
+  ADMIN:     { bg: "rgba(90,120,200,0.3)",  text: "#90CAF9", label: "Admin"     },
+  SELLER:    { bg: "rgba(74,124,89,0.35)",  text: "#A5D6A7", label: "Seller"    },
+  CUSTOMER:  { bg: "rgba(194,112,58,0.3)",  text: "#FFCC80", label: "Customer"  },
+  WAREHOUSE: { bg: "rgba(14,165,233,0.25)", text: "#7DD3FC", label: "Warehouse" },
 };
 
 // ── Utility ───────────────────────────────────────────────────────────────────
@@ -421,9 +477,10 @@ function SidebarUserFooter() {
 // ── Logo Header ───────────────────────────────────────────────────────────────
 function SidebarLogoHeader({ role }: { role: Role | null }) {
   const ROLE_SUB: Record<string, string> = {
-    ADMIN:    "Admin Console",
-    SELLER:   "Seller Portal",
-    CUSTOMER: "Customer Portal",
+    ADMIN:     "Admin Console",
+    SELLER:    "Seller Portal",
+    CUSTOMER:  "Customer Portal",
+    WAREHOUSE: "Warehouse Portal",
   };
 
   return (
@@ -459,9 +516,10 @@ function SidebarLogoHeader({ role }: { role: Role | null }) {
 // ── Role Banner ───────────────────────────────────────────────────────────────
 function RoleBanner({ role }: { role: Role }) {
   const config: Record<Role, { label: string; desc: string; color: string; bg: string }> = {
-    ADMIN:    { label: "Admin",    desc: "Full platform control",    color: "#90CAF9", bg: "rgba(90,120,200,0.15)"  },
-    SELLER:   { label: "Seller",   desc: "Manage your store",        color: "#A5D6A7", bg: "rgba(74,124,89,0.15)"  },
-    CUSTOMER: { label: "Customer", desc: "Your health & orders",     color: "#FFCC80", bg: "rgba(194,112,58,0.15)" },
+    ADMIN:     { label: "Admin",     desc: "Full platform control",    color: "#90CAF9", bg: "rgba(90,120,200,0.15)"  },
+    SELLER:    { label: "Seller",    desc: "Manage your store",        color: "#A5D6A7", bg: "rgba(74,124,89,0.15)"  },
+    CUSTOMER:  { label: "Customer",  desc: "Your health & orders",     color: "#FFCC80", bg: "rgba(194,112,58,0.15)" },
+    WAREHOUSE: { label: "Warehouse", desc: "Warehouse operations",     color: "#7DD3FC", bg: "rgba(14,165,233,0.12)" },
   };
   const c = config[role];
   return (

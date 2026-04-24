@@ -27,8 +27,9 @@ const navLinks = [
 ];
 
 function getDashboardUrl(role: string) {
-  if (role === "ADMIN")  return "/dashboard/admin";
-  if (role === "SELLER") return "/dashboard/seller";
+  if (role === "ADMIN")     return "/dashboard/admin";
+  if (role === "SELLER")    return "/dashboard/seller";
+  if (role === "WAREHOUSE") return "/dashboard/warehouse/overview";
   return "/dashboard/customer/orders";
 }
 
@@ -227,7 +228,18 @@ export default function Navbar() {
                             <p className="font-bold text-sm truncate">{user.name}</p>
                             <p className="text-xs text-muted-foreground truncate">{user.email}</p>
                             <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full mt-0.5 inline-block"
-                              style={{ background: user.role === "ADMIN" ? "#E3F0FB" : user.role === "SELLER" ? "#E8F5E9" : "#FFF3E0", color: user.role === "ADMIN" ? "#3A6EA5" : user.role === "SELLER" ? "#2E7D32" : "#C2703A" }}>
+                              style={{
+                                background:
+                                  user.role === "ADMIN"     ? "#E3F0FB" :
+                                  user.role === "SELLER"    ? "#E8F5E9" :
+                                  user.role === "WAREHOUSE" ? "#E0F2FE" :
+                                  "#FFF3E0",
+                                color:
+                                  user.role === "ADMIN"     ? "#3A6EA5" :
+                                  user.role === "SELLER"    ? "#2E7D32" :
+                                  user.role === "WAREHOUSE" ? "#0369A1" :
+                                  "#C2703A",
+                              }}>
                               {user.role}
                             </span>
                           </div>

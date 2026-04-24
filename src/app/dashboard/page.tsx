@@ -5,7 +5,7 @@ import { DoughnutChart, BarChart, LineChart } from "@/components/ui/Charts";
 import { COLORS } from "@/lib/theme";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-type Role = "ADMIN" | "SELLER" | "CUSTOMER";
+type Role = "ADMIN" | "SELLER" | "CUSTOMER" | "WAREHOUSE";
 
 interface Me {
   id: string; name: string; email: string;
@@ -56,9 +56,10 @@ const STATUS_COLOR: Record<string, string> = {
 };
 
 const ROLE_BADGE: Record<Role, string> = {
-  ADMIN:    "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300",
-  SELLER:   "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300",
-  CUSTOMER: "bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300",
+  ADMIN:     "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300",
+  SELLER:    "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300",
+  CUSTOMER:  "bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300",
+  WAREHOUSE: "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300",
 };
 
 const ACCENT: Record<number, string> = {
@@ -524,6 +525,9 @@ function CustomerView({ data }: { data: CustomerData }) {
             { label: "Prescriptions",      href: "/dashboard/customer/prescription", icon: "💊" },
             { label: "Wallet & Payments",  href: "/dashboard/customer/wallet",       icon: "💳" },
             { label: "Track Orders",       href: "/dashboard/customer/tracking",     icon: "📍" },
+            { label: "Returns",            href: "/dashboard/customer/returns",      icon: "↩️" },
+            { label: "Subscriptions",      href: "/dashboard/customer/subscription", icon: "🔄" },
+            { label: "Help & Support",     href: "/dashboard/customer/support",      icon: "🎧" },
           ].map(link => (
             <a key={link.href} href={link.href}
               className="flex items-center gap-3 py-2 px-2 rounded-lg hover:bg-muted/50 transition-colors text-sm text-primary group">
@@ -635,30 +639,49 @@ export default function DashboardPage() {
       heading: "Platform Overview",
       sub: "MediStore Admin · Real-time statistics",
       navLinks: [
-        { label: "Users",     href: "/dashboard/admin/users"    },
-        { label: "Orders",    href: "/dashboard/admin/orders"   },
-        { label: "Licenses",  href: "/dashboard/admin/license"  },
-        { label: "Medicines", href: "/dashboard/admin/categories" },
+        { label: "Users",             href: "/dashboard/admin/users"             },
+        { label: "Orders",            href: "/dashboard/admin/orders"            },
+        { label: "Licenses",          href: "/dashboard/admin/license"           },
+        { label: "Payouts",           href: "/dashboard/admin/payouts"           },
+        { label: "Support",           href: "/dashboard/admin/support"           },
+        { label: "Fraud Flags",       href: "/dashboard/admin/fraud-flags"       },
+        { label: "Settings",          href: "/dashboard/admin/platform-settings" },
+        { label: "Audit Logs",        href: "/dashboard/admin/audit-logs"        },
       ],
     },
     SELLER: {
       heading: "Seller Dashboard",
       sub: "Your store performance · Live data",
       navLinks: [
-        { label: "Medicines", href: "/dashboard/seller/medicines"    },
-        { label: "Orders",    href: "/dashboard/seller/orders"       },
-        { label: "Stock",     href: "/dashboard/seller/stock-alerts" },
-        { label: "Batches",   href: "/dashboard/seller/batches"      },
+        { label: "Medicines",   href: "/dashboard/seller/medicines"    },
+        { label: "Orders",      href: "/dashboard/seller/orders"       },
+        { label: "Analytics",   href: "/dashboard/seller/analytics"    },
+        { label: "Inventory",   href: "/dashboard/seller/inventory"    },
+        { label: "Wallet",      href: "/dashboard/seller/wallet"       },
+        { label: "Profile",     href: "/dashboard/seller/profile"      },
+        { label: "Import",      href: "/dashboard/seller/catalog/import" },
       ],
     },
     CUSTOMER: {
       heading: "My Health Dashboard",
       sub: `Welcome back, ${me.name.split(" ")[0]} · Your orders & account`,
       navLinks: [
-        { label: "Orders",   href: "/dashboard/customer/orders"  },
-        { label: "Cart",     href: "/dashboard/customer/cart"    },
-        { label: "Wishlist", href: "/dashboard/customer/wishlist"},
-        { label: "Wallet",   href: "/dashboard/customer/wallet"  },
+        { label: "Orders",       href: "/dashboard/customer/orders"       },
+        { label: "Cart",         href: "/dashboard/customer/cart"         },
+        { label: "Wishlist",     href: "/dashboard/customer/wishlist"     },
+        { label: "Wallet",       href: "/dashboard/customer/wallet"       },
+        { label: "Prescriptions",href: "/dashboard/customer/prescription" },
+        { label: "Support",      href: "/dashboard/customer/support"      },
+      ],
+    },
+    WAREHOUSE: {
+      heading: "Warehouse Operations",
+      sub: "Fulfillment & dispatch management",
+      navLinks: [
+        { label: "Orders",      href: "/dashboard/warehouse/orders"      },
+        { label: "Fulfillment", href: "/dashboard/warehouse/fulfillment" },
+        { label: "Pick & Pack", href: "/dashboard/warehouse/packing"     },
+        { label: "Dispatch",    href: "/dashboard/warehouse/dispatch"    },
       ],
     },
   };
@@ -749,9 +772,27 @@ export default function DashboardPage() {
         </div>
 
         {/* Role-based content */}
-        {role === "ADMIN"    && data && <AdminView    data={data as AdminData}    />}
-        {role === "SELLER"   && data && <SellerView   data={data as SellerData}   />}
-        {role === "CUSTOMER" && data && <CustomerView data={data as CustomerData} />}
+        {role === "ADMIN"     && data && <AdminView    data={data as AdminData}    />}
+        {role === "SELLER"    && data && <SellerView   data={data as SellerData}   />}
+        {role === "CUSTOMER"  && data && <CustomerView data={data as CustomerData} />}
+        {role === "WAREHOUSE" && (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              { label: "Orders",      href: "/dashboard/warehouse/orders",      emoji: "📋", desc: "View all incoming orders" },
+              { label: "Fulfillment", href: "/dashboard/warehouse/fulfillment", emoji: "📦", desc: "Full pipeline queue" },
+              { label: "Pick & Pack", href: "/dashboard/warehouse/packing",     emoji: "🏷️", desc: "Receive & pack orders" },
+              { label: "Dispatch",    href: "/dashboard/warehouse/dispatch",    emoji: "🚚", desc: "Orders out for delivery" },
+            ].map(card => (
+              <a key={card.href} href={card.href}
+                className="bg-card rounded-2xl p-6 border border-border hover:shadow-lg transition-all hover:-translate-y-1 group">
+                <p className="text-4xl mb-3">{card.emoji}</p>
+                <p className="font-bold text-primary text-sm">{card.label}</p>
+                <p className="text-xs text-muted-foreground mt-1">{card.desc}</p>
+                <p className="text-xs text-sky-500 mt-3 group-hover:underline">Open →</p>
+              </a>
+            ))}
+          </div>
+        )}
 
         {!data && (
           <div className="text-center py-20">
