@@ -126,33 +126,24 @@ const navData: NavItem[] = [
   // ──────────────────────────────────────────────────────────────────────────
   // WAREHOUSE
   // ──────────────────────────────────────────────────────────────────────────
-  { title: "Overview",            url: "/dashboard/warehouse/overview",     role: "WAREHOUSE", icon: FaWarehouse,       group: "Warehouse"  },
-  { title: "Analytics",           url: "/dashboard/warehouse/analytics",    role: "WAREHOUSE", icon: FaChartLine,       group: "Warehouse"  },
+  { title: "Overview",            url: "/dashboard/warehouse/overview",    role: "WAREHOUSE", icon: FaWarehouse,           group: "Warehouse"   },
+  { title: "Analytics",           url: "/dashboard/warehouse/analytics",   role: "WAREHOUSE", icon: FaChartLine,           group: "Warehouse"   },
 
-  { title: "Stock Transfers",     url: "/dashboard/warehouse/transfers",    role: "WAREHOUSE", icon: FaExchangeAlt,     group: "Inventory"  },
-  { title: "Storage Bins",        url: "/dashboard/warehouse/bins",         role: "WAREHOUSE", icon: FaCubes,           group: "Inventory"  },
-  { title: "Expiry Monitor",      url: "/dashboard/warehouse/expiry",       role: "WAREHOUSE", icon: FaExclamationTriangle, group: "Inventory" },
+  { title: "Order Management",    url: "/dashboard/warehouse/orders",      role: "WAREHOUSE", icon: FaClipboardList,       group: "Fulfillment" },
+  { title: "Fulfillment Queue",   url: "/dashboard/warehouse/fulfillment", role: "WAREHOUSE", icon: FaBoxes,               group: "Fulfillment" },
+  { title: "Pick & Pack",         url: "/dashboard/warehouse/packing",     role: "WAREHOUSE", icon: FaBoxOpen,             group: "Fulfillment" },
+  { title: "Dispatch & Delivery", url: "/dashboard/warehouse/dispatch",    role: "WAREHOUSE", icon: FaTruck,               group: "Fulfillment" },
 
-  { title: "GRN Management",      url: "/dashboard/warehouse/grn",          role: "WAREHOUSE", icon: FaFileInvoice,     group: "Receiving"  },
-  { title: "Suppliers",           url: "/dashboard/warehouse/suppliers",    role: "WAREHOUSE", icon: FaShippingFast,    group: "Receiving"  },
+  { title: "Storage Bins",        url: "/dashboard/warehouse/bins",        role: "WAREHOUSE", icon: FaCubes,               group: "Inventory"   },
+  { title: "Locations",           url: "/dashboard/warehouse/locations",   role: "WAREHOUSE", icon: FaMapMarkerAlt,        group: "Inventory"   },
+  { title: "Expiry Monitor",      url: "/dashboard/warehouse/expiry",      role: "WAREHOUSE", icon: FaExclamationTriangle, group: "Inventory"   },
 
-  { title: "Order Management",  url: "/dashboard/warehouse/orders",      role: "WAREHOUSE", icon: FaCheckDouble,     group: "Fulfillment" },
-  { title: "Fulfillment Queue",   url: "/dashboard/warehouse/fulfillment",  role: "WAREHOUSE", icon: FaBoxes,           group: "Fulfillment" },
-  { title: "Inbound Parcels",     url: "/dashboard/warehouse/inbound",      role: "WAREHOUSE", icon: FaInbox,           group: "Fulfillment" },
-  { title: "Pick & Pack",         url: "/dashboard/warehouse/packing",      role: "WAREHOUSE", icon: FaBoxOpen,         group: "Fulfillment" },
-  { title: "Dispatch / Delivery", url: "/dashboard/warehouse/dispatch",     role: "WAREHOUSE", icon: FaShippingFast,    group: "Fulfillment" },
-
-  { title: "All Stock",           url: "/dashboard/warehouse/stock",        role: "WAREHOUSE", icon: FaDatabase,        group: "Inventory"  },
-  { title: "Locations",           url: "/dashboard/warehouse/locations",    role: "WAREHOUSE", icon: FaMapMarkerAlt,    group: "Inventory"  },
-
-  { title: "Stock & Expiry Alerts",url: "/dashboard/warehouse/alerts",     role: "WAREHOUSE", icon: FaBell,            group: "Monitoring" },
-  { title: "Temperature Logs",    url: "/dashboard/warehouse/temperature",  role: "WAREHOUSE", icon: FaThermometerHalf, group: "Monitoring" },
-  { title: "Notifications",       url: "/dashboard/warehouse/notifications",role: "WAREHOUSE", icon: FaBell,            group: "Monitoring" },
+  { title: "Temperature Logs",    url: "/dashboard/warehouse/temperature", role: "WAREHOUSE", icon: FaThermometerHalf,     group: "Monitoring"  },
 
   // ADMIN — Warehouse pages
-  { title: "Warehouses",          url: "/dashboard/admin/warehouses",       role: "ADMIN", icon: FaWarehouse,       group: "Warehouse"  },
-  { title: "Stock Transfers",     url: "/dashboard/admin/transfers",        role: "ADMIN", icon: FaExchangeAlt,     group: "Warehouse"  },
-  { title: "Expiry Alerts",       url: "/dashboard/admin/expiry-alerts",    role: "ADMIN", icon: FaExclamationTriangle, group: "Warehouse" },
+  { title: "Warehouses",          url: "/dashboard/admin/warehouses",      role: "ADMIN", icon: FaWarehouse,          group: "Warehouse"  },
+  { title: "Stock Transfers",     url: "/dashboard/admin/transfers",       role: "ADMIN", icon: FaExchangeAlt,        group: "Warehouse"  },
+  { title: "Expiry Alerts",       url: "/dashboard/admin/expiry-alerts",   role: "ADMIN", icon: FaExclamationTriangle,group: "Warehouse"  },
 ];
 
 const GROUP_META: Record<string, { icon: React.ElementType; color: string }> = {

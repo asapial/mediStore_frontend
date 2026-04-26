@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import {
   FaWallet, FaArrowUp, FaArrowDown, FaClock, FaPlus, FaHistory,
-  FaCheckCircle, FaTimesCircle, FaExclamationTriangle
+  FaCheckCircle, FaTimesCircle, FaExclamationTriangle, FaSync,
 } from "react-icons/fa";
 
 interface Transaction {
@@ -44,11 +44,13 @@ export default function SellerWalletPage() {
   const [wallet, setWallet] = useState<SellerWallet | null>(null);
   const [withdrawals, setWithdrawals] = useState<WithdrawalRequest[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [tab, setTab] = useState<Tab>("transactions");
   const [txnFilter, setTxnFilter] = useState("ALL");
 
-  const fetchData = async () => {
-    setLoading(true);
+  const fetchData = async (silent = false) => {
+    if (!silent) setLoading(true);
+    else setRefreshing(true);
     try {
       const [wRes, wdRes] = await Promise.all([
         fetch("/api/wallet/seller/my", { credentials: "include" }),
@@ -58,10 +60,19 @@ export default function SellerWalletPage() {
       if (wData.success)  setWallet(wData.data);
       if (wdData.success) setWithdrawals(wdData.data || []);
     } catch { toast.error("Failed to load wallet"); }
-    finally { setLoading(false); }
+    finally { setLoading(false); setRefreshing(false); }
   };
 
-  useEffect(() => { fetchData(); }, []);
+  // Auto-refresh when window regains focus (e.g. seller switches back from dispatch page)
+  useEffect(() => {
+    fetchData();
+    const onFocus = () => fetchData(true);
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") fetchData(true);
+    });
+    return () => window.removeEventListener("focus", onFocus);
+  }, []);
 
   const filteredTxns = wallet?.transactions.filter(t =>
     txnFilter === "ALL" || t.type === txnFilter
@@ -92,19 +103,29 @@ export default function SellerWalletPage() {
             <p className="text-sm" style={{ color: "#8A6650" }}>Your earnings, withdrawals and transactions</p>
           </div>
         </div>
-        <button onClick={() => router.push("/dashboard/seller/wallet/withdraw")}
-          className="medi-btn-accent flex items-center gap-2">
-          <FaPlus /> Request Withdrawal
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => fetchData(true)}
+            disabled={refreshing}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all disabled:opacity-60"
+            style={{ background: "#F5EDE3", color: "#5C4033", border: "1px solid #DDD0C4" }}>
+            <FaSync className={refreshing ? "animate-spin" : ""} style={{ fontSize: 12 }} />
+            {refreshing ? "Refreshing..." : "Refresh"}
+          </button>
+          <button onClick={() => router.push("/dashboard/seller/wallet/withdraw")}
+            className="medi-btn-accent flex items-center gap-2">
+            <FaPlus /> Request Withdrawal
+          </button>
+        </div>
       </div>
 
       {/* Balance Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
         {[
-          { label: "Available Balance", value: `$${wallet.balance.toFixed(2)}`, color: "#1B3A5C", big: true },
-          { label: "Total Earned", value: `$${wallet.totalEarned.toFixed(2)}`, color: "#2E7D32" },
-          { label: "Total Withdrawn", value: `$${wallet.totalWithdrawn.toFixed(2)}`, color: "#C62828" },
-          { label: "Pending Requests", value: `$${wallet.pendingAmount.toFixed(2)}`, color: "#C2703A" },
+          { label: "Available Balance", value: `৳${wallet.balance.toFixed(2)}`, color: "#1B3A5C", big: true },
+          { label: "Total Earned",      value: `৳${wallet.totalEarned.toFixed(2)}`, color: "#2E7D32" },
+          { label: "Total Withdrawn",   value: `৳${wallet.totalWithdrawn.toFixed(2)}`, color: "#C62828" },
+          { label: "Pending Requests",  value: `৳${wallet.pendingAmount.toFixed(2)}`, color: "#C2703A" },
         ].map((c, i) => (
           <motion.div key={i} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.07 }} className="medi-card p-5">
@@ -173,7 +194,7 @@ export default function SellerWalletPage() {
                       </div>
                       <span className="font-bold text-sm"
                         style={{ color: TXN_COLORS[t.type] || "#1B3A5C" }}>
-                        {t.type === "DEPOSIT" || t.type === "REFUND" ? "+" : "-"}${t.amount.toFixed(2)}
+                        {t.type === "DEPOSIT" || t.type === "REFUND" ? "+" : "-"}৳{t.amount.toFixed(2)}
                       </span>
                     </motion.div>
                   ))}
@@ -204,7 +225,7 @@ export default function SellerWalletPage() {
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
                             <span className="text-lg font-black" style={{ color: "#1B3A5C" }}>
-                              ${wd.amount.toFixed(2)}
+                              ৳{wd.amount.toFixed(2)}
                             </span>
                             <span className="flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-bold"
                               style={{ background: s.bg, color: s.color }}>

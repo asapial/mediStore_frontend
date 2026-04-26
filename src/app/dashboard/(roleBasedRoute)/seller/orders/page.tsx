@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   FaClipboardList, FaBox, FaTruck, FaCheckCircle,
   FaUser, FaMapMarkerAlt, FaChevronDown, FaChevronUp,
-  FaSpinner, FaWarehouse, FaSitemap,
+  FaSpinner, FaWarehouse, FaSitemap, FaPhone, FaEnvelope,
 } from "react-icons/fa";
 
 type OrderStatus = "PLACED" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED";
@@ -13,11 +13,17 @@ type OrderStatus = "PLACED" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLE
 interface Medicine { id: string; name: string; image?: string; }
 interface OrderItem { id: string; quantity: number; price: number; status: string; medicine: Medicine; subOrderId?: string; }
 interface SubOrder  { id: string; status: OrderStatus; total: number; items: Array<{ id: string; quantity: number; price: number; medicine: Medicine }>; }
+interface WarehouseInfo {
+  id: string; name: string; address: string; city: string; country: string; phone?: string;
+  manager: { name: string; email: string };
+}
+interface FulfillmentTaskInfo { id: string; status: string; warehouse: WarehouseInfo; }
 interface SellerOrder {
   id: string; status: OrderStatus; address: string; createdAt: string;
   user: { name: string; email: string };
   items: OrderItem[];
-  subOrders: SubOrder[]; // empty for old orders, has 1 entry for new orders
+  subOrders: SubOrder[];
+  fulfillmentTask?: FulfillmentTaskInfo | null;
 }
 
 const STATUS_COLORS: Record<OrderStatus, string> = {
@@ -308,12 +314,58 @@ export default function SellerOrdersPage() {
                       </button>
                     </div>
                   ) : effectiveStatus === "SHIPPED" ? (
-                    <div className="px-5 py-3 flex items-center gap-2"
+                    <div className="px-5 py-4 space-y-3"
                       style={{ borderTop: "1px solid #EEE4D9", background: "#EDE7F6" }}>
-                      <FaWarehouse style={{ color: "#512DA8" }} />
-                      <p className="text-xs font-semibold" style={{ color: "#512DA8" }}>
-                        Items at warehouse — being consolidated for delivery
-                      </p>
+                      {/* Always-visible shipped hint */}
+                      <div className="flex items-center gap-2">
+                        <FaWarehouse style={{ color: "#512DA8" }} />
+                        <p className="text-xs font-semibold" style={{ color: "#512DA8" }}>
+                          Items at warehouse — being consolidated for delivery
+                        </p>
+                      </div>
+
+                      {/* Warehouse details card */}
+                      {order.fulfillmentTask?.warehouse && (
+                        <div className="rounded-xl p-4 space-y-2"
+                          style={{ background: "rgba(255,255,255,0.7)", border: "1px solid #D1C4E9" }}>
+                          <p className="text-xs font-black uppercase tracking-wide mb-2" style={{ color: "#512DA8" }}>
+                            📦 Ship Your Items To
+                          </p>
+                          <div className="flex items-start gap-2">
+                            <FaWarehouse style={{ color: "#512DA8", fontSize: 12, marginTop: 2 }} />
+                            <div>
+                              <p className="text-sm font-bold" style={{ color: "#1B3A5C" }}>
+                                {order.fulfillmentTask.warehouse.name}
+                              </p>
+                              <p className="text-xs" style={{ color: "#5C4033" }}>
+                                {order.fulfillmentTask.warehouse.address},&nbsp;
+                                {order.fulfillmentTask.warehouse.city},&nbsp;
+                                {order.fulfillmentTask.warehouse.country}
+                              </p>
+                            </div>
+                          </div>
+                          {order.fulfillmentTask.warehouse.phone && (
+                            <div className="flex items-center gap-2">
+                              <FaPhone style={{ color: "#512DA8", fontSize: 11 }} />
+                              <p className="text-xs" style={{ color: "#5C4033" }}>
+                                {order.fulfillmentTask.warehouse.phone}
+                              </p>
+                            </div>
+                          )}
+                          <div className="flex items-center gap-2">
+                            <FaEnvelope style={{ color: "#512DA8", fontSize: 11 }} />
+                            <div>
+                              <span className="text-xs" style={{ color: "#8A6650" }}>Manager: </span>
+                              <span className="text-xs font-semibold" style={{ color: "#5C4033" }}>
+                                {order.fulfillmentTask.warehouse.manager.name}
+                              </span>
+                              <span className="text-xs" style={{ color: "#8A6650" }}>
+                                &nbsp;({order.fulfillmentTask.warehouse.manager.email})
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ) : effectiveStatus === "DELIVERED" ? (
                     <div className="px-5 py-3 flex items-center gap-2"

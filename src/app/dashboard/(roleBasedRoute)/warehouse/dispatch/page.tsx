@@ -12,7 +12,12 @@ type OrderStatus   = "PLACED" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCEL
 
 interface Medicine  { id: string; name: string; image?: string; }
 interface OrderItem { id: string; quantity: number; price: number; medicine: Medicine; }
-interface SubOrder  { id: string; status: OrderStatus; total: number; seller: { id: string; name: string }; }
+interface SubOrderItem { price: number; quantity: number; }
+interface SubOrder  {
+  id: string; status: OrderStatus; total: number;
+  seller: { id: string; name: string };
+  items: SubOrderItem[]; // used to compute accurate earnings (total field may be 0 for legacy orders)
+}
 interface Task {
   id: string; orderId: string; status: FulfillStatus;
   createdAt: string; dispatchedAt?: string;
@@ -188,21 +193,25 @@ export default function WarehouseDispatchPage() {
                   </div>
                 </div>
 
-                {/* Sellers */}
+                {/* Sellers — earnings computed from items (not subOrder.total which may be 0 for old orders) */}
                 {task.order.subOrders.length > 0 && (
                   <div className="px-5 py-3" style={{ borderBottom: "1px solid #EEE4D9", background: "#F9F6F2" }}>
                     <p className="text-xs font-bold uppercase mb-2" style={{ color: "#8A6650" }}>
-                      <FaStore style={{ display: "inline", marginRight: 4 }} />Sellers in this order
+                      <FaStore style={{ display: "inline", marginRight: 4 }} />Sellers & Earnings
                     </p>
                     <div className="flex flex-wrap gap-2">
-                      {task.order.subOrders.map(sub => (
-                        <span key={sub.id} className="text-xs px-3 py-1.5 rounded-xl flex items-center gap-1.5"
-                          style={{ background: "#1B3A5C10", color: "#1B3A5C" }}>
-                          <FaStore style={{ fontSize: 10 }} />
-                          {sub.seller.name}
-                          <span style={{ color: "#C2703A", fontWeight: "bold" }}>৳{sub.total.toFixed(2)}</span>
-                        </span>
-                      ))}
+                      {task.order.subOrders.map(sub => {
+                        const earned = sub.items.reduce((s, i) => s + i.price * i.quantity, 0);
+                        return (
+                          <span key={sub.id} className="text-xs px-3 py-1.5 rounded-xl flex items-center gap-1.5"
+                            style={{ background: "#1B3A5C10", color: "#1B3A5C" }}>
+                            <FaStore style={{ fontSize: 10 }} />
+                            {sub.seller.name}
+                            <span style={{ color: "#10B981", fontWeight: "bold" }}>৳{earned.toFixed(2)}</span>
+                            <span style={{ fontSize: 9, color: "#8A6650" }}>(on delivery)</span>
+                          </span>
+                        );
+                      })}
                     </div>
                   </div>
                 )}

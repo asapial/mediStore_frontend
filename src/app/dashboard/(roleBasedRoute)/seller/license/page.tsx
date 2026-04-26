@@ -185,7 +185,7 @@ export default function SellerLicensePage() {
               {/* Document proxy link — opens through our backend so Cloudinary
                   CDN restrictions don't block delivery in the browser */}
               <a
-                href="/api/seller-license/document"
+                href={`/api/seller-license/document?t=${Date.now()}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-4 inline-flex items-center gap-2 text-xs px-4 py-2 rounded-lg font-semibold"

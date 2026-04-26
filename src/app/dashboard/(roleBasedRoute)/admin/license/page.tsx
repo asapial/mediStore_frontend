@@ -147,8 +147,13 @@ export default function AdminLicensePage() {
                   </div>
                 </div>
 
-                <a href={lic.documentUrl} target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 text-xs mb-4 font-semibold" style={{ color: "#3A6EA5" }}>
+                <a
+                  href={`/api/seller-license/document?sellerId=${lic.seller.id}&t=${Date.now()}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 text-xs mb-4 font-semibold"
+                  style={{ color: "#3A6EA5" }}
+                >
                   <FaExternalLinkAlt /> View Document
                 </a>
 

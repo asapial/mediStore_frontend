@@ -5,10 +5,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   FaBoxes, FaSpinner, FaStore, FaUser, FaMapMarkerAlt,
   FaChevronDown, FaChevronUp, FaBox, FaBoxOpen, FaTruck,
-  FaCheckDouble, FaClock, FaFilter,
+  FaCheckDouble, FaClock,
 } from "react-icons/fa";
 
-type FulfillStatus = "PENDING" | "PICKED" | "PACKED" | "DISPATCHED";
+type FulfillStatus = "PENDING" | "PICKED" | "PACKED" | "DISPATCHED" | "DELIVERED";
 type OrderStatus   = "PLACED" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED";
 
 interface Medicine  { id: string; name: string; image?: string; }
@@ -29,18 +29,19 @@ interface Task {
   packingSlip?: { id: string; items: any };
 }
 
-const FS_COLOR: Record<FulfillStatus, string> = {
+const FS_COLOR: Record<string, string> = {
   PENDING: "#3A6EA5", PICKED: "#C2703A", PACKED: "#512DA8", DISPATCHED: "#0EA5E9",
 };
-const FS_ICON: Record<FulfillStatus, React.ReactNode> = {
+const FS_ICON: Record<string, React.ReactNode> = {
   PENDING: <FaClock />, PICKED: <FaBox />, PACKED: <FaBoxOpen />, DISPATCHED: <FaTruck />,
 };
-const ALL_STATUSES: (FulfillStatus | "ALL")[] = ["ALL", "PENDING", "PICKED", "PACKED", "DISPATCHED"];
+
+// Only show active fulfillment stages — DISPATCHED lives on the Dispatch page
+const ACTIVE_STAGES: FulfillStatus[] = ["PENDING", "PICKED", "PACKED"];
 
 export default function FulfillmentQueuePage() {
   const [tasks,    setTasks]    = useState<Task[]>([]);
   const [loading,  setLoading]  = useState(true);
-  const [filter,   setFilter]   = useState<FulfillStatus | "ALL">("ALL");
   const [expanded, setExpanded] = useState<string | null>(null);
   const [acting,   setActing]   = useState<string | null>(null);
 
@@ -48,7 +49,11 @@ export default function FulfillmentQueuePage() {
     setLoading(true);
     fetch("/api/fulfillment/my-queue", { credentials: "include" })
       .then(r => r.json())
-      .then(d => setTasks(d.data || []))
+      .then(d => {
+        const all: Task[] = d.data || [];
+        // Only show tasks that still need action on this page
+        setTasks(all.filter(t => ACTIVE_STAGES.includes(t.status as FulfillStatus)));
+      })
       .catch(() => toast.error("Failed to load queue"))
       .finally(() => setLoading(false));
   }, []);
@@ -66,32 +71,39 @@ export default function FulfillmentQueuePage() {
       const d = await res.json();
       if (!res.ok) throw new Error(d.message);
       toast.success(msg);
-      if (newStatus) setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: newStatus } : t));
-      else load();
+      if (newStatus === "DISPATCHED") {
+        // Remove from this page — it moves to the Dispatch page
+        setTasks(prev => prev.filter(t => t.id !== taskId));
+        toast.info("Order moved to Dispatch & Delivery page");
+      } else if (newStatus) {
+        setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: newStatus } : t));
+      } else {
+        load();
+      }
     } catch (e: any) { toast.error(e.message); }
     finally { setActing(null); }
   };
 
-  const count = (s: FulfillStatus | "ALL") =>
-    s === "ALL" ? tasks.length : tasks.filter(t => t.status === s).length;
-
-  const filtered = filter === "ALL" ? tasks : tasks.filter(t => t.status === filter);
+  const count = (s: FulfillStatus) => tasks.filter(t => t.status === s).length;
 
   return (
     <div className="medi-page">
+      {/* Header */}
       <div className="mb-8 flex items-center gap-3">
         <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: "#D97706" }}>
           <FaBoxes className="text-white text-lg" />
         </div>
         <div>
           <h1 className="text-2xl font-bold" style={{ color: "#1B3A5C" }}>Fulfillment Queue</h1>
-          <p className="text-sm" style={{ color: "#8A6650" }}>All orders — pending through dispatched</p>
+          <p className="text-sm" style={{ color: "#8A6650" }}>
+            Pending → Picked → Packed — dispatched orders appear on the Dispatch page
+          </p>
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-        {(["PENDING","PICKED","PACKED","DISPATCHED"] as FulfillStatus[]).map(s => (
+      {/* Status summary cards */}
+      <div className="grid grid-cols-3 gap-3 mb-6">
+        {ACTIVE_STAGES.map(s => (
           <div key={s} className="medi-card p-4 flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl flex items-center justify-center"
               style={{ background: FS_COLOR[s] + "18", color: FS_COLOR[s] }}>{FS_ICON[s]}</div>
@@ -103,34 +115,21 @@ export default function FulfillmentQueuePage() {
         ))}
       </div>
 
-      {/* Filter pills */}
-      <div className="flex items-center gap-2 mb-5 flex-wrap">
-        <FaFilter style={{ color: "#8A6650", fontSize: 11 }} />
-        {ALL_STATUSES.map(f => (
-          <button key={f} onClick={() => setFilter(f)}
-            className="px-3 py-1.5 rounded-full text-xs font-bold transition-all"
-            style={{
-              background: filter === f ? (f === "ALL" ? "#1B3A5C" : FS_COLOR[f as FulfillStatus]) : "#F5EDE3",
-              color: filter === f ? "#FFF" : "#5C4033",
-              border: "1px solid #DDD0C4",
-            }}>
-            {f} ({count(f)})
-          </button>
-        ))}
-      </div>
-
       {loading ? (
         <div className="flex justify-center py-16">
           <FaSpinner className="text-3xl animate-spin" style={{ color: "#D97706" }} />
         </div>
-      ) : filtered.length === 0 ? (
+      ) : tasks.length === 0 ? (
         <div className="medi-card text-center py-16">
-          <FaBoxes className="mx-auto text-4xl mb-3 opacity-20" style={{ color: "#D97706" }} />
-          <p style={{ color: "#8A6650" }}>No tasks in this status.</p>
+          <FaCheckDouble className="mx-auto text-4xl mb-3" style={{ color: "#10B981", opacity: 0.5 }} />
+          <p className="font-bold" style={{ color: "#10B981" }}>All caught up!</p>
+          <p className="text-sm mt-1" style={{ color: "#8A6650" }}>
+            No orders awaiting processing. Dispatched orders are on the Dispatch page.
+          </p>
         </div>
       ) : (
         <div className="space-y-4">
-          {filtered.map((task, i) => {
+          {tasks.map((task, i) => {
             const isExpanded = expanded === task.id;
             const total = task.order.items.reduce((s, it) => s + it.price * it.quantity, 0);
             return (
@@ -139,7 +138,7 @@ export default function FulfillmentQueuePage() {
 
                 {/* Header */}
                 <div className="flex flex-wrap items-center justify-between gap-2 px-5 py-4"
-                  style={{ background: `linear-gradient(90deg,${FS_COLOR[task.status]}10,#FFF)`, borderBottom: "1px solid #DDD0C4" }}>
+                  style={{ background: `linear-gradient(90deg,${FS_COLOR[task.status] ?? "#3A6EA5"}10,#FFF)`, borderBottom: "1px solid #DDD0C4" }}>
                   <div>
                     <span className="font-black text-sm" style={{ color: "#1B3A5C" }}>
                       Order #{task.order.id.slice(-8).toUpperCase()}
@@ -155,7 +154,7 @@ export default function FulfillmentQueuePage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1"
-                      style={{ background: FS_COLOR[task.status] + "18", color: FS_COLOR[task.status] }}>
+                      style={{ background: (FS_COLOR[task.status] ?? "#3A6EA5") + "18", color: FS_COLOR[task.status] ?? "#3A6EA5" }}>
                       {FS_ICON[task.status]} {task.status}
                     </span>
                     <span className="font-black text-sm" style={{ color: "#C2703A" }}>৳{total.toFixed(2)}</span>
@@ -197,7 +196,7 @@ export default function FulfillmentQueuePage() {
                   )}
                 </div>
 
-                {/* Items */}
+                {/* Items collapsible */}
                 <div className="px-5 py-3">
                   <button onClick={() => setExpanded(isExpanded ? null : task.id)}
                     className="flex items-center gap-1 text-xs font-semibold mb-2"
@@ -219,6 +218,9 @@ export default function FulfillmentQueuePage() {
                             <p className="text-xs font-semibold" style={{ color: "#1B3A5C" }}>
                               {it.medicine.name} <span style={{ color: "#8A6650" }}>× {it.quantity}</span>
                             </p>
+                            <span className="ml-auto text-xs font-bold" style={{ color: "#C2703A" }}>
+                              ৳{(it.price * it.quantity).toFixed(2)}
+                            </span>
                           </div>
                         ))}
                       </motion.div>
@@ -226,11 +228,11 @@ export default function FulfillmentQueuePage() {
                   </AnimatePresence>
                 </div>
 
-                {/* Actions */}
+                {/* Action */}
                 <div className="px-5 py-3 flex flex-wrap gap-2 justify-end"
                   style={{ borderTop: "1px solid #EEE4D9", background: "#FAFAFA" }}>
                   {task.status === "PENDING" && (
-                    <button onClick={() => doAction(task.id, "pick", "Picking started", "PICKED")}
+                    <button onClick={() => doAction(task.id, "pick", "Picking started ✅", "PICKED")}
                       disabled={acting === task.id}
                       className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold disabled:opacity-60"
                       style={{ background: FS_COLOR.PICKED, color: "#FFF" }}>
@@ -238,7 +240,7 @@ export default function FulfillmentQueuePage() {
                     </button>
                   )}
                   {task.status === "PICKED" && (
-                    <button onClick={() => doAction(task.id, "pack", "Packed!", "PACKED")}
+                    <button onClick={() => doAction(task.id, "pack", "Packed! 📦", "PACKED")}
                       disabled={acting === task.id}
                       className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold disabled:opacity-60"
                       style={{ background: FS_COLOR.PACKED, color: "#FFF" }}>
@@ -250,15 +252,7 @@ export default function FulfillmentQueuePage() {
                       disabled={acting === task.id}
                       className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold disabled:opacity-60"
                       style={{ background: FS_COLOR.DISPATCHED, color: "#FFF" }}>
-                      {acting === task.id ? <FaSpinner className="animate-spin" /> : <FaTruck />} Dispatch
-                    </button>
-                  )}
-                  {task.status === "DISPATCHED" && (
-                    <button onClick={() => doAction(task.id, "deliver", "Delivered! Wallets credited 💰")}
-                      disabled={acting === task.id}
-                      className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold disabled:opacity-60"
-                      style={{ background: "#2E7D32", color: "#FFF" }}>
-                      {acting === task.id ? <FaSpinner className="animate-spin" /> : <FaCheckDouble />} Mark Delivered
+                      {acting === task.id ? <FaSpinner className="animate-spin" /> : <FaTruck />} Dispatch Order
                     </button>
                   )}
                 </div>
