@@ -413,7 +413,6 @@ export default function CustomerTrackingPage() {
                                                 style={{
                                                   background: step.done ? step.color : step.active ? step.color + "30" : "#F5EDE3",
                                                   color:      step.done ? "#FFF"       : step.active ? step.color          : "#C5B0A0",
-                                                  ringColor:  step.color + "40",
                                                   boxShadow:  step.active ? `0 0 0 4px ${step.color}30` : undefined,
                                                 }}>
                                                 <span style={{ fontSize: 12 }}>{step.icon}</span>

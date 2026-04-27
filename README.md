@@ -1,509 +1,481 @@
-<p align="center">
-  <img src="public/logo/medistore-high-resolution-logo-transparent.png" alt="MediStore Logo" width="250" />
-</p>
+# 💊 MediStore Frontend
 
-<h1 align="center">💊 MediStore Frontend</h1>
-
-<p align="center">
-  A modern, full-featured <strong>online medicine e-commerce platform</strong> built with <strong>Next.js 16</strong>, <strong>TypeScript</strong>, and <strong>Tailwind CSS 4</strong>.
-</p>
-
-<p align="center">
-  <a href="https://medi-store-frontend-khaki.vercel.app/">
-    <img src="https://img.shields.io/badge/🌐_Live_Demo-Visit_Site-00b894?style=for-the-badge" alt="Live Demo" />
-  </a>
-  <img src="https://img.shields.io/badge/Next.js-16-black?style=for-the-badge&logo=next.js" alt="Next.js 16" />
-  <img src="https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
-  <img src="https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS 4" />
-  <img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React 19" />
-  <img src="https://img.shields.io/badge/Deployed_on-Vercel-000?style=for-the-badge&logo=vercel" alt="Vercel" />
-</p>
-
-<p align="center">
-  MediStore provides a seamless shopping experience for customers, a powerful dashboard for sellers to manage medicines and orders, and a comprehensive admin panel for platform-wide management.
-</p>
-
-## 🌐 Live Demo
-
-The application is live and accessible at the following URL:
-
-> **[https://medi-store-frontend-khaki.vercel.app](https://medi-store-frontend-khaki.vercel.app)**
+> **A production-grade, multi-role pharmacy e-commerce web application built with Next.js 16, React 19, and a unified light pharmacy design system — featuring real-time order tracking, multi-warehouse fulfillment dashboards, and role-based navigation.**
 
 ---
 
 ## 📋 Table of Contents
 
-- [Live Demo](#-live-demo)
-- [Features](#-features)
-- [Tech Stack](#-tech-stack)
-- [Project Structure](#-project-structure)
-- [Prerequisites](#-prerequisites)
-- [Installation](#-installation)
-- [Environment Variables](#-environment-variables)
-- [Running the Project](#-running-the-project)
-- [Authentication & Authorization](#-authentication--authorization)
-- [Route Architecture](#-route-architecture)
-- [UI Components](#-ui-components)
-- [API Proxy & Backend Integration](#-api-proxy--backend-integration)
-- [Animations](#-animations)
-- [Deployment](#-deployment)
-- [Scripts](#-scripts)
-- [License](#-license)
+- [Overview](#overview)
+- [Tech Stack](#tech-stack)
+- [Design System](#design-system)
+- [Application Architecture](#application-architecture)
+- [User Roles & Dashboard Routes](#user-roles--dashboard-routes)
+- [System Workflow](#system-workflow)
+- [Page Reference](#page-reference)
+- [Getting Started](#getting-started)
+- [Environment Variables](#environment-variables)
+- [Project Structure](#project-structure)
+- [API Integration](#api-integration)
 
 ---
 
-## ✨ Features
+## Overview
 
-### 🛒 Customer Features
-- **Product Browsing** — Browse medicines by category, brand, and search
-- **Shopping Cart** — Add/remove medicines, adjust quantities
-- **Checkout Flow** — Complete order placement with a streamlined checkout
-- **Order Tracking** — View order history and individual order details
-- **User Profile** — View and manage account information
-
-### 🏪 Seller Features
-- **Seller Dashboard** — Overview of sales, orders, and medicine inventory with parallel slots (`@medicines`, `@orders`)
-- **Add Medicine** — Create new medicine listings
-- **Update Medicine** — Edit existing medicine details
-- **Order Management** — View and manage incoming orders
-
-### 🛡️ Admin Features
-- **Admin Dashboard** — Platform-wide overview with charts and statistics (powered by **Recharts**)
-- **User Management** — View and manage all registered users
-- **Order Management** — Monitor and manage all orders across the platform
-- **Category Management** — Create and manage medicine categories
-
-### 🌐 Public Pages
-- **Home Page** — Hero section, featured products, categories, brands, testimonials, blog, FAQ, newsletter, and promotional banners
-- **Shop** — Full product listing and browsing
-- **Login / Register** — Secure user authentication with animated Lottie visuals
-- **Static Pages** — Contact, FAQ, Privacy Policy, Refund Policy, Shipping Policy, Terms & Conditions
-- **404 Page** — Custom "Not Found" page
-
-### 🎨 Design & UX
-- **Dark / Light Mode** — System-aware theme toggling via `next-themes`
-- **Responsive Design** — Mobile-first layout with responsive navigation and sidebar
-- **Smooth Animations** — Powered by **Framer Motion** and **GSAP**
-- **Lottie Animations** — Animated JSON visuals on login and registration pages
-- **Toast Notifications** — User feedback with **Sonner**
-- **Image Carousels** — Embla Carousel with autoplay for hero/slider sections
+MediStore Frontend is a Next.js 15 App Router application that serves four distinct user roles — **Customer**, **Seller**, **Admin**, and **Warehouse Manager** — each with a fully isolated, role-specific dashboard. The app features a public-facing pharmacy storefront, AI chatbot, real-time order tracking, multi-seller cart checkout, and a complete warehouse operations suite.
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
-| Category            | Technology                                                                 |
-| ------------------- | -------------------------------------------------------------------------- |
-| **Framework**       | [Next.js 16](https://nextjs.org/) (App Router)                            |
-| **Language**        | [TypeScript 5](https://www.typescriptlang.org/)                           |
-| **Styling**         | [Tailwind CSS 4](https://tailwindcss.com/) + [tw-animate-css](https://github.com/magicuidesign/tw-animate-css) |
-| **UI Components**   | [Shadcn UI](https://ui.shadcn.com/) (Radix UI primitives)                |
-| **Authentication** | [Better Auth](https://www.better-auth.com/)                               |
-| **Env Validation**  | [@t3-oss/env-nextjs](https://env.t3.gg/)                                 |
-| **Animations**      | [Framer Motion](https://www.framer.com/motion/), [GSAP](https://gsap.com/), [Lottie React](https://lottiereact.com/) |
-| **Charts**          | [Recharts](https://recharts.org/)                                         |
-| **Carousel**        | [Embla Carousel](https://www.embla-carousel.com/) + [Swiper](https://swiperjs.com/) |
-| **Icons**           | [Lucide React](https://lucide.dev/), [React Icons](https://react-icons.github.io/react-icons/) |
-| **Notifications**   | [Sonner](https://sonner.emilkowal.dev/)                                   |
-| **Theming**         | [next-themes](https://github.com/pacocoursey/next-themes)                |
-| **React**           | React 19                                                                  |
+| Layer             | Technology                                          |
+|-------------------|-----------------------------------------------------|
+| Framework         | Next.js 16 (App Router)                             |
+| UI Library        | React 19                                            |
+| Language          | TypeScript                                          |
+| Styling           | Vanilla CSS (custom design system via `globals.css`)|
+| Animations        | Framer Motion                                       |
+| Icons             | React Icons (Font Awesome 6 set)                    |
+| Notifications     | Sonner (toast notifications)                        |
+| Auth              | Better Auth (session cookies, `credentials: include`)|
+| Maps/Geo          | GPS coordinate picker (custom)                      |
+| Charts            | Recharts                                            |
+| PDF Viewer        | PDF.js / Cloudinary proxy                           |
+| HTTP              | Native `fetch` with `credentials: include`          |
 
 ---
 
-## 📁 Project Structure
+## Design System
+
+All pages share a unified **Light Pharmacy Theme** defined in `globals.css`.
+
+### Color Palette
+
+| Token       | Hex       | Usage                              |
+|-------------|-----------|------------------------------------|
+| Navy        | `#1B3A5C` | Primary headings, key data         |
+| Amber       | `#C2703A` | CTAs, prices, highlights           |
+| Steel Blue  | `#3A6EA5` | Info states, links                 |
+| Cream       | `#F5EDE3` | Page backgrounds, soft containers  |
+| Warm Tan    | `#8A6650` | Secondary text, labels             |
+| Border      | `#DDD0C4` | Card borders, dividers             |
+| Green       | `#2E7D32` | Success, delivered, credits        |
+| Sky Blue    | `#0EA5E9` | Dispatch, active states            |
+| Purple      | `#7C3AED` | In-transit, packing states         |
+
+### Core CSS Classes
+
+```css
+.medi-page   /* Page wrapper — cream background, max-width, padding */
+.medi-card   /* White card — rounded-2xl, border, subtle shadow      */
+```
+
+### Component Patterns
+
+- **Stat Grid** — `2×4` metric cards at top of every dashboard page
+- **Filter Pill Tabs** — Rounded pill buttons with live counts
+- **Status Badges** — Color-coded `px-3 py-1 rounded-full` pills
+- **Gradient Card Headers** — `linear-gradient(90deg, {color}10, #FFF)`
+- **Status Hint Bar** — Thin colored bar below card header
+- **Expandable Rows** — Framer Motion `height: 0 → auto` animations
+- **Action Footer** — Sticky bottom row with CTA buttons
+
+---
+
+## Application Architecture
 
 ```
-mediStore_frontend/
-├── public/                     # Static assets
-│   ├── homeImage/              # Home page images
-│   ├── logo/                   # Brand logos
-│   ├── sliderImage/            # Carousel / slider images
-│   └── capsule.png             # Decorative asset
-│
-├── src/
-│   ├── animation/              # Lottie JSON animation files
-│   │   ├── Login.json          # Login page animation
-│   │   └── Registration.json   # Registration page animation
-│   │
-│   ├── app/                    # Next.js App Router
-│   │   ├── layout.tsx          # Root layout (ThemeProvider + Toaster)
-│   │   ├── globals.css         # Global styles & Tailwind directives
-│   │   ├── loading.tsx         # Global loading state
-│   │   ├── not-found.tsx       # Custom 404 page
-│   │   │
-│   │   ├── (public)/           # Public route group (no auth required)
-│   │   │   ├── page.tsx        # Home page
-│   │   │   ├── layout.tsx      # Public layout (Navbar + Footer)
-│   │   │   ├── login/          # Login page
-│   │   │   ├── register/       # Registration page
-│   │   │   ├── shop/           # Shop / product listing
-│   │   │   ├── profile/        # User profile
-│   │   │   └── (others)/       # Static info pages
-│   │   │       ├── contact/
-│   │   │       ├── faq/
-│   │   │       ├── privacy/
-│   │   │       ├── refundPolicy/
-│   │   │       ├── shipingPolicy/
-│   │   │       └── terms/
-│   │   │
-│   │   ├── (customer)/         # Customer route group (auth required)
-│   │   │   ├── layout.tsx      # Customer layout
-│   │   │   ├── cart/           # Shopping cart
-│   │   │   ├── checkout/       # Checkout flow
-│   │   │   └── orders/         # Order history & details
-│   │   │       ├── page.tsx    # Orders list
-│   │   │       └── [id]/       # Individual order detail
-│   │   │
-│   │   ├── seller/             # Seller route group (auth required)
-│   │   │   ├── layout.tsx      # Seller layout (Sidebar)
-│   │   │   ├── dashboard/      # Seller dashboard
-│   │   │   ├── addMedicine/    # Add new medicine
-│   │   │   ├── updateMedicine/ # Update existing medicine
-│   │   │   └── (dashboard)/    # Parallel routes
-│   │   │       ├── @medicines/ # Medicines slot
-│   │   │       └── @orders/    # Orders slot
-│   │   │
-│   │   └── (admin)/            # Admin route group (auth required)
-│   │       └── admin/
-│   │           ├── page.tsx    # Admin dashboard (charts & stats)
-│   │           ├── layout.tsx  # Admin layout (Sidebar)
-│   │           ├── users/      # User management
-│   │           ├── orders/     # Order management
-│   │           └── categories/ # Category management
-│   │
-│   ├── components/
-│   │   ├── ui/                 # Shadcn UI components (24 components)
-│   │   │   ├── accordion.tsx   ├── button.tsx    ├── card.tsx
-│   │   │   ├── dialog.tsx      ├── dropdown-menu.tsx
-│   │   │   ├── input.tsx       ├── label.tsx     ├── select.tsx
-│   │   │   ├── sheet.tsx       ├── sidebar.tsx   ├── table.tsx
-│   │   │   ├── navigation-menu.tsx              └── ...more
-│   │   │
-│   │   ├── home/               # Homepage section components
-│   │   │   ├── HeroSection.tsx
-│   │   │   ├── FeaturedProducts.tsx
-│   │   │   ├── CategoriesSection.tsx
-│   │   │   ├── BrandSection.tsx
-│   │   │   ├── TestimonialsSection.tsx
-│   │   │   ├── BlogSecion.tsx
-│   │   │   ├── FAQSection.tsx
-│   │   │   ├── HowItWorksSection.tsx
-│   │   │   ├── NewsletterSection.tsx
-│   │   │   ├── PromoSection.tsx
-│   │   │   ├── banner.tsx
-│   │   │   └── themeToggleSwitch.tsx
-│   │   │
-│   │   ├── shared/             # Shared layout components
-│   │   │   ├── navbar1.tsx     # Main navigation bar
-│   │   │   ├── Footer.tsx      # Site footer
-│   │   │   ├── LoadingPage.tsx # Loading skeleton
-│   │   │   ├── app-sidebar.tsx # Dashboard sidebar
-│   │   │   ├── SidebarHeader.tsx
-│   │   │   └── SidebarUserCard.tsx
-│   │   │
-│   │   ├── login-form.tsx      # Login form component
-│   │   ├── signup-form.tsx     # Registration form component
-│   │   ├── search-form.tsx     # Search bar component
-│   │   └── version-switcher.tsx
-│   │
-│   ├── hooks/
-│   │   └── use-mobile.ts       # Custom hook for mobile detection
-│   │
-│   ├── lib/
-│   │   ├── auth.ts             # Server-side auth configuration
-│   │   ├── auth-client.ts      # Client-side auth (Better Auth)
-│   │   └── utils.ts            # Utility functions (cn helper)
-│   │
-│   ├── provider/
-│   │   └── themeProvider.tsx    # next-themes ThemeProvider wrapper
-│   │
-│   ├── services/
-│   │   └── user.service.ts     # User session service (server-side)
-│   │
-│   ├── utils/
-│   │   └── SectionContainer.tsx # Reusable section wrapper
-│   │
-│   ├── env.ts                  # Environment variable validation (Zod)
-│   └── proxy.ts                # Route protection middleware
-│
-├── .env                        # Environment variables
-├── components.json             # Shadcn UI configuration
-├── next.config.ts              # Next.js configuration (API rewrites)
-├── postcss.config.mjs          # PostCSS configuration
-├── tailwind.config.ts          # Tailwind CSS configuration
-├── tsconfig.json               # TypeScript configuration
-└── package.json                # Dependencies and scripts
+┌─────────────────────────────────────────────────────────────┐
+│                    MediStore Frontend                        │
+│                                                             │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │                  Public Routes                       │   │
+│  │  / (home) · /medicines · /blogs · /about · /auth     │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                                                             │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │              Role-Based Dashboard                    │   │
+│  │                                                      │   │
+│  │  /dashboard/customer/*   → Customer portal          │   │
+│  │  /dashboard/seller/*     → Seller portal            │   │
+│  │  /dashboard/admin/*      → Admin control panel      │   │
+│  │  /dashboard/warehouse/*  → WMS operations           │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                                                             │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │              Next.js API Routes (/api/*)              │   │
+│  │          Proxy → Backend (localhost:4000)             │   │
+│  └─────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 📌 Prerequisites
+## User Roles & Dashboard Routes
 
-- **Node.js** — v20.0.0 or higher
-- **npm** — v10.0.0 or higher (or use `yarn` / `pnpm` / `bun`)
-- **Backend API** — A running instance of the MediStore Backend (see [Backend Integration](#-api-proxy--backend-integration))
+### 🛒 Customer (`/dashboard/customer/`)
+
+| Page           | Route                         | Purpose                                      |
+|----------------|-------------------------------|----------------------------------------------|
+| Overview       | `/customer` (index)           | Stats: orders, wallet, wishlist              |
+| Orders         | `/customer/orders`            | Order history list                           |
+| Tracking       | `/customer/tracking`          | Real-time multi-seller journey tracker       |
+| Cart           | `/customer/cart`              | Cart management                              |
+| Checkout       | `/customer/checkout`          | Address, coupon, payment                     |
+| Wallet         | `/customer/wallet`            | Balance, transactions                        |
+| Prescriptions  | `/customer/prescription`      | Upload & track prescriptions                 |
+| Wishlist       | `/customer/wishlist`          | Saved medicines                              |
+| Returns        | `/customer/returns`           | Return request form & history                |
+| Coupons        | `/customer/coupons`           | Available discount codes                     |
+| Search         | `/customer/search`            | Medicine search with filters                 |
+| Notifications  | `/customer/notifications`     | In-app alerts                                |
+| Subscription   | `/customer/subscription`      | Premium plan management                      |
+| Support        | `/customer/support`           | Contact form                                 |
+| Profile        | `/customer/profile`           | Account settings                             |
+
+### 🏪 Seller (`/dashboard/seller/`)
+
+| Page           | Route                         | Purpose                                      |
+|----------------|-------------------------------|----------------------------------------------|
+| Overview       | `/seller` (index)             | Revenue, orders, stock KPIs                  |
+| Medicines      | `/seller/medicines`           | Medicine listing management                  |
+| Add Medicine   | `/seller/addMedicine`         | Upload new medicine with image               |
+| Edit Medicine  | `/seller/updateMedicine`      | Edit existing listing                        |
+| Catalog        | `/seller/catalog`             | Full product catalog view                    |
+| Orders         | `/seller/orders`              | Incoming order management                    |
+| Batches        | `/seller/batches`             | Lot/batch tracking with expiry               |
+| Stock Alerts   | `/seller/stock-alerts`        | Low-stock notifications                      |
+| Flash Sales    | `/seller/flash-sale`          | Time-limited discount campaigns              |
+| Coupons        | `/seller/coupons`             | Seller-specific coupon codes                 |
+| Wallet         | `/seller/wallet`              | Earnings, withdrawal requests                |
+| Returns        | `/seller/returns`             | Return requests management                   |
+| License        | `/seller/license`             | Pharmacy license upload & status             |
+| Subscription   | `/seller/subscription`        | Seller plan management                       |
+| Analytics      | `/seller/analytics`           | Sales trends, revenue charts                 |
+| Notifications  | `/seller/notifications`       | Alerts from admin/system                     |
+| Profile        | `/seller/profile`             | Seller account settings                      |
+
+### 🔧 Admin (`/dashboard/admin/`)
+
+| Page              | Route                        | Purpose                                   |
+|-------------------|------------------------------|-------------------------------------------|
+| Overview          | `/admin` (index)             | Platform-wide KPIs                        |
+| Users             | `/admin/users`               | User management, role assignment          |
+| Orders            | `/admin/orders`              | All orders across platform                |
+| Medicines         | `/admin/featured-products`   | Featured product curation                 |
+| Categories        | `/admin/categories`          | Medicine category management              |
+| License           | `/admin/license`             | Seller license review & approval          |
+| Prescription      | `/admin/prescription`        | Prescription verification queue           |
+| Flash Sales       | `/admin/flash-sale`          | Flash sale approval                       |
+| Coupons           | `/admin/coupons`             | Platform-wide coupon management           |
+| Banners           | `/admin/banners`             | Homepage banner CMS                       |
+| Blogs             | `/admin/blogs`               | Health article CMS                        |
+| Testimonials      | `/admin/testimonials`        | Customer testimonial management           |
+| Platform Features | `/admin/platform-features`   | Feature highlight cards CMS               |
+| Warehouses        | `/admin/warehouses`          | Warehouse creation & manager assignment   |
+| Returns           | `/admin/returns`             | Return request approvals                  |
+| Payouts           | `/admin/payouts`             | Seller withdrawal approvals               |
+| Wallet            | `/admin/wallet`              | Wallet oversight                          |
+| Newsletter        | `/admin/newsletter`          | Subscriber management                     |
+| Messages          | `/admin/messages`            | Contact form inbox                        |
+| Support           | `/admin/support`             | Support ticket management                 |
+| Fraud Flags       | `/admin/fraud-flags`         | Suspicious activity review                |
+| Audit Logs        | `/admin/audit-logs`          | System audit trail                        |
+| Settings          | `/admin/platform-settings`   | Global platform configuration             |
+| Profile           | `/admin/profile`             | Admin account settings                    |
+
+### 🏭 Warehouse (`/dashboard/warehouse/`)
+
+| Page        | Route                   | Purpose                                                    |
+|-------------|-------------------------|------------------------------------------------------------|
+| Overview    | `/warehouse/overview`   | Warehouse KPIs — pending, packed, dispatched counts        |
+| Orders      | `/warehouse/orders`     | Incoming order queue with status breakdown                 |
+| Routing     | `/warehouse/routing`    | Shipment leg management — receive from sellers, route legs |
+| Packing     | `/warehouse/packing`    | Pick & pack — stage per-seller packages, create packing slip|
+| Dispatch    | `/warehouse/dispatch`   | Dispatch packed orders, confirm customer delivery          |
+| Fulfillment | `/warehouse/fulfillment`| Delivery history archive with seller credit timeline       |
+| Inventory   | `/warehouse/inventory`  | Stock levels, search, medicine tracking                    |
+| Locations   | `/warehouse/locations`  | Warehouse location/zone management                         |
+| Bins        | `/warehouse/bins`       | Storage bin allocation                                     |
+| Analytics   | `/warehouse/analytics`  | Operational performance charts                             |
+| Expiry      | `/warehouse/expiry`     | Expiry date monitoring & alerts                            |
+| Temperature | `/warehouse/temperature`| Cold chain temperature logging                             |
+| Profile     | `/warehouse/profile`    | Warehouse manager account                                  |
 
 ---
 
-## 🚀 Installation
+## System Workflow
 
-1. **Clone the repository**
+### 1. Customer Order Journey
 
-   ```bash
-   git clone https://github.com/your-username/mediStore_frontend.git
-   cd mediStore_frontend
-   ```
+```
+[Public Storefront]
+  Browse Medicines → Add to Cart → Apply Coupon
+      ↓
+[Checkout]
+  Enter Address (GPS picker) → Select Payment Method
+  SSLCommerz / Wallet → Order Placed
+      ↓
+[Customer Tracking: /customer/tracking]
+  Per-seller journey visualization:
+  ┌─────────────────────────────────────────────────────┐
+  │  Order Placed → Seller Processing → Seller Shipped  │
+  │  → At Origin WH → In Transit → At Dest WH          │
+  │  → Packing → Out for Delivery → Delivered ✓         │
+  └─────────────────────────────────────────────────────┘
+  Animated progress bar + per-milestone timestamps
+```
 
-2. **Install dependencies**
+### 2. Warehouse Operations Workflow
 
-   ```bash
-   npm install
-   ```
+```
+[/warehouse/routing]
+┌──────────────────────────────────────────────────────────┐
+│                                                          │
+│  SELLER_PREPARING                                        │
+│       │                                                  │
+│  AWAITING_ORIGIN_WH ──────────────────────────────┐     │
+│       │                                           │     │
+│  [Same WH?] ──Yes──► AT_DEST_WH (skip transit)   │     │
+│       │No                                         │     │
+│  [Receive from Seller]                            │     │
+│       │                                           │     │
+│  AT_ORIGIN_WH                                     │     │
+│       │                                           │     │
+│  [Dispatch to Dest WH]                            │     │
+│       │                                           │     │
+│  IN_TRANSIT                                       │     │
+│       │                                           │     │
+│  [Confirm Arrival]                                │     │
+│       │                                           │     │
+│  AT_DEST_WH ◄─────────────────────────────────────┘     │
+└──────────────────────────────────────────────────────────┘
+       ↓
+[/warehouse/packing]
+  FulfillmentTask: PENDING → CONSOLIDATING
+  Worker clicks "Mark Received" per seller package
+  All packages received? → "Create Packing Slip" → PICKED
+       ↓
+[/warehouse/dispatch]
+  PACKED → "Dispatch to Customer" → DISPATCHED
+  "Mark Customer Received" → DELIVERED
+  → Auto-credit seller wallets ✓
+       ↓
+[/warehouse/fulfillment]
+  Read-only history — seller credits shown per order
+```
 
-3. **Set up environment variables** (see [Environment Variables](#-environment-variables))
+### 3. Same-Warehouse Fast Path (Visual)
 
-4. **Start the development server**
-
-   ```bash
-   npm run dev
-   ```
-
-5. **Open in browser**
-
-   Navigate to [http://localhost:3000](http://localhost:3000)
+```
+Routing Page Card (sameWH = true):
+  ┌─────────────────────────────────────────────────┐
+  │  🏬 Same Warehouse — No Transit                  │
+  │  Dhaka WH · Seller ships → Receive → Pick & Pack│
+  │                                                  │
+  │  [🟠 Receive from Seller → Pick & Pack]          │
+  └─────────────────────────────────────────────────┘
+        ↓ (one click)
+  Packing page shows the order immediately
+```
 
 ---
 
-## 🔐 Environment Variables
+## Page Reference
 
-Create a `.env` file in the project root with the following variables:
+### Customer Tracking Page (`/customer/tracking`)
+- Fetches `GET /api/orders/my` including `subOrders`, `shipmentLeg`, `fulfillmentTask`
+- Per-seller `deriveJourney()` maps live status into 9 visual timeline steps
+- Animated progress bar with % milestones (3% → 100%)
+- Expandable per-seller panels with warehouse route summary
+- Delivered orders show green "🎉 All sellers paid" banner
+
+### Warehouse Routing Page (`/warehouse/routing`)
+- Fetches `GET /api/shipment-legs/mine` for warehouse manager's legs
+- Detects `sameWH = originWarehouseId === destWarehouseId`
+- **Same-WH:** Single action — "Receive from Seller → Pick & Pack" (amber)
+- **Multi-WH:** Origin actions: Confirm Receipt → Dispatch; Dest actions: Confirm Arrival
+- Tab filters: All / Incoming / Ready to Dispatch / In Transit / Arrived
+
+### Warehouse Packing Page (`/warehouse/packing`)
+- Fetches fulfillment tasks with status `CONSOLIDATING` or `PICKED`
+- Per-seller staging rows with individual "📥 Mark Received" buttons
+- Progress bar shows `received / total` legs
+- "📦 Create Packing Slip" button unlocks when all legs are `AT_DEST_WH`
+
+### Warehouse Dispatch Page (`/warehouse/dispatch`)
+- Fetches tasks with status `PACKED` or `DISPATCHED`
+- Filter pills: All / Ready / Dispatched
+- "Dispatch to Customer" (sky blue) → "Mark Customer Received" (green)
+- Shows all seller credits on delivery confirmation
+
+### Warehouse Fulfillment History (`/warehouse/fulfillment`)
+- Read-only archive of `DELIVERED` tasks (newest first)
+- Stat grid: delivered count, total revenue, sellers paid, warehouses
+- Expandable order tracking timeline with dot connector
+
+---
+
+## Getting Started
+
+### Prerequisites
+- Node.js ≥ 18
+- MediStore Backend running on `http://localhost:4000`
+
+### Installation
+
+```bash
+# Clone the repository
+git clone <repo-url>
+cd mediStore_frontend
+
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+```
+
+The app runs on **http://localhost:3000**
+
+### Development Scripts
+
+```bash
+npm run dev      # Start Next.js dev server with hot reload
+npm run build    # Production build (TypeScript checked)
+npm run start    # Serve production build
+npm run lint     # ESLint check
+```
+
+---
+
+## Environment Variables
+
+Create a `.env.local` file in the project root:
 
 ```env
 # Backend API base URL
-backendBaseUrl=https://your-backend-url.com
+NEXT_PUBLIC_API_URL=http://localhost:4000
 
-# Frontend base URL (used by Better Auth)
-frontendBaseUrl=https://your-frontend-url.com
+# Better Auth
+BETTER_AUTH_SECRET="same-secret-as-backend"
+BETTER_AUTH_URL="http://localhost:3000"
 
-# Better Auth URL
-BETTER_AUTH_URL=https://your-frontend-url.com
-
-# Public backend URL (client-side access)
-NEXT_PUBLIC_backendBaseUrl=https://your-backend-url.com
+# Next.js
+NEXTAUTH_URL=http://localhost:3000
 ```
 
-| Variable                     | Description                                          | Required |
-| ---------------------------- | ---------------------------------------------------- | -------- |
-| `backendBaseUrl`             | Base URL of the MediStore backend API                | ✅ Yes   |
-| `frontendBaseUrl`            | Base URL of this frontend application                | ✅ Yes   |
-| `BETTER_AUTH_URL`            | URL for Better Auth session management               | ✅ Yes   |
-| `NEXT_PUBLIC_backendBaseUrl` | Public backend URL accessible from the client        | ✅ Yes   |
-
-> **Note:** Environment variables are validated at runtime using `@t3-oss/env-nextjs` with Zod schemas in `src/env.ts`.
+> **Note:** All API calls use relative `/api/*` paths — Next.js rewrites proxy to the backend. No `NEXT_PUBLIC_API_URL` needed for browser-side calls.
 
 ---
 
-## ▶️ Running the Project
+## Project Structure
 
-```bash
-# Development server (with hot reload)
-npm run dev
-
-# Production build
-npm run build
-
-# Start production server
-npm start
-
-# Run ESLint
-npm run lint
+```
+mediStore_frontend/
+├── src/
+│   ├── app/
+│   │   ├── (public)/                  # Public storefront pages
+│   │   │   ├── page.tsx               # Homepage (banners, flash sales, medicines)
+│   │   │   ├── medicines/             # Browse all medicines
+│   │   │   ├── blogs/                 # Health articles
+│   │   │   ├── about/                 # About page
+│   │   │   └── auth/                  # Login / Register
+│   │   │
+│   │   ├── dashboard/
+│   │   │   ├── page.tsx               # Dashboard landing / role redirect
+│   │   │   ├── layout.tsx             # Sidebar + header shell
+│   │   │   │
+│   │   │   ├── (commonRoute)/         # Shared across roles
+│   │   │   │   └── notifications/
+│   │   │   │
+│   │   │   └── (roleBasedRoute)/
+│   │   │       ├── customer/          # 14 customer pages
+│   │   │       │   ├── tracking/      # ← Real-time order journey
+│   │   │       │   ├── cart/
+│   │   │       │   ├── checkout/
+│   │   │       │   └── ...
+│   │   │       │
+│   │   │       ├── seller/            # 17 seller pages
+│   │   │       │   ├── addMedicine/
+│   │   │       │   ├── flash-sale/
+│   │   │       │   └── ...
+│   │   │       │
+│   │   │       ├── admin/             # 23 admin pages
+│   │   │       │   ├── license/       # ← PDF viewer with Cloudinary proxy
+│   │   │       │   ├── warehouses/
+│   │   │       │   └── ...
+│   │   │       │
+│   │   │       └── warehouse/         # 13 warehouse pages
+│   │   │           ├── routing/       # ← Shipment leg management
+│   │   │           ├── packing/       # ← Pick & pack workflow
+│   │   │           ├── dispatch/      # ← Dispatch & deliver
+│   │   │           ├── fulfillment/   # ← Delivery history
+│   │   │           └── ...
+│   │   │
+│   │   ├── api/                       # Next.js API route handlers
+│   │   ├── globals.css                # Design system tokens + medi-page/medi-card
+│   │   ├── layout.tsx                 # Root layout (Sonner, fonts)
+│   │   └── not-found.tsx              # Custom 404
+│   │
+│   └── components/                    # Shared UI components
+│       ├── Sidebar/
+│       ├── Header/
+│       └── ...
+│
+├── public/                            # Static assets
+└── package.json
 ```
 
 ---
 
-## 🔒 Authentication & Authorization
+## API Integration
 
-MediStore uses **[Better Auth](https://www.better-auth.com/)** for authentication, with session management handled server-side through cookies.
-
-### Authentication Flow
-
-1. **Client-side**: `authClient` is initialized in `src/lib/auth-client.ts` using `createAuthClient` from `better-auth/react`
-2. **Server-side**: Sessions are verified by forwarding cookies to the backend's `/api/auth/me` endpoint via `src/services/user.service.ts`
-3. **Route Protection**: The middleware in `src/proxy.ts` intercepts requests to protected routes and enforces role-based access
-
-### User Roles
-
-| Role         | Accessible Routes                                      | Restricted From                        |
-| ------------ | ------------------------------------------------------ | -------------------------------------- |
-| **CUSTOMER** | `/cart`, `/checkout`, `/orders`, `/profile`             | `/admin/*`, `/seller/*`                |
-| **SELLER**   | `/seller/dashboard`, `/seller/addMedicine`, `/seller/*` | `/admin/*`, `/cart`, `/orders`          |
-| **ADMIN**    | `/admin/*`, `/admin/users`, `/admin/orders`             | `/seller/*`, `/cart`, `/checkout`       |
-
-### Protected Routes (Middleware Matcher)
-
-```
-/cart, /checkout, /orders/*, /profile, /seller/*, /admin/*
-```
-
-Unauthenticated users are redirected to `/login`. Users accessing routes outside their role are redirected to their respective dashboard.
-
----
-
-## 🗂️ Route Architecture
-
-MediStore uses **Next.js App Router** with **route groups** to organize pages by access level:
-
-| Route Group    | Path Prefix | Description                             | Auth Required |
-| -------------- | ----------- | --------------------------------------- | ------------- |
-| `(public)`     | `/`         | Home, shop, login, register, info pages | ❌ No         |
-| `(customer)`   | `/`         | Cart, checkout, orders                  | ✅ Yes        |
-| `(admin)`      | `/admin`    | Admin dashboard, users, orders, categories | ✅ Yes     |
-| `seller`       | `/seller`   | Seller dashboard, medicine management   | ✅ Yes        |
-
-### Parallel Routes (Seller Dashboard)
-
-The seller dashboard at `seller/(dashboard)` uses Next.js **parallel routes** with named slots:
-- `@medicines` — Displays medicine inventory
-- `@orders` — Displays order overview
-
-Both render simultaneously in the seller dashboard layout.
-
----
-
-## 🧩 UI Components
-
-### Shadcn UI Components (`src/components/ui/`)
-
-The project uses **24 Shadcn UI components** built on top of Radix UI primitives:
-
-| Component        | Component         | Component          |
-| ---------------- | ----------------- | ------------------ |
-| Accordion        | Alert             | Avatar             |
-| Badge            | Breadcrumb        | Button             |
-| Card             | Dialog            | Dropdown Menu      |
-| Field            | Input             | Label              |
-| Navigation Menu  | Scroll Area       | Select             |
-| Separator        | Sheet             | Sidebar            |
-| Skeleton         | Sonner (Toast)    | Spinner            |
-| Table            | Textarea          | Tooltip            |
-
-### Homepage Sections (`src/components/home/`)
-
-The home page is composed of **12 modular section components**:
-
-- `HeroSection` — Main hero banner with call-to-action
-- `FeaturedProducts` — Highlighted medicine products
-- `CategoriesSection` — Browse by medicine category
-- `BrandSection` — Featured pharmaceutical brands
-- `TestimonialsSection` — Customer reviews and testimonials
-- `BlogSecion` — Health and wellness blog posts
-- `FAQSection` — Frequently asked questions (accordion)
-- `HowItWorksSection` — Step-by-step guide
-- `NewsletterSection` — Email subscription form
-- `PromoSection` — Promotional banners
-- `banner` — Top announcement banner
-- `themeToggleSwitch` — Dark/light mode toggle
-
-### Shared Components (`src/components/shared/`)
-
-- `navbar1` — Main responsive navigation bar
-- `Footer` — Site-wide footer
-- `LoadingPage` — Full-page loading skeleton
-- `app-sidebar` — Collapsible dashboard sidebar (admin & seller)
-- `SidebarHeader` — Sidebar header with branding
-- `SidebarUserCard` — User info card in sidebar
-
----
-
-## 🔄 API Proxy & Backend Integration
-
-MediStore Frontend acts as a **proxy** to the backend API using Next.js **rewrites** configured in `next.config.ts`:
+All data fetching uses the browser's native `fetch` API with `credentials: include` to pass session cookies:
 
 ```typescript
-async rewrites() {
-  return [
-    {
-      source: "/api/auth/:path*",
-      destination: `${process.env.backendBaseUrl}/api/auth/:path*`,
-    },
-    {
-      source: "/api/:path*",
-      destination: `${process.env.backendBaseUrl}/api/:path*`,
-    },
-  ];
-}
+// Standard pattern used across all warehouse/customer pages
+const res = await fetch("/api/fulfillment/my-queue", {
+  credentials: "include",
+});
+const data = await res.json();
 ```
 
-This means:
-- All requests to `/api/*` on the frontend are forwarded to the backend
-- Auth-specific routes (`/api/auth/*`) are matched first for priority
-- The backend URL is configured via the `backendBaseUrl` environment variable
-- No API routes exist in the frontend itself — all data comes from the external backend
+### Route → API Mapping
+
+| Frontend Page             | API Endpoint                                  |
+|---------------------------|-----------------------------------------------|
+| Customer tracking         | `GET /api/orders/my`                          |
+| Warehouse routing         | `GET /api/shipment-legs/mine`                 |
+| Warehouse packing         | `GET /api/fulfillment/my-queue`               |
+| Warehouse dispatch        | `GET /api/fulfillment/my-queue`               |
+| Fulfillment history       | `GET /api/fulfillment/my-queue`               |
+| Confirm receipt (seller)  | `PATCH /api/shipment-legs/:id/receive-at-origin` |
+| Dispatch inter-WH         | `PATCH /api/shipment-legs/:id/dispatch`        |
+| Confirm dest arrival      | `PATCH /api/shipment-legs/:id/receive-at-dest` |
+| Mark item received        | `PATCH /api/fulfillment/:id/receive-item`      |
+| Create packing slip       | `PATCH /api/fulfillment/:id/pack`              |
+| Dispatch to customer      | `PATCH /api/fulfillment/:id/dispatch`          |
+| Mark delivered            | `PATCH /api/fulfillment/:id/deliver`           |
 
 ---
 
-## 🎬 Animations
+## Key Design Decisions
 
-MediStore uses three animation libraries for a rich, interactive experience:
+### Why Vanilla CSS over Tailwind?
+The project uses a custom CSS design system (`medi-page`, `medi-card`) via `globals.css` to maintain full control over the pharmacy-themed aesthetics including warm cream backgrounds, navy headings, and amber CTAs — without the overhead of purging or configuration.
 
-| Library          | Usage                                           |
-| ---------------- | ----------------------------------------------- |
-| **Framer Motion** | Page transitions, component mount/unmount animations, hover effects |
-| **GSAP**          | Complex timeline animations, scroll-triggered effects |
-| **Lottie React**  | JSON-based vector animations on login & registration pages |
+### Why Framer Motion?
+All card expansions, page transitions, and status animations use Framer Motion for smooth `height: 0 → auto` animations that maintain layout stability without JavaScript hacks.
 
-Lottie animation files are stored in `src/animation/`:
-- `Login.json` (~227 KB) — Animated visual on the login page
-- `Registration.json` (~53 KB) — Animated visual on the registration page
+### Session-based Auth
+Better Auth sessions are stored in HTTP-only cookies. All API calls use `credentials: include` to send these cookies. No JWT tokens are stored in localStorage.
 
----
-
-## 🚢 Deployment
-
-### Vercel (Recommended) — Currently Deployed ✅
-
-This project is **live and deployed** on **[Vercel](https://vercel.com)**:
-
-🔗 **Production URL:** [https://medi-store-frontend-khaki.vercel.app/](https://medi-store-frontend-khaki.vercel.app/)
-
-**To deploy your own instance:**
-
-1. Fork this repository
-2. Import the project on [Vercel](https://vercel.com/new)
-3. Configure the environment variables in the Vercel dashboard
-4. Deploy!
-
-### Other Platforms
-
-```bash
-# Build the production bundle
-npm run build
-
-# Start the production server
-npm start
-```
-
-> **Note:** Ensure your hosting platform supports Node.js and Next.js server-side rendering.
+### Same-Warehouse Detection
+The frontend detects `originWarehouseId === destWarehouseId` per shipment leg and renders a simplified "one-click receive" UI, bypassing the multi-step routing flow entirely.
 
 ---
 
-## 📜 Scripts
+## License
 
-| Script         | Command           | Description                    |
-| -------------- | ----------------- | ------------------------------ |
-| `dev`          | `npm run dev`     | Start development server       |
-| `build`        | `npm run build`   | Create production build         |
-| `start`        | `npm run start`   | Start production server         |
-| `lint`         | `npm run lint`    | Run ESLint for code quality     |
-
----
-
-## 📄 License
-
-This project is private and not licensed for public distribution.
-
----
-
-<p align="center">
-  Built with ❤️ by <strong>Md Abu Syeed Abdullah</strong>
-</p>
+MIT © MediStore Team

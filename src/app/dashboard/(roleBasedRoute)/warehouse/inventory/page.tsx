@@ -195,7 +195,7 @@ export default function WarehouseInventoryPage() {
               onChange={e => setSearch(e.target.value)}
               className="w-full rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2"
               style={{ border: "1px solid #DDD0C4", background: "#FFF",
-                       color: "#1B3A5C", focusRingColor: "#0EA5E940" }}
+                       color: "#1B3A5C" }}
             />
           </div>
 
