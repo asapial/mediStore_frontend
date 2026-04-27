@@ -45,22 +45,14 @@ export default function WarehouseOverviewPage() {
   useEffect(() => {
     const init = async () => {
       try {
-        // 1. Get current user
-        const meRes  = await fetch("/api/auth/me", { credentials: "include" });
-        const meData = await meRes.json();
-        const userId = meData?.user?.id;
-        if (!userId) { setError("Not authenticated"); return; }
-
-        // 2. Get warehouses list to find the one this user manages
-        const whRes  = await fetch("/api/warehouses", { credentials: "include" });
+        // Use the dedicated /my endpoint — returns only the warehouse for the logged-in manager
+        const whRes  = await fetch("/api/warehouses/my", { credentials: "include" });
         const whData = await whRes.json();
-        const wh: Warehouse | undefined = (whData.data || []).find(
-          (w: Warehouse) => w.manager?.id === userId
-        );
-        if (!wh) { setError("No warehouse assigned to your account."); return; }
+        if (!whData.success) { setError(whData.message || "No warehouse assigned to your account."); return; }
+        const wh: Warehouse = whData.data;
         setWarehouse(wh);
 
-        // 3. Fetch analytics for this warehouse
+        // Fetch analytics for this warehouse
         const aRes  = await fetch(`/api/warehouse-analytics/${wh.id}`, { credentials: "include" });
         const aData = await aRes.json();
         setStats(aData.data ?? null);

@@ -9,13 +9,24 @@ import {
 } from "react-icons/fa";
 
 type OrderStatus = "PLACED" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED";
+type LegStatus = "SELLER_PREPARING" | "AWAITING_ORIGIN_WH" | "AT_ORIGIN_WH" | "IN_TRANSIT" | "AT_DEST_WH";
 
 interface Medicine { id: string; name: string; image?: string; }
 interface OrderItem { id: string; quantity: number; price: number; status: string; medicine: Medicine; subOrderId?: string; }
-interface SubOrder  { id: string; status: OrderStatus; total: number; items: Array<{ id: string; quantity: number; price: number; medicine: Medicine }>; }
 interface WarehouseInfo {
   id: string; name: string; address: string; city: string; country: string; phone?: string;
   manager: { name: string; email: string };
+}
+interface ShipmentLegInfo {
+  id: string; status: LegStatus;
+  arrivedAtOriginAt?: string; dispatchedAt?: string; arrivedAtDestAt?: string;
+  destWarehouse?: { id: string; name: string; city: string };
+}
+interface SubOrder {
+  id: string; status: OrderStatus; total: number;
+  items: Array<{ id: string; quantity: number; price: number; medicine: Medicine }>;
+  originWarehouse?: WarehouseInfo | null;  // where SELLER ships their items to
+  shipmentLeg?: ShipmentLegInfo | null;    // live tracking leg
 }
 interface FulfillmentTaskInfo { id: string; status: string; warehouse: WarehouseInfo; }
 interface SellerOrder {
@@ -35,10 +46,18 @@ const NEXT_STATUS: Partial<Record<OrderStatus, OrderStatus>> = {
 };
 const STATUS_HINT: Partial<Record<OrderStatus, string>> = {
   PLACED:     "Review the order and confirm you can fulfill it",
-  PROCESSING: "Pack items and ship to the nearest warehouse",
-  SHIPPED:    "✅ Items sent to warehouse — they will pack & deliver",
+  PROCESSING: "Pack items — your nearest warehouse is shown below",
+  SHIPPED:    "✅ Items sent to warehouse — tracking your shipment leg",
   DELIVERED:  "✅ Delivered! Earnings credited to your wallet.",
   CANCELLED:  "This order has been cancelled.",
+};
+
+const LEG_STATUS_LABELS: Record<LegStatus, string> = {
+  SELLER_PREPARING:   "📦 Preparing",
+  AWAITING_ORIGIN_WH: "🚚 En route to origin WH",
+  AT_ORIGIN_WH:       "🏭 At origin warehouse",
+  IN_TRANSIT:         "✈️ In transit to dest WH",
+  AT_DEST_WH:         "✅ Arrived — consolidating",
 };
 
 export default function SellerOrdersPage() {
@@ -294,76 +313,90 @@ export default function SellerOrdersPage() {
 
                   {/* Action footer */}
                   {nextStatus ? (
-                    <div className="px-5 py-3 flex items-center justify-between gap-3 flex-wrap"
+                    <div className="px-5 py-3 flex flex-col gap-3"
                       style={{ borderTop: "1px solid #EEE4D9", background: "#FAFAFA" }}>
-                      <p className="text-xs" style={{ color: "#8A6650" }}>
-                        {nextStatus === "SHIPPED"
-                          ? "⚠ Confirm you've physically sent items to the warehouse"
-                          : `Ready to advance to: ${nextStatus}`}
-                      </p>
-                      <button onClick={() => advanceStatus(order)}
-                        disabled={updating === order.id}
-                        className="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-bold disabled:opacity-60 shadow-sm transition-all"
-                        style={{ background: STATUS_COLORS[nextStatus], color: "#FFF" }}>
-                        {updating === order.id ? (
-                          <FaSpinner className="animate-spin" />
-                        ) : (
-                          nextStatus === "PROCESSING" ? <FaBox /> : <FaTruck />
-                        )}
-                        Mark as {nextStatus}
-                      </button>
-                    </div>
-                  ) : effectiveStatus === "SHIPPED" ? (
-                    <div className="px-5 py-4 space-y-3"
-                      style={{ borderTop: "1px solid #EEE4D9", background: "#EDE7F6" }}>
-                      {/* Always-visible shipped hint */}
-                      <div className="flex items-center gap-2">
-                        <FaWarehouse style={{ color: "#512DA8" }} />
-                        <p className="text-xs font-semibold" style={{ color: "#512DA8" }}>
-                          Items at warehouse — being consolidated for delivery
-                        </p>
-                      </div>
 
-                      {/* Warehouse details card */}
-                      {order.fulfillmentTask?.warehouse && (
+                      {/* Origin warehouse — where seller must ship items to */}
+                      {effectiveStatus === "PROCESSING" && sub?.originWarehouse && (
                         <div className="rounded-xl p-4 space-y-2"
-                          style={{ background: "rgba(255,255,255,0.7)", border: "1px solid #D1C4E9" }}>
-                          <p className="text-xs font-black uppercase tracking-wide mb-2" style={{ color: "#512DA8" }}>
-                            📦 Ship Your Items To
+                          style={{ background: "#EDE7F6", border: "1px solid #D1C4E9" }}>
+                          <p className="text-xs font-black uppercase tracking-wide mb-1" style={{ color: "#512DA8" }}>
+                            📦 Ship Your Items To (Origin Warehouse)
                           </p>
                           <div className="flex items-start gap-2">
                             <FaWarehouse style={{ color: "#512DA8", fontSize: 12, marginTop: 2 }} />
                             <div>
-                              <p className="text-sm font-bold" style={{ color: "#1B3A5C" }}>
-                                {order.fulfillmentTask.warehouse.name}
-                              </p>
+                              <p className="text-sm font-bold" style={{ color: "#1B3A5C" }}>{sub.originWarehouse.name}</p>
                               <p className="text-xs" style={{ color: "#5C4033" }}>
-                                {order.fulfillmentTask.warehouse.address},&nbsp;
-                                {order.fulfillmentTask.warehouse.city},&nbsp;
-                                {order.fulfillmentTask.warehouse.country}
+                                {sub.originWarehouse.address}, {sub.originWarehouse.city}, {sub.originWarehouse.country}
+                              </p>
+                              {sub.originWarehouse.phone && (
+                                <p className="text-xs flex items-center gap-1 mt-1" style={{ color: "#512DA8" }}>
+                                  <FaPhone style={{ fontSize: 10 }} /> {sub.originWarehouse.phone}
+                                </p>
+                              )}
+                              <p className="text-xs mt-1" style={{ color: "#8A6650" }}>
+                                Manager: <strong>{sub.originWarehouse.manager.name}</strong>
+                                &nbsp;({sub.originWarehouse.manager.email})
                               </p>
                             </div>
                           </div>
-                          {order.fulfillmentTask.warehouse.phone && (
-                            <div className="flex items-center gap-2">
-                              <FaPhone style={{ color: "#512DA8", fontSize: 11 }} />
-                              <p className="text-xs" style={{ color: "#5C4033" }}>
-                                {order.fulfillmentTask.warehouse.phone}
-                              </p>
-                            </div>
+                        </div>
+                      )}
+
+                      <div className="flex items-center justify-between gap-3 flex-wrap">
+                        <p className="text-xs" style={{ color: "#8A6650" }}>
+                          {nextStatus === "SHIPPED"
+                            ? "⚠ Confirm you've physically sent items to the origin warehouse above"
+                            : `Ready to advance to: ${nextStatus}`}
+                        </p>
+                        <button onClick={() => advanceStatus(order)}
+                          disabled={updating === order.id}
+                          className="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-bold disabled:opacity-60 shadow-sm transition-all"
+                          style={{ background: STATUS_COLORS[nextStatus], color: "#FFF" }}>
+                          {updating === order.id ? (
+                            <FaSpinner className="animate-spin" />
+                          ) : (
+                            nextStatus === "PROCESSING" ? <FaBox /> : <FaTruck />
                           )}
-                          <div className="flex items-center gap-2">
-                            <FaEnvelope style={{ color: "#512DA8", fontSize: 11 }} />
-                            <div>
-                              <span className="text-xs" style={{ color: "#8A6650" }}>Manager: </span>
-                              <span className="text-xs font-semibold" style={{ color: "#5C4033" }}>
-                                {order.fulfillmentTask.warehouse.manager.name}
-                              </span>
-                              <span className="text-xs" style={{ color: "#8A6650" }}>
-                                &nbsp;({order.fulfillmentTask.warehouse.manager.email})
-                              </span>
-                            </div>
-                          </div>
+                          Mark as {nextStatus}
+                        </button>
+                      </div>
+                    </div>
+                  ) : effectiveStatus === "SHIPPED" ? (
+                    <div className="px-5 py-4 space-y-3"
+                      style={{ borderTop: "1px solid #EEE4D9", background: "#EDE7F6" }}>
+                      <div className="flex items-center gap-2">
+                        <FaWarehouse style={{ color: "#512DA8" }} />
+                        <p className="text-xs font-semibold" style={{ color: "#512DA8" }}>
+                          Items in transit — tracking shipment leg
+                        </p>
+                      </div>
+
+                      {/* Shipment leg status */}
+                      {sub?.shipmentLeg && (
+                        <div className="rounded-xl p-3 text-xs font-semibold flex items-center justify-between"
+                          style={{ background: "rgba(255,255,255,0.7)", border: "1px solid #D1C4E9", color: "#512DA8" }}>
+                          <span>{LEG_STATUS_LABELS[sub.shipmentLeg.status]}</span>
+                          {sub.shipmentLeg.destWarehouse && (
+                            <span style={{ color: "#8A6650", fontWeight: 400 }}>
+                              → {sub.shipmentLeg.destWarehouse.name}, {sub.shipmentLeg.destWarehouse.city}
+                            </span>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Origin WH summary */}
+                      {sub?.originWarehouse && (
+                        <div className="rounded-xl p-3"
+                          style={{ background: "rgba(255,255,255,0.6)", border: "1px solid #D1C4E9" }}>
+                          <p className="text-xs font-black uppercase tracking-wide mb-1" style={{ color: "#512DA8" }}>
+                            📦 Shipped to Origin WH
+                          </p>
+                          <p className="text-sm font-bold" style={{ color: "#1B3A5C" }}>{sub.originWarehouse.name}</p>
+                          <p className="text-xs" style={{ color: "#5C4033" }}>
+                            {sub.originWarehouse.address}, {sub.originWarehouse.city}
+                          </p>
                         </div>
                       )}
                     </div>

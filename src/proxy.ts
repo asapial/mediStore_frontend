@@ -133,11 +133,13 @@ export async function proxy(request: NextRequest) {
   // ─────────────────────────────────────────────────────────────────────────
   // WAREHOUSE ROUTES  — /dashboard/warehouse/*
   //
-  //  Pages: /dashboard/warehouse/overview  /dashboard/warehouse/analytics
-  //         /dashboard/warehouse/transfers /dashboard/warehouse/bins
-  //         /dashboard/warehouse/expiry    /dashboard/warehouse/grn
-  //         /dashboard/warehouse/fulfillment /dashboard/warehouse/suppliers
-  //         /dashboard/warehouse/temperature /dashboard/warehouse/notifications
+  //  Pages: /dashboard/warehouse/overview    /dashboard/warehouse/analytics
+  //         /dashboard/warehouse/orders      /dashboard/warehouse/fulfillment
+  //         /dashboard/warehouse/packing     /dashboard/warehouse/dispatch
+  //         /dashboard/warehouse/routing     /dashboard/warehouse/inbound
+  //         /dashboard/warehouse/inventory   /dashboard/warehouse/bins
+  //         /dashboard/warehouse/locations   /dashboard/warehouse/expiry
+  //         /dashboard/warehouse/temperature
   //
   //  Only WAREHOUSE may access these.
   // ─────────────────────────────────────────────────────────────────────────

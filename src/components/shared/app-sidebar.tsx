@@ -22,7 +22,7 @@ import {
   FaChartBar, FaChartLine, FaWarehouse, FaExchangeAlt, FaFileInvoice,
   FaThermometerHalf, FaCubes, FaShippingFast, FaExclamationTriangle,
   FaMoneyBillWave, FaHeadset, FaHistory, FaDatabase, FaMapMarkerAlt,
-  FaFileUpload, FaBoxOpen, FaCheckDouble,
+  FaFileUpload, FaBoxOpen, FaCheckDouble, FaRoute,
 } from "react-icons/fa";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -74,6 +74,7 @@ const navData: NavItem[] = [
   { title: "Fraud Flags",         url: "/dashboard/admin/fraud-flags",       role: "ADMIN", icon: FaShieldAlt,      group: "Operations"   },
   { title: "Platform Settings",   url: "/dashboard/admin/platform-settings", role: "ADMIN", icon: FaCog,            group: "Operations"   },
   { title: "Audit Logs",          url: "/dashboard/admin/audit-logs",        role: "ADMIN", icon: FaHistory,        group: "Operations"   },
+  { title: "My Profile",          url: "/dashboard/admin/profile",           role: "ADMIN", icon: FaUser,           group: "Operations"   },
 
   // ──────────────────────────────────────────────────────────────────────────
   // SELLER
@@ -122,6 +123,7 @@ const navData: NavItem[] = [
   { title: "Notifications",       url: "/dashboard/customer/notifications", role: "CUSTOMER", icon: FaBell,          group: "Finance"   },
 
   { title: "Help & Support",      url: "/dashboard/customer/support",       role: "CUSTOMER", icon: FaHeadset,       group: "Support"   },
+  { title: "My Profile",          url: "/dashboard/customer/profile",       role: "CUSTOMER", icon: FaUser,          group: "Account"   },
 
   // ──────────────────────────────────────────────────────────────────────────
   // WAREHOUSE
@@ -132,13 +134,12 @@ const navData: NavItem[] = [
   { title: "Order Management",    url: "/dashboard/warehouse/orders",      role: "WAREHOUSE", icon: FaClipboardList,       group: "Fulfillment" },
   { title: "Fulfillment Queue",   url: "/dashboard/warehouse/fulfillment", role: "WAREHOUSE", icon: FaBoxes,               group: "Fulfillment" },
   { title: "Pick & Pack",         url: "/dashboard/warehouse/packing",     role: "WAREHOUSE", icon: FaBoxOpen,             group: "Fulfillment" },
-  { title: "Dispatch & Delivery", url: "/dashboard/warehouse/dispatch",    role: "WAREHOUSE", icon: FaTruck,               group: "Fulfillment" },
+  { title: "Dispatch & Delivery", url: "/dashboard/warehouse/dispatch",    role: "WAREHOUSE", icon: FaTruck,  group: "Fulfillment" },
+  { title: "Routing & Transfers", url: "/dashboard/warehouse/routing",    role: "WAREHOUSE", icon: FaRoute,  group: "Fulfillment" },
 
-  { title: "Storage Bins",        url: "/dashboard/warehouse/bins",        role: "WAREHOUSE", icon: FaCubes,               group: "Inventory"   },
-  { title: "Locations",           url: "/dashboard/warehouse/locations",   role: "WAREHOUSE", icon: FaMapMarkerAlt,        group: "Inventory"   },
-  { title: "Expiry Monitor",      url: "/dashboard/warehouse/expiry",      role: "WAREHOUSE", icon: FaExclamationTriangle, group: "Inventory"   },
 
-  { title: "Temperature Logs",    url: "/dashboard/warehouse/temperature", role: "WAREHOUSE", icon: FaThermometerHalf,     group: "Monitoring"  },
+
+  { title: "My Profile",          url: "/dashboard/warehouse/profile",     role: "WAREHOUSE", icon: FaUser,               group: "Account"     },
 
   // ADMIN — Warehouse pages
   { title: "Warehouses",          url: "/dashboard/admin/warehouses",      role: "ADMIN", icon: FaWarehouse,          group: "Warehouse"  },
